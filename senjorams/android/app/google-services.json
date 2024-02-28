@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "592574480137",
+    "project_id": "senjorai-3d32d",
+    "storage_bucket": "senjorai-3d32d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:592574480137:android:4f888d717232cbf2691dd8",
+        "android_client_info": {
+          "package_name": "com.example.senjorams"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwEDNDPAjqlI7uw2cRD3uCGR4zh7yFdLg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
