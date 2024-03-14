@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:senjorams/login_ui.dart';
-import 'package:senjorams/main_screen_ui.dart';
+import 'package:senjorams/medicine_page_ui.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -15,7 +17,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
-  final _database = FirebaseDatabase.instance.reference();
+  final _database = FirebaseFirestore.instance;
 
   String _email = '';
   String _password = '';
@@ -27,24 +29,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
+      if (_password != _confirmPassword) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Passwords do not match'),
+        ));
+        return;
+      }
+
       try {
         final userCredential = await _auth.createUserWithEmailAndPassword(
           email: _email,
           password: _password,
         );
         final user = userCredential.user;
+        final loginCode = _generateLoginCode();
         if (user != null) {
           // Save user data to Firebase Realtime Database
-          await _database.child('users').child(user.uid).set({
+          await _database.collection('Users').doc(user.uid).set({
             'email': _email,
+            'password': _password,
             'name': _name,
             'surname': _surname,
             'dob': _dob?.toIso8601String(),
             'phoneNumber': _phoneNumber,
+            'loginCode': loginCode,
           });
+
+          // Navigate to login screen
           Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen())
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         }
       } catch (e) {
@@ -56,6 +70,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ));
       }
     }
+  }
+
+  String _generateLoginCode() {
+    final random = Random();
+    final roomNumber = random.nextInt(1000); // Generate a random 3-digit number
+    final randomLetter = String.fromCharCode(random.nextInt(6) + 65); // Generate a random letter from A to F
+    return 'RM$roomNumber$randomLetter';
   }
 
   @override
@@ -143,9 +164,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   });
                 },
               ),
-              // Date of Birth picker
-              // You can use a DatePicker or any other widget to select date of birth
-              // Here's a basic example using a TextFormField
               TextFormField(
                 decoration: InputDecoration(labelText: 'Date of Birth'),
                 readOnly: true,

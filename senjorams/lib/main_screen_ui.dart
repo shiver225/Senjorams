@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:senjorams/medicine_page_ui.dart';
+import 'package:senjorams/start_sreen_ui.dart';
 
 class MainScreen extends StatefulWidget {
    const MainScreen({super.key});
@@ -82,8 +84,12 @@ class _MainScreenState extends State<MainScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                // Navigate to another page
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const StartScreen()),
+                );
               },
               child: const FittedBox(
                 fit: BoxFit.fitWidth,
