@@ -36,7 +36,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
    Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Medicines'),
+        title: const Text('Medicines'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -45,21 +45,21 @@ class _MedicineScreenState extends State<MedicineScreen> {
           children: [
             TextField(
               controller: _medicineController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Enter medicine name',
               ),
               onSubmitted: (value) {
                 addMedicine(value);
               },
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 addMedicine(_medicineController.text);
               },
-              child: Text('Add Medicine'),
+              child: const Text('Add Medicine'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
                 itemCount: medicines.length,

@@ -57,7 +57,7 @@ class _MainScreenState extends State<MainScreen> {
               },
               child: const FittedBox(
                 fit: BoxFit.fitWidth,
-                child: Icon(Icons.medical_information),
+                child: Icon(Icons.medical_information, color: Color.fromARGB(255, 206, 178, 129)),
               ),
             ),
             const SizedBox(height: 20),
@@ -67,7 +67,7 @@ class _MainScreenState extends State<MainScreen> {
               },
               child: const FittedBox(
                 fit: BoxFit.fitWidth,
-                child: Icon(Icons.restaurant),
+                child: Icon(Icons.restaurant, color: Color.fromARGB(255, 206, 178, 129)),
               ),
             ),
             const SizedBox(height: 20),
@@ -77,13 +77,24 @@ class _MainScreenState extends State<MainScreen> {
               },
               child: const FittedBox(
                 fit: BoxFit.fitWidth,
-                child: Icon(Icons.alarm),
+                child: Icon(Icons.alarm, color: Color.fromARGB(255, 206, 178, 129)),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to another page
+              },
+              child: const FittedBox(
+                fit: BoxFit.fitWidth,
+                child: Icon(Icons.logout, color: Colors.black),
               ),
             ),
           ],
         ),
       ),
       bottomNavigationBar: BottomAppBar(
+        color: const Color(0xFFFBF9F1),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
           child: ElevatedButton(
@@ -93,22 +104,31 @@ class _MainScreenState extends State<MainScreen> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text("Popup Window"),
-                    content: const Text("This is a popup window."),
+                    content: const Text("Pagalba iškviesta!", textAlign: TextAlign.center, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                     actions: [
                       TextButton(
                         onPressed: () {
                           // Close the dialog
                           Navigator.of(context).pop();
                         },
-                        child: const Text("Close"),
+                        child: const Text("Close", textAlign: TextAlign.end, style: TextStyle(color: Colors.black),),
                       ),
                     ],
                   );
                 },
               );
             },
-            child: const Text('Show Popup'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.black
+            ),
+            child: const Text(
+              'Pagalba!',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+              ),
+              ),
           ),
         ),
       ),
