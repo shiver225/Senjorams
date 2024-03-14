@@ -1,14 +1,18 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:senjorams/firebase_options.dart';
 import 'package:senjorams/main_screen_ui.dart';
+import 'package:senjorams/start_sreen_ui.dart';
 
 // void main() {
 //   runApp(const MyApp());
 // }
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(const MyApp());
 }
@@ -49,6 +53,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: MainScreen());
+    return const MaterialApp(home: StartScreen());
   }
 }
