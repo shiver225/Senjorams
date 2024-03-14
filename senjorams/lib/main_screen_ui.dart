@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:senjorams/medicine_page_ui.dart';
 
 class MainScreen extends StatefulWidget {
    const MainScreen({super.key});
@@ -49,23 +50,35 @@ class _MainScreenState extends State<MainScreen> {
           children: [
             ElevatedButton(
               onPressed: () {
-                // Navigate to another page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MedicineScreen())
+                );
               },
-              child: const Text('Page 1'),
+              child: const FittedBox(
+                fit: BoxFit.fitWidth,
+                child: Icon(Icons.medical_information),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 // Navigate to another page
               },
-              child: const Text('Page 2'),
+              child: const FittedBox(
+                fit: BoxFit.fitWidth,
+                child: Icon(Icons.restaurant),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 // Navigate to another page
               },
-              child: const Text('Page 3'),
+              child: const FittedBox(
+                fit: BoxFit.fitWidth,
+                child: Icon(Icons.alarm),
+              ),
             ),
           ],
         ),
