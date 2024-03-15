@@ -5,7 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:senjorams/main_screen_ui.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({Key? key, this.loginCode}) : super(key: key);
+  final String? loginCode;
+  
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -15,9 +17,17 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
   final _database = FirebaseFirestore.instance;
+  
 
 
   String _loginCode = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // Set the login code from the widget parameter when available
+    _loginCode = widget.loginCode ?? '';
+  }
 
   Future<void> _login() async {
   if (_formKey.currentState!.validate()) {
@@ -74,6 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               TextFormField(
                 decoration: InputDecoration(labelText: 'Login Code'),
+                initialValue: widget.loginCode, // Set initial value here
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your login code';

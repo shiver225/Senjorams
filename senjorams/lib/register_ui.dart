@@ -6,9 +6,10 @@ import 'package:intl/intl.dart';
 import 'package:senjorams/login_ui.dart';
 import 'package:senjorams/medicine_page_ui.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({Key? key});
 
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
@@ -18,6 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _auth = FirebaseAuth.instance;
   final _database = FirebaseFirestore.instance;
+  //final _cloudFunctions = FirebaseFunctions.instance;
 
   String _email = '';
   String _password = '';
@@ -55,10 +57,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             'loginCode': loginCode,
           });
 
-          // Navigate to login screen
+          await _sendLoginCodeEmail(_email, loginCode);
+
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            MaterialPageRoute(builder: (context) => LoginScreen(loginCode: loginCode)),
           );
         }
       } catch (e) {
@@ -77,6 +80,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final roomNumber = random.nextInt(1000); // Generate a random 3-digit number
     final randomLetter = String.fromCharCode(random.nextInt(6) + 65); // Generate a random letter from A to F
     return 'RM$roomNumber$randomLetter';
+  }
+  
+  Future<void> _sendLoginCodeEmail(String email, String loginCode) async {
+    final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('sendLoginCodeEmail');
+    try {
+      await callable.call({'email': email, 'loginCode': loginCode});
+      print('Login code email sent successfully.');
+    } catch (error) {
+      print('Error sending login code email: $error');
+    }
   }
 
   @override
