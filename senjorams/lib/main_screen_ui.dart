@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:senjorams/food_ui.dart';
 import 'package:senjorams/medicine_page_ui.dart';
 import 'package:senjorams/start_sreen_ui.dart';
 
@@ -52,6 +53,9 @@ class _MainScreenState extends State<MainScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(100, 75)
+              ),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -60,31 +64,43 @@ class _MainScreenState extends State<MainScreen> {
               },
               child: const FittedBox(
                 fit: BoxFit.fitWidth,
-                child: Icon(Icons.medical_information, color: Color.fromARGB(255, 206, 178, 129)),
+                child: Icon(Icons.medical_information, color: Color.fromARGB(255, 206, 178, 129), size: 50),
               ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(100, 75)
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FoodScreen())
+                );
+              },
+              child: const FittedBox(
+                fit: BoxFit.fitWidth,
+                child: Icon(Icons.restaurant, color: Color.fromARGB(255, 206, 178, 129), size: 50),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(100, 75)
+              ),
               onPressed: () {
                 // Navigate to another page
               },
               child: const FittedBox(
                 fit: BoxFit.fitWidth,
-                child: Icon(Icons.restaurant, color: Color.fromARGB(255, 206, 178, 129)),
+                child: Icon(Icons.alarm, color: Color.fromARGB(255, 206, 178, 129), size: 50),
               ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                // Navigate to another page
-              },
-              child: const FittedBox(
-                fit: BoxFit.fitWidth,
-                child: Icon(Icons.alarm, color: Color.fromARGB(255, 206, 178, 129)),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(100, 75)
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
                 Navigator.pushReplacement(
@@ -94,7 +110,7 @@ class _MainScreenState extends State<MainScreen> {
               },
               child: const FittedBox(
                 fit: BoxFit.fitWidth,
-                child: Icon(Icons.logout, color: Colors.black),
+                child: Icon(Icons.logout, color: Colors.black, size: 50),
               ),
             ),
           ],
