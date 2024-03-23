@@ -1,22 +1,22 @@
 import 'package:senjorams/models/video_model.dart';
 
 class Channel {
-  final String? id;
-  final String? title;
-  final String? profilePicture;
-  final String? subscriberCount;
-  final String? videoCount;
-  final String? uploadPlaylistId;
-  List<Video>? videos;
+  final String id;
+  final String title;
+  final String profilePicture;
+  final String subscriberCount;
+  final String videoCount;
+  final String uploadPlaylistId;
+  List<Video> videos;
 
   Channel({
-    this.id,
-    this.title,
-    this.profilePicture,
-    this.subscriberCount,
-    this.videoCount,
-    this.uploadPlaylistId,
-    this.videos,
+    required this.id,
+    required this.title,
+    required this.profilePicture,
+    required this.subscriberCount,
+    required this.videoCount,
+    required this.uploadPlaylistId,
+    required this.videos,
   });
 
   factory Channel.fromMap(Map<String, dynamic> map) {
@@ -27,6 +27,7 @@ class Channel {
       subscriberCount: map['statistics']['subscriberCount'],
       videoCount: map['statistics']['videoCount'],
       uploadPlaylistId: map['contentDetails']['relatedPlaylist']['uploads'],
+      videos: [],
     );
   }
 }
