@@ -77,7 +77,7 @@ class _SleepScreenState extends State<SleepScreen> {
                           },
                         );
                         setState(() {
-                          NotificationService().showNotification(title: 'Sample title', body: 'Sample body');
+                          NotificationService().scheduledNotification(title: 'Sample title', body: 'Sample body');
                           selectedTime = time;
                         });
                       },
