@@ -20,7 +20,7 @@ class NotificationService{
   NotificationService._internal();
 
   Future<void> initNotification() async {
-    tz.initializeTimeZones();
+    _configureLocalTimeZone();
     notificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
     AndroidInitializationSettings initializationSettingsAndroid = 
       const AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -54,12 +54,14 @@ class NotificationService{
   Future<void> _configureLocalTimeZone() async {
     tz.initializeTimeZones();
     final String timeZone = await FlutterTimezone.getLocalTimezone();
-    tz.setLocalLocation(tz.getLocation("Europe/Vilnius")); //needs to be timeZone but error says that Europe/Kiev doesnt exist since it was changed to Europe/Kyiv in 2022
+    tz.setLocalLocation(tz.getLocation(timeZone == "Europe/Kiev" ? "Europe/Kyiv" : timeZone)); //needs to be timeZone but error says that Europe/Kiev doesnt exist since it was changed to Europe/Kyiv in 2022
   }
 
   /// Scheduled Notification
   Future<void> scheduledNotification({
     int id = 0,
+    required int hour,
+    required int minutes,
     String? title, 
     String? body
     }) async {
@@ -67,7 +69,7 @@ class NotificationService{
       id,
       title,
       body,
-      tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10)), //schedule the notification to show after 2 seconds.
+      _convertTime(hour, minutes),
       const NotificationDetails(
         // Android details
         android: AndroidNotificationDetails('main_channel', 'Main Channel',
@@ -78,6 +80,8 @@ class NotificationService{
       // Type of time interpretation
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,// To show notification even when the app is closed
+      matchDateTimeComponents: DateTimeComponents.time,
     );
+    debugPrint(tz.TZDateTime.now(tz.local).toString());
   }
 }
