@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:senjorams/main_screen_ui.dart';
+import 'package:senjorams/services/notification_service.dart';
 
 class SleepScreen extends StatefulWidget {
   const SleepScreen({Key? key}) : super(key: key);
@@ -76,6 +77,7 @@ class _SleepScreenState extends State<SleepScreen> {
                           },
                         );
                         setState(() {
+                          NotificationService().showNotification(title: 'Sample title', body: 'Sample body');
                           selectedTime = time;
                         });
                       },

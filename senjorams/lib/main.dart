@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:senjorams/firebase_options.dart';
 import 'package:senjorams/main_screen_ui.dart';
+import 'package:senjorams/services/notification_service.dart';
 import 'package:senjorams/start_sreen_ui.dart';
 
 // void main() {
@@ -12,6 +13,7 @@ import 'package:senjorams/start_sreen_ui.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  NotificationService().initNotification();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
