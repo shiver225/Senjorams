@@ -1,7 +1,11 @@
+import 'package:bottom_picker/bottom_picker.dart';
+import 'package:bottom_picker/resources/arrays.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:senjorams/main_screen_ui.dart';
 import 'package:senjorams/services/notification_service.dart';
 
@@ -19,7 +23,6 @@ class _SleepScreenState extends State<SleepScreen> {
   TextDirection textDirection = TextDirection.ltr;
   MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.padded;
   bool use24HourTime = true;
-
 
 
   @override
@@ -49,37 +52,52 @@ class _SleepScreenState extends State<SleepScreen> {
                     child: ElevatedButton(
                       child: const Text('Open time picker'),
                       onPressed: () async {
-                        final TimeOfDay? time = await showTimePicker(
-                          context: context,
-                          initialTime: selectedTime ?? TimeOfDay.now(),
-                          initialEntryMode: entryMode,
-                          orientation: orientation,
-                          builder: (BuildContext context, Widget? child) {
-                            // We just wrap these environmental changes around the
-                            // child in this builder so that we can apply the
-                            // options selected above. In regular usage, this is
-                            // rarely necessary, because the default values are
-                            // usually used as-is.
-                            return Theme(
-                              data: Theme.of(context).copyWith(
-                                materialTapTargetSize: tapTargetSize,
-                              ),
-                              child: Directionality(
-                                textDirection: textDirection,
-                                child: MediaQuery(
-                                  data: MediaQuery.of(context).copyWith(
-                                    alwaysUse24HourFormat: use24HourTime,
-                                  ),
-                                  child: child!,
+                        BottomPicker.time(
+                              pickerTitle: const Text(
+                                'Set your sleep time',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: Colors.black,
                                 ),
                               ),
-                            );
-                          },
-                        );
-                        setState(() {
-                          NotificationService().scheduledNotification(hour: time?.hour ?? 0, minutes: time?.minute ?? 0,title: 'Sample title', body: 'Sample body');
-                          selectedTime = time;
-                        });
+                              buttonContent: const Text(
+                                'select',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.deepPurple,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              buttonStyle: BoxDecoration(
+                                border: const Border(
+                                    bottom:BorderSide(
+                                      color: Colors.grey,
+                                      width: 0.5,
+                                    ),
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                                color: const Color.fromARGB(255, 247,242,249),
+                              ),
+                              onSubmit: (index) {
+                                setState(() {
+                                selectedTime = TimeOfDay(hour: index.hour, minute: index.minute);
+                                NotificationService().scheduledNotification(hour: selectedTime?.hour ?? 0, minutes: selectedTime?.minute ?? 0,title: 'Sample title', body: 'Sample body');
+                                });
+                              },
+                              pickerTextStyle: const TextStyle(
+                                color: Colors.deepPurple,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 25,
+                              ),
+                              onClose: () {
+                                print('Picker closed');
+                              },
+                              bottomPickerTheme: BottomPickerTheme.blue,
+                              use24hFormat: true,
+                              initialTime: Time.now(),
+                          ).show(context);
+                        
                       },
                     ),
                   ),
