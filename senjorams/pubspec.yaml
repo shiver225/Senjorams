@@ -50,6 +50,7 @@ dependencies:
   bottom_picker: ^2.6.0
   android_alarm_manager_plus: ^4.0.1
   shared_preferences: ^2.2.2
+  flutter_time_picker_spinner: ^2.0.0
 
 dev_dependencies:
   flutter_test:
