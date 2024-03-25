@@ -49,6 +49,7 @@ dependencies:
   flutter_timezone: ^1.0.8
   bottom_picker: ^2.6.0
   android_alarm_manager_plus: ^4.0.1
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
