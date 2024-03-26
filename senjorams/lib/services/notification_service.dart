@@ -84,4 +84,7 @@ class NotificationService{
     );
     debugPrint(tz.TZDateTime.now(tz.local).toString());
   }
+  Future<void> cancelScheduledNotification(int id) async{
+    await notificationsPlugin.cancel(id);
+  }
 }
