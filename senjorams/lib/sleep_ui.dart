@@ -6,38 +6,49 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:senjorams/main.dart';
+import 'package:uuid/uuid.dart';
 import 'package:senjorams/services/notification_service.dart';
+import 'package:uuid/v1.dart';
 
 
 class Alarm{
-  TimeOfDay time;
+  List<TimeOfDay> time;
   int alarmId;
   bool enabled;
-  String title;
-  String body;
+  int linkedAlarmAmm;
+  List<String> title;
+  List<String> body;
   bool isSelected = false;
   Color cardColor = Colors.white;
-  Alarm({required this.time, required this.alarmId, required this.title, required this.body, this.enabled = true});
+
+  Alarm({required this.time, required this.alarmId, required this.title, required this.body, this.enabled = true, this.linkedAlarmAmm = 0});
 
   Alarm.fromJson(Map<String, dynamic> json)
-      : time = TimeOfDay(hour: int.parse(json['time'].split(":")[0]), minute: int.parse(json['time'].split(":")[1])),
+      : time = json['time'].cast<String>().map((tm) => TimeOfDay(hour: int.parse(tm.split(":")[0]), minute: int.parse(tm.split(":")[1]))).toList().cast<TimeOfDay>(),
         alarmId = json['alarmId'] as int,
         enabled = json['enabled'] as bool,
-        title = json['title'] ?? "",
-        body = json['body'] ?? "";
+        title = json['title'].cast<String>(),
+        body = json['body'].cast<String>(),
+        linkedAlarmAmm = json['linkedAlarmAmm'];
   Map<String, dynamic> toJson() => {
-        'time': '${time.hour}:${time.minute}',
+        'time': time.map((tm) => '${tm.hour}:${tm.minute}').toList(),
         'alarmId': alarmId,
         'enabled' : enabled,
         'title' : title,
         'body' : body,
+        'linkedAlarmAmm' : linkedAlarmAmm,
       };
   Future<void> updateScheduledNotification() async{
     if(enabled){
-      NotificationService().scheduledNotification(id: alarmId, hour: time.hour, minutes: time.minute,title: title, body: body);
+      for(int i = 0; i <= linkedAlarmAmm; i++){
+        print(i);
+        NotificationService().scheduledNotification(id: alarmId+i, hour: time[i].hour, minutes: time[i].minute, title: title[i], body: body[i]);
+      }
     }
     else{
-      await NotificationService().cancelScheduledNotification(alarmId);
+      for(int i = 0; i <= linkedAlarmAmm; i++){
+        await NotificationService().cancelScheduledNotification(alarmId+i);
+      }
     }
   }
 }
@@ -55,8 +66,8 @@ class _SleepScreenState extends State<SleepScreen> {
   List<Alarm> alarmList = [];
   List<Alarm> alarmTrachCan = [];
   TimeOfDay? _selectedTime;
-  TimeOfDay? _selectedTimeSleep = TimeOfDay.now();
-  TimeOfDay? _selectedTimeWakeUp = TimeOfDay(hour: TimeOfDay.now().hour + 8, minute: TimeOfDay.now().minute);
+  TimeOfDay _selectedTimeSleep = TimeOfDay.now();
+  TimeOfDay _selectedTimeWakeUp = TimeOfDay(hour: (TimeOfDay.now().hour + 8)%24, minute: TimeOfDay.now().minute);
 
   TimePickerEntryMode entryMode = TimePickerEntryMode.dial;
   Orientation? orientation;
@@ -84,6 +95,10 @@ class _SleepScreenState extends State<SleepScreen> {
         leading: IconButton(
           icon: const Icon(Icons.clear, color: Colors.white),
           onPressed: () {
+            for (var element in alarmTrachCan) {
+              element.isSelected = false;
+              element.cardColor = Colors.white;
+            }
             setState(() {
               alarmTrachCan.clear();
             });
@@ -121,15 +136,17 @@ class _SleepScreenState extends State<SleepScreen> {
                       color: alarmList[index].cardColor,
                       child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
                         ListTile(
-                          selected: alarmTrachCan.contains(alarmList[index]),
+                          selected: alarmList[index].isSelected,
                           title: Text(
-                            '${alarmList[index].time?.format(context)}',
-                            style: const TextStyle(
+                            alarmList[index].linkedAlarmAmm == 0 ? alarmList[index].time[0].format(context)
+                            : "${alarmList[index].time[0].format(context)}-${alarmList[index].time[1].format(context)}",
+                            style: TextStyle(
+                              color: alarmList[index].enabled ? Colors.black:Colors.grey,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          trailing: Switch(
+                          trailing:alarmTrachCan.isEmpty ? Switch(
                             value: alarmList[index].enabled,
                             onChanged: (bool value) async {
                               // This is called when the user toggles the switch.
@@ -138,6 +155,12 @@ class _SleepScreenState extends State<SleepScreen> {
                               });
                               await alarmList[index].updateScheduledNotification();
                               await _saveData();
+                            },
+                          ) 
+                          : Checkbox(
+                            value: alarmList[index].isSelected,
+                            onChanged: (bool? value) { 
+                              toggleSelection(alarmList[index]);            
                             },
                           ),
                           onTap: alarmTrachCan.isEmpty ? ()=> {} : () => toggleSelection(alarmList[index]),
@@ -153,20 +176,20 @@ class _SleepScreenState extends State<SleepScreen> {
         ),
       ),
       bottomNavigationBar: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        shape: MaterialStateProperty.all(CircleBorder()),
-                        padding: MaterialStateProperty.all(EdgeInsets.all(20)),
-                        backgroundColor: MaterialStateProperty.all(Colors.deepPurple),// <-- Button color
-                        overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
-                          if (states.contains(MaterialState.pressed)) return Colors.deepPurple.shade800; // <-- Splash color
-                        }),
-                      ),
-                      onPressed: () => modalScrollPicker(context),
-                      child: const Icon(Icons.add, color: Colors.white, size: 24,)
-                    ),
-                  ),
+        padding: const EdgeInsets.all(12.0),
+        child: ElevatedButton(
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all(CircleBorder()),
+            padding: MaterialStateProperty.all(EdgeInsets.all(20)),
+            backgroundColor: MaterialStateProperty.all(Colors.deepPurple),// <-- Button color
+            overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
+              if (states.contains(MaterialState.pressed)) return Colors.deepPurple.shade800; // <-- Splash color
+            }),
+          ),
+          onPressed: () => modalScrollPicker(context),
+          child: const Icon(Icons.add, color: Colors.white, size: 24,)
+        ),
+      ),
     );
   }
   void _loadData() {
@@ -220,7 +243,12 @@ class _SleepScreenState extends State<SleepScreen> {
                       child: const Icon(Icons.check),
                       onPressed: () async {
                         setState(() {
-                          alarmList.add(Alarm(time: _selectedTime ?? TimeOfDay.now(), alarmId: 0, title: 'sample title', body: 'sample body', enabled: true));
+                          if(_visableSleepSchedule[1]){
+                            alarmList.add(Alarm(time: [_selectedTimeSleep,_selectedTimeWakeUp], alarmId: UuidV1().hashCode, title: ['sample title', 'sample title'], body: ['sample body','sample body'], enabled: true, linkedAlarmAmm: 1));
+                          }
+                          else{
+                            alarmList.add(Alarm(time: [_selectedTime ?? TimeOfDay.now()], alarmId: UuidV1().hashCode, title: ['sample title'], body: ['sample body'], enabled: true));
+                          }
                           Navigator.pop(context);
                         });
                         await alarmList.last.updateScheduledNotification();
@@ -237,8 +265,8 @@ class _SleepScreenState extends State<SleepScreen> {
                   visible: _visableSleepSchedule[1],
                   child: toggleButtons2B(
                     selectionList: _timeSelection, 
-                    text1: "${_selectedTimeSleep?.hour}:${_selectedTimeSleep?.minute}", 
-                    text2: "${_selectedTimeWakeUp?.hour}:${_selectedTimeWakeUp?.minute}", 
+                    text1: _selectedTimeSleep.format(context), 
+                    text2: _selectedTimeWakeUp.format(context), 
                     setModalState: setModalState,
                     textStyle: const TextStyle(
                       fontSize: 24,
@@ -321,51 +349,51 @@ class _SleepScreenState extends State<SleepScreen> {
     }
   ){
     return ToggleButtons(
-                    renderBorder: false,
-                    color: Colors.deepPurple,
-                    fillColor: Colors.deepPurple,
-                    selectedColor: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    isSelected: selectionList,
-                    children: <Widget> [
-                      SizedBox(
-                        width: buttonWidth ?? (MediaQuery.of(context).size.width - 36)/3,
-                        height: buttonHeight ?? (MediaQuery.of(context).size.height - 36)/20,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center, 
-                          children: <Widget>[
-                            const SizedBox(width: 4.0),
-                            Text(text1, style: textStyle,),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        width: buttonWidth ?? (MediaQuery.of(context).size.width - 36)/3,
-                        height: buttonHeight ?? (MediaQuery.of(context).size.height - 36)/20,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center, 
-                          children: <Widget>[
-                            const SizedBox(width: 4.0,),
-                            Text(text2, style: textStyle),
-                          ],
-                        ),
-                      ),
-                    ],
-                    onPressed: (index) { 
-                      setModalState(() { 
-                        for (int i = 0; i < selectionList.length; i++){
-                          selectionList[i] = index == i;
-                        }
-                        if(selectionList[index] && index == 0){
-                          _selectedTime = _selectedTimeSleep;
-                        }
-                        else{
-                          _selectedTime = _selectedTimeWakeUp;
-                        }
-                        globalKey = GlobalKey();
-                      });
-                    },
-                  );
+      renderBorder: false,
+      color: Colors.deepPurple,
+      fillColor: Colors.deepPurple,
+      selectedColor: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      isSelected: selectionList,
+      children: <Widget> [
+        SizedBox(
+          width: buttonWidth ?? (MediaQuery.of(context).size.width - 36)/3,
+          height: buttonHeight ?? (MediaQuery.of(context).size.height - 36)/20,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center, 
+            children: <Widget>[
+              const SizedBox(width: 4.0),
+              Text(text1, style: textStyle,),
+            ],
+          ),
+        ),
+        SizedBox(
+          width: buttonWidth ?? (MediaQuery.of(context).size.width - 36)/3,
+          height: buttonHeight ?? (MediaQuery.of(context).size.height - 36)/20,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center, 
+            children: <Widget>[
+              const SizedBox(width: 4.0,),
+              Text(text2, style: textStyle),
+            ],
+          ),
+        ),
+      ],
+      onPressed: (index) { 
+        setModalState(() { 
+          for (int i = 0; i < selectionList.length; i++){
+            selectionList[i] = index == i;
+          }
+          if(selectionList[index] && index == 0){
+            _selectedTime = _selectedTimeSleep;
+          }
+          else{
+            _selectedTime = _selectedTimeWakeUp;
+          }
+          globalKey = GlobalKey();
+        });
+      },
+    );
   }
   Widget timePicker(StateSetter setSpinnerState){
     return Container(
@@ -399,10 +427,10 @@ class _SleepScreenState extends State<SleepScreen> {
             });
             setSpinnerState(() {
               if(_timeSelection[0]){
-                _selectedTimeSleep = _selectedTime ?? TimeOfDay.now();
+                _selectedTimeSleep = _selectedTime ?? _selectedTimeSleep;
               }
               else{
-                _selectedTimeWakeUp = _selectedTime ?? TimeOfDay.now();
+                _selectedTimeWakeUp = _selectedTime ?? _selectedTimeWakeUp;
               }
             });
           },

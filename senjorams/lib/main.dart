@@ -19,7 +19,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
+  await prefs!.clear();
+  NotificationService().cancelAllScheduledNotification();
   runApp(const MyApp());
 }
 
