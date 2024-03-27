@@ -63,7 +63,8 @@ class NotificationService{
     required int hour,
     required int minutes,
     String? title, 
-    String? body
+    String? body,
+    DateTimeComponents component = DateTimeComponents.time,
     }) async {
     await notificationsPlugin.zonedSchedule(
       id,
@@ -80,7 +81,7 @@ class NotificationService{
       // Type of time interpretation
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,// To show notification even when the app is closed
-      matchDateTimeComponents: DateTimeComponents.time,
+      matchDateTimeComponents: component,
     );
     debugPrint(tz.TZDateTime.now(tz.local).toString());
   }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:senjorams/main.dart';
 import 'package:uuid/uuid.dart';
 import 'package:senjorams/services/notification_service.dart';
@@ -13,6 +14,7 @@ import 'package:uuid/v1.dart';
 
 class Alarm{
   List<TimeOfDay> time;
+  DateTime activationDate;
   int alarmId;
   bool enabled;
   int linkedAlarmAmm;
@@ -21,7 +23,7 @@ class Alarm{
   bool isSelected = false;
   Color cardColor = Colors.white;
 
-  Alarm({required this.time, required this.alarmId, required this.title, required this.body, this.enabled = true, this.linkedAlarmAmm = 0});
+  Alarm({required this.time, required this.alarmId, required this.title, required this.body, this.enabled = true, this.linkedAlarmAmm = 0}) : activationDate = DateTime.now();
 
   Alarm.fromJson(Map<String, dynamic> json)
       : time = json['time'].cast<String>().map((tm) => TimeOfDay(hour: int.parse(tm.split(":")[0]), minute: int.parse(tm.split(":")[1]))).toList().cast<TimeOfDay>(),
@@ -29,7 +31,8 @@ class Alarm{
         enabled = json['enabled'] as bool,
         title = json['title'].cast<String>(),
         body = json['body'].cast<String>(),
-        linkedAlarmAmm = json['linkedAlarmAmm'];
+        linkedAlarmAmm = json['linkedAlarmAmm'],
+        activationDate = DateTime.parse(json['activationDate'].toString());
   Map<String, dynamic> toJson() => {
         'time': time.map((tm) => '${tm.hour}:${tm.minute}').toList(),
         'alarmId': alarmId,
@@ -37,12 +40,19 @@ class Alarm{
         'title' : title,
         'body' : body,
         'linkedAlarmAmm' : linkedAlarmAmm,
+        'activationDate' : activationDate.toString(),
       };
   Future<void> updateScheduledNotification() async{
+    if(linkedAlarmAmm == 0){
+      DateTime date = DateTime(activationDate.year, activationDate.month, activationDate.day, time[0].hour, time[0].minute);
+      if(date.add(const Duration(days: 1)).compareTo(DateTime.now()) < 0){
+        enabled = false;
+      }
+    }
     if(enabled){
       for(int i = 0; i <= linkedAlarmAmm; i++){
         print(i);
-        NotificationService().scheduledNotification(id: alarmId+i, hour: time[i].hour, minutes: time[i].minute, title: title[i], body: body[i]);
+        NotificationService().scheduledNotification(id: alarmId+i, hour: time[i].hour, minutes: time[i].minute, title: title[i], body: body[i], component: linkedAlarmAmm == 0 ? DateTimeComponents.dateAndTime : DateTimeComponents.time);
       }
     }
     else{
@@ -132,43 +142,23 @@ class _SleepScreenState extends State<SleepScreen> {
                 child: ListView.builder(
                   itemCount: alarmList.length,
                   itemBuilder: (context, index){
-                    return Card(
-                      color: alarmList[index].cardColor,
-                      child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-                        ListTile(
-                          selected: alarmList[index].isSelected,
-                          title: Text(
-                            alarmList[index].linkedAlarmAmm == 0 ? alarmList[index].time[0].format(context)
-                            : "${alarmList[index].time[0].format(context)}-${alarmList[index].time[1].format(context)}",
-                            style: TextStyle(
-                              color: alarmList[index].enabled ? Colors.black:Colors.grey,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          trailing:alarmTrachCan.isEmpty ? Switch(
-                            value: alarmList[index].enabled,
-                            onChanged: (bool value) async {
-                              // This is called when the user toggles the switch.
-                              setState(() {
-                                alarmList[index].enabled = value;
-                              });
-                              await alarmList[index].updateScheduledNotification();
-                              await _saveData();
-                            },
-                          ) 
-                          : Checkbox(
-                            value: alarmList[index].isSelected,
-                            onChanged: (bool? value) { 
-                              toggleSelection(alarmList[index]);            
-                            },
-                          ),
-                          onTap: alarmTrachCan.isEmpty ? ()=> {} : () => toggleSelection(alarmList[index]),
-                          onLongPress: () => toggleSelection(alarmList[index]),
-                          ),
-                        ],
-                      ),
+                    alarmList.sort((a, b) {
+                      if (b.linkedAlarmAmm.compareTo(a.linkedAlarmAmm) > 0) {return 1;}
+                      else if (b.linkedAlarmAmm.compareTo(a.linkedAlarmAmm) == 0) {
+                        int compare(a, b, index) => (a.time[index].hour + a.time[index].minute/60).compareTo(b.time[index].hour + b.time[index].minute/60);
+                        if(b.linkedAlarmAmm == 0){
+                          return compare(a,b, 0);
+                        }
+                        else{
+                          if(compare(b,a, 0) > 0) {return 1;}
+                          else if (compare(b,a, 0) == 0) {return compare(b,a, 1);}
+                          else {return -1;}
+                        }
+                      }
+                      else {return -1;}
+                      }
                     );
+                    return alarmCard(index);
                   },
                 ),
               ),
@@ -186,11 +176,62 @@ class _SleepScreenState extends State<SleepScreen> {
               if (states.contains(MaterialState.pressed)) return Colors.deepPurple.shade800; // <-- Splash color
             }),
           ),
-          onPressed: () => modalScrollPicker(context),
+          onPressed: () => modalScrollPicker(context: context),
           child: const Icon(Icons.add, color: Colors.white, size: 24,)
         ),
       ),
     );
+  }
+  Card alarmCard(int index){
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      color: alarmList[index].cardColor,
+      child: Column(
+        mainAxisSize: MainAxisSize.min, 
+        children: <Widget>[
+          InkWell(
+            onTap: alarmTrachCan.isEmpty ? () => modalScrollPicker(context: context, index: index) : () => toggleSelection(alarmList[index]),
+            onLongPress: () {toggleSelection(alarmList[index]);Feedback.forTap(context);},
+            borderRadius: BorderRadius.circular(14),
+            child: ListTile(
+              enabled: alarmList[index].enabled, 
+              selected: alarmList[index].isSelected,
+              title: Text(
+                alarmList[index].linkedAlarmAmm == 0 ? alarmList[index].time[0].format(context)
+                : alarmList[index].time[1].format(context),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Text(
+                alarmList[index].linkedAlarmAmm == 0 ? "Ring once" : "Daily reminder | ${alarmList[index].time[0].format(context)}"
+              ),
+              trailing:alarmTrachCan.isEmpty ? Switch(
+                value: alarmList[index].enabled,
+                onChanged: (bool value) async {
+                  // This is called when the user toggles the switch.
+                  setState(() {
+                    alarmList[index].enabled = value;
+                  });
+                  Feedback.forTap(context);
+                  await alarmList[index].updateScheduledNotification();
+                  await _saveData();
+                },
+              ) 
+              : Checkbox(
+                value: alarmList[index].isSelected,
+                onChanged: (bool? value) { 
+                  Feedback.forTap(context);
+                  toggleSelection(alarmList[index]);            
+                },
+              ),
+              
+              ),
+            )
+          ],
+        ),
+      );
   }
   void _loadData() {
     final String? saved = prefs?.getString('alarmList');
@@ -213,13 +254,12 @@ class _SleepScreenState extends State<SleepScreen> {
       } else {
         alarm.cardColor=const Color.fromARGB(255, 223, 222, 222);
         alarm.isSelected = true;
+        alarm.activationDate = DateTime.now();
         alarmTrachCan.add(alarm);
       }
     });
   }
-  
-
-  void modalScrollPicker(BuildContext context){
+  void modalScrollPicker({required BuildContext context, int? index}){
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled:true,
@@ -244,14 +284,31 @@ class _SleepScreenState extends State<SleepScreen> {
                       onPressed: () async {
                         setState(() {
                           if(_visableSleepSchedule[1]){
-                            alarmList.add(Alarm(time: [_selectedTimeSleep,_selectedTimeWakeUp], alarmId: UuidV1().hashCode, title: ['sample title', 'sample title'], body: ['sample body','sample body'], enabled: true, linkedAlarmAmm: 1));
+                            if(index != null)
+                            {
+                              alarmList[index] = Alarm(time: [_selectedTimeSleep,_selectedTimeWakeUp], alarmId: alarmList[index].alarmId, title: alarmList[index].title, body: alarmList[index].body, enabled: true, linkedAlarmAmm: 1);
+                            }
+                            else{
+                              alarmList.add(Alarm(time: [_selectedTimeSleep,_selectedTimeWakeUp], alarmId: UuidV1().hashCode, title: ['sample title', 'sample title'], body: ['sample body','sample body'], enabled: true, linkedAlarmAmm: 1));
+                            }
                           }
                           else{
-                            alarmList.add(Alarm(time: [_selectedTime ?? TimeOfDay.now()], alarmId: UuidV1().hashCode, title: ['sample title'], body: ['sample body'], enabled: true));
+                            if(index != null)
+                            {
+                              alarmList[index] = Alarm(time: [_selectedTime ?? TimeOfDay.now()], alarmId: alarmList[index].alarmId, title: alarmList[index].title, body: alarmList[index].body, enabled: true);
+                            }
+                            else{
+                              alarmList.add(Alarm(time: [_selectedTime ?? TimeOfDay.now()], alarmId: UuidV1().hashCode, title: ['sample title'], body: ['sample body'], enabled: true));
+                            }
                           }
                           Navigator.pop(context);
                         });
-                        await alarmList.last.updateScheduledNotification();
+                        if(index != null){
+                          await alarmList[index].updateScheduledNotification();
+                        }
+                        else {
+                          await alarmList.last.updateScheduledNotification();
+                        }
                         await _saveData();
                       },
                     ),
