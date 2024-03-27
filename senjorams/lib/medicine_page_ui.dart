@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:alarm/alarm.dart';
+import 'package:senjorams/models/medicine.dart';
+import 'dart:math';
+import 'package:senjorams/meds_grid_ui.dart';
 
 class MedicineScreen extends StatefulWidget {
   const MedicineScreen({Key? key});
@@ -9,7 +13,7 @@ class MedicineScreen extends StatefulWidget {
 }
 
 class _MedicineScreenState extends State<MedicineScreen> {
-  final List<String> medicines = []; // List to store medicine names
+  late List<Medicine> medicines = []; // List to store medicine names
   final TextEditingController _medicineController = TextEditingController();
 
   final List<String> items = [
@@ -19,6 +23,24 @@ class _MedicineScreenState extends State<MedicineScreen> {
     'Once per week',
   ];
   String selectedValue = 'Every 6 hours';
+  @override
+  void initState() {
+    super.initState();
+    loadMedicines(); // Load medicines when the screen is initialized
+  }
+
+  Future<void> loadMedicines() async {
+    // Load medicines from storage
+    medicines = await Medicine.loadMedicines();
+    setState(() {}); // Update the UI after loading medicines
+  }
+
+  void deleteMedicine(int index) {
+    setState(() {
+      medicines.removeAt(index);
+      Medicine.saveMedicines(medicines);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +52,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
+              /*
             child: ListView.builder(
               itemCount: medicines.length,
               itemBuilder: (context, index) {
@@ -37,8 +60,11 @@ class _MedicineScreenState extends State<MedicineScreen> {
                   title: Text(medicines[index]),
                 );
               },
-            ),
-          ),
+            ),*/
+              child: MedicineGridWidget(
+            medicines: medicines,
+            onDelete: deleteMedicine,
+          )),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -50,10 +76,14 @@ class _MedicineScreenState extends State<MedicineScreen> {
                 items: items,
                 onMedicineAdded: (medicineName, frequency, date, time) {
                   setState(() {
-                    medicines.add(medicineName);
-                    medicines.add(frequency);
-                    medicines.add(date);
-                    medicines.add(time);
+                    Medicine newMedicine = Medicine(
+                        notificationID: generateInteger(),
+                        medicineName: medicineName,
+                        startTime: time,
+                        startDate: date,
+                        interval: frequency);
+                    medicines.add(newMedicine);
+                    Medicine.saveMedicines(medicines);
                   });
                 },
               );
@@ -204,4 +234,27 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
       ],
     );
   }
+}
+
+int generateInteger() {
+  DateTime now = DateTime.now();
+  int year = now.year % 100; // taking only last two digits of the year
+  int month = now.month;
+  int day = now.day;
+  int hour = now.hour;
+  int minute = now.minute;
+
+  int result = year * 10000000000 +
+      month * 100000000 +
+      day * 1000000 +
+      hour * 10000 +
+      minute * 100;
+
+  // Adding a random integer between 1 and 99
+  Random random = Random();
+  int randomInt = random.nextInt(99) + 1;
+
+  result += randomInt;
+
+  return result;
 }

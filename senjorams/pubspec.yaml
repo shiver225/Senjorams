@@ -45,6 +45,8 @@ dependencies:
   http: ^1.2.1
   youtube_player_flutter: ^9.0.0
   dropdown_button2: ^2.3.8
+  alarm: ^3.0.14
+  shared_preferences: ^2.0.8
 
 dev_dependencies:
   flutter_test:
