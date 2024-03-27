@@ -21,7 +21,7 @@ class APIService {
       'key': YT_API_KEY,
     };
     
-    Uri uri = Uri.http(
+    Uri uri = Uri.https(
       _baseUrl,
       '/youtube/v3/channels',
       parameters,
@@ -34,6 +34,7 @@ class APIService {
     // Get Channel
     var response = await http.get(uri, headers: headers);
     if(response.statusCode == 200) {
+      print(response.body);
       Map<String, dynamic> data = json.decode(response.body)['items'][0];
       Channel channel = Channel.fromMap(data);
 
