@@ -40,7 +40,7 @@ class APIService {
 
       // Fetch first batch of videos from playlist
       channel.videos = await fetchVideosFromPlaylist(
-        playlistId: channel.uploadPlaylistId!,
+        playlistId: channel.uploadPlaylistId,
       );
       return channel;
     } else {
@@ -57,7 +57,7 @@ class APIService {
       'key': YT_API_KEY,
     };
 
-    Uri uri = Uri.http(
+    Uri uri = Uri.https(
       _baseUrl,
       '/youtube/v3/playlistItems',
       parameters,
@@ -71,6 +71,7 @@ class APIService {
     var response = await http.get(uri, headers: headers);
     if(response.statusCode == 200) {
       var data = json.decode(response.body);
+      print(response.body);
       
       _nextPageToken = data['nextPageToken'] ?? '';
       List<dynamic> videosJson = data['items'];

@@ -24,7 +24,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
 
   _initChannel() async {
     Channel channel = await APIService.instance
-        .fetchChannel(channelId: 'MrBeast');
+        .fetchChannel(channelId: 'UCX6OQ3DkcsbYNE6H8uQQuVA');
     setState(() {
       _channel = channel;
     });
