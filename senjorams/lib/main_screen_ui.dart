@@ -8,6 +8,7 @@ import 'package:senjorams/youtube_ui.dart';
 import 'package:senjorams/food_ui.dart';
 import 'package:senjorams/medicine_page_ui.dart';
 import 'package:senjorams/start_sreen_ui.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MainScreen extends StatefulWidget {
    const MainScreen({super.key});
@@ -111,7 +112,7 @@ class _MainScreenState extends State<MainScreen> {
               },
               child: const FittedBox(
                 fit: BoxFit.fitWidth,
-                child: Icon(Icons.play_circle_rounded, color: Color.fromARGB(255, 206, 178, 129), size: 50),
+                child: Icon(FontAwesomeIcons.brain, color: Color.fromARGB(255, 206, 178, 129), size: 50),
               ),
             ),
             const SizedBox(height: 20),

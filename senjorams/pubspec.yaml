@@ -45,6 +45,7 @@ dependencies:
   http: ^1.2.1
   youtube_player_flutter: ^9.0.0
   translator: ^1.0.0
+  font_awesome_flutter: ^10.7.0
 
 dev_dependencies:
   flutter_test:
