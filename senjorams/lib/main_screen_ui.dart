@@ -2,11 +2,16 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:senjorams/activities_ui.dart';
+import 'package:senjorams/test.dart';
+import 'package:senjorams/youtube_ui.dart';
 import 'package:senjorams/food_ui.dart';
 import 'package:senjorams/medicine_page_ui.dart';
 import 'package:senjorams/social_events.dart';
 import 'package:senjorams/start_sreen_ui.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -108,7 +113,41 @@ class _MainScreenState extends State<MainScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(100, 75)
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ActivitiesScreen())
+                );
+              },
+              child: const FittedBox(
+                fit: BoxFit.fitWidth,
+                child: Icon(FontAwesomeIcons.brain, color: Color.fromARGB(255, 206, 178, 129), size: 50),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(100, 75)
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => (const FoodScreen()))
+                );
+              },
+              child: const FittedBox(
+                fit: BoxFit.fitWidth,
+                child: Icon(Icons.fastfood, color: Color.fromARGB(255, 206, 178, 129), size: 50),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(100, 75)
+              ),
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
                 Navigator.pushReplacement(

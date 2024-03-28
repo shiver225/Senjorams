@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:senjorams/services/api_services.dart';
 import 'package:translator/translator.dart';
 
-class FoodScreen extends StatefulWidget {
-  const FoodScreen({Key? key}) : super(key: key);
+class TestScreen extends StatefulWidget {
+  const TestScreen({Key? key}) : super(key: key);
 
   @override
-  _FoodScreenState createState() => _FoodScreenState();
+  _TestScreenState createState() => _TestScreenState();
 }
 
-class _FoodScreenState extends State<FoodScreen> {
+class _TestScreenState extends State<TestScreen> {
   final TextEditingController _foodNameController = TextEditingController();
   bool _isLoading = false;
   final translator = GoogleTranslator();
@@ -62,7 +62,7 @@ class _FoodScreenState extends State<FoodScreen> {
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
-        backgroundColor: Colors.lightBlueAccent,
+        backgroundColor: const Color(0xFF92C7CF),
         elevation: 0, // Remove app bar shadow
       ),
       body: Padding(
@@ -87,16 +87,13 @@ class _FoodScreenState extends State<FoodScreen> {
             ),
             SizedBox(height: 20.0),
             ElevatedButton(
-              onPressed: _isLoading ? null : () {
-                _fetchFoodNutrition();
-                FocusScope.of(context).unfocus(); // Hide keyboard
-              },
+              onPressed: _isLoading ? null : _fetchFoodNutrition,
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                backgroundColor: Colors.lightBlueAccent,
+                backgroundColor: const Color(0xFF92C7CF),
               ),
               child: _isLoading
                   ? SizedBox(
@@ -125,30 +122,28 @@ class _FoodScreenState extends State<FoodScreen> {
             if (_foodData != null)
               Expanded(
                 child: Card(
-                  color: Colors.lightBlueAccent.withOpacity(0.1),
+                  color: const Color(0xFF92C7CF),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildNutritionInfo('Pavadinimas', foodName),
-                          _buildNutritionInfo('Kalorojos', _foodData!['calories']),
-                          _buildNutritionInfo('Porcijos dydis (g)', _foodData!['serving_size_g']),
-                          _buildNutritionInfo('Bendras riebalų kiekis (g)', _foodData!['fat_total_g']),
-                          _buildNutritionInfo('Sotieji riebalai (g)', _foodData!['fat_saturated_g']),
-                          _buildNutritionInfo('Baltymai (g)', _foodData!['protein_g']),
-                          _buildNutritionInfo('Natris (mg)', _foodData!['sodium_mg']),
-                          _buildNutritionInfo('Kalis (mg)', _foodData!['potassium_mg']),
-                          _buildNutritionInfo('Cholesterolis (mg)', _foodData!['cholesterol_mg']),
-                          _buildNutritionInfo('Bendras angliavandenių kiekis (g)', _foodData!['carbohydrates_total_g']),
-                          _buildNutritionInfo('Skaidulos (g)', _foodData!['fiber_g']),
-                          _buildNutritionInfo('Cukrus (g)', _foodData!['sugar_g']),
-                        ],
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildNutritionInfo('Pavadinimas', foodName),
+                        _buildNutritionInfo('Kalorojos', _foodData!['calories']),
+                        _buildNutritionInfo('Porcijos dydis (g)', _foodData!['serving_size_g']),
+                        _buildNutritionInfo('Bendras riebalų kiekis (g)', _foodData!['fat_total_g']),
+                        _buildNutritionInfo('Sotieji riebalai (g)', _foodData!['fat_saturated_g']),
+                        _buildNutritionInfo('Baltymai (g)', _foodData!['protein_g']),
+                        _buildNutritionInfo('Natris (mg)', _foodData!['sodium_mg']),
+                        _buildNutritionInfo('Kalis (mg)', _foodData!['potassium_mg']),
+                        _buildNutritionInfo('Cholesterolis (mg)', _foodData!['cholesterol_mg']),
+                        _buildNutritionInfo('Bendras angliavandenių kiekis (g)', _foodData!['carbohydrates_total_g']),
+                        _buildNutritionInfo('Skaidulos (g)', _foodData!['fiber_g']),
+                        _buildNutritionInfo('Cukrus (g)', _foodData!['sugar_g']),
+                      ],
                     ),
                   ),
                 ),
