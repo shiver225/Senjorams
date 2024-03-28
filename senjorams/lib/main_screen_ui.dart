@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:senjorams/activities_ui.dart';
 import 'package:senjorams/test.dart';
@@ -124,12 +125,12 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => (const TestScreen()))
+                  MaterialPageRoute(builder: (context) => (const FoodScreen()))
                 );
               },
               child: const FittedBox(
                 fit: BoxFit.fitWidth,
-                child: Icon(Icons.error_rounded, color: Colors.redAccent, size: 50),
+                child: Icon(Icons.fastfood, color: Color.fromARGB(255, 206, 178, 129), size: 50),
               ),
             ),
             const SizedBox(height: 20),
