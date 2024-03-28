@@ -1,13 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-<<<<<<< HEAD
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />   
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-=======
     <!-- Required to fetch data from the internet. -->
     <uses-permission android:name="android.permission.INTERNET" />
->>>>>>> a2e1194f62d6ec6ecea1af99fd8d850721e291ae
     <application
         android:label="senjorams"
         android:name="${applicationName}"
