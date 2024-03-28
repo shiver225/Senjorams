@@ -4,12 +4,13 @@ import 'package:http/http.dart' as http;
 import 'package:senjorams/models/channel_model.dart';
 import 'package:senjorams/models/video_model.dart';
 import 'package:senjorams/utilities/keys.dart';
+import 'package:senjorams/models/food_model.dart';
 
-class APIService {
+class YouTubeAPI {
 
-  APIService._instantiate();
+  YouTubeAPI._instantiate();
 
-  static final APIService instance = APIService._instantiate();
+  static final YouTubeAPI instance = YouTubeAPI._instantiate();
 
   final String _baseUrl = 'www.googleapis.com';
   String _nextPageToken = '';
@@ -85,6 +86,26 @@ class APIService {
       );
       return videos;
     } else {
+      throw json.decode(response.body)['error']['message'];
+    }
+  }
+}
+
+class FoodAPI {
+  static Future<List<dynamic>> fetchFoodNutrition(String foodName) async {
+    final response = await http.get(
+      Uri.parse('https://api.api-ninjas.com/v1/nutrition?query=$foodName'),
+      headers: {
+        'X-Api-Key': Food_API_KEY,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON
+      final List<dynamic> data = json.decode(response.body);
+      return data;
+    } else {
+      // If the server did not return a 200 OK response, throw an exception
       throw json.decode(response.body)['error']['message'];
     }
   }

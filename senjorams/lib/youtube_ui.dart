@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:senjorams/models/channel_model.dart';
 import 'package:senjorams/models/video_model.dart';
-import 'package:senjorams/services/api_service.dart';
+import 'package:senjorams/services/api_services.dart';
 import 'package:senjorams/video_screen_ui.dart';
 
 
@@ -30,7 +30,7 @@ class _YouTubeScreenState extends State<YouTubeScreen> {
   }
 
   _initChannel() async {
-    Channel channel = await APIService.instance
+    Channel channel = await YouTubeAPI.instance
         .fetchChannel(channelId: id);
     setState(() {
       _channel = channel;
@@ -137,7 +137,7 @@ class _YouTubeScreenState extends State<YouTubeScreen> {
 
   _loadMoreVideos() async {
     _isLoading = true;
-    List<Video> moreVideos = await APIService.instance
+    List<Video> moreVideos = await YouTubeAPI.instance
       .fetchVideosFromPlaylist(playlistId: _channel!.uploadPlaylistId);
     List<Video> allVideos = _channel!.videos..addAll(moreVideos);
     setState(() {
