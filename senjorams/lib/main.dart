@@ -14,7 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 SharedPreferences? prefs;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  prefs  = await SharedPreferences.getInstance();
+  prefs = await SharedPreferences.getInstance();
   NotificationService().initNotification();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -23,7 +23,6 @@ Future<void> main() async {
   NotificationService().cancelAllScheduledNotification();
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -63,8 +62,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      locale: const Locale('lt', 'LT'),
-      home: MainScreen()
-      );
+        locale: const Locale('lt', 'LT'), home: MainScreen());
   }
 }
