@@ -1,178 +1,98 @@
 import 'package:flutter/material.dart';
-import 'package:senjorams/models/channel_model.dart';
-import 'package:senjorams/models/video_model.dart';
-import 'package:senjorams/services/api_service.dart';
-import 'package:senjorams/video_screen_ui.dart';
+import 'package:senjorams/youtube_ui.dart'; // Import the youtube_ui.dart file
 
-class ActivitiesScreen extends StatefulWidget {
-  const ActivitiesScreen({Key? key}) : super(key: key);
-
-  @override
-  _ActivitiesScreenState createState() => _ActivitiesScreenState();
-}
-
-class _ActivitiesScreenState extends State<ActivitiesScreen> {
-
-  Channel? _channel;
-  bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initChannel();
-  }
-
-  _initChannel() async {
-    Channel channel = await APIService.instance
-        .fetchChannel(channelId: 'UCX6OQ3DkcsbYNE6H8uQQuVA');
-    setState(() {
-      _channel = channel;
-    });
-  }
-
-  _buildProfileInfo() {
-    return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(20),
-      height: 100,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            offset: Offset(0, 1),
-            blurRadius: 6,
-          ),
-        ],
-      ),
-      child: Row(
-        children: <Widget>[
-          CircleAvatar(
-            backgroundColor: Colors.white,
-            radius: 25,
-            backgroundImage: NetworkImage(_channel!.profilePicture),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  _channel!.title,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  '${_channel!.subscriberCount} subscribers',
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                )
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  _buildVideo(Video video) {
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => VideoScreen(id: video.id),
-        ),
-      ),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        padding: const EdgeInsets.all(10),
-        height: 140,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              offset: Offset(0, 1),
-              blurRadius: 6,
-            ),
-          ]
-        ),
-        child: Row(
-          children: <Widget>[
-            Image(
-              width: 150,
-              image: NetworkImage(video.thumbnailUrl),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                video.title,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18,
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  _loadMoreVideos() async {
-    _isLoading = true;
-    List<Video> moreVideos = await APIService.instance
-      .fetchVideosFromPlaylist(playlistId: _channel!.uploadPlaylistId);
-    List<Video> allVideos = _channel!.videos..addAll(moreVideos);
-    setState(() {
-      _channel!.videos = allVideos;
-    });
-    _isLoading = false;
-  }
-
+class ActivitiesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("YouTube Channel"),
+        title: Text("Activities"),
       ),
-      body: _channel != null 
-      ? NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification scrollDetails) {
-          if (!_isLoading &&
-          _channel!.videos.length != int.parse(_channel!.videoCount) &&
-          scrollDetails.metrics.pixels == scrollDetails.metrics.maxScrollExtent) {
-            _loadMoreVideos();
-          }
-          return false;
-        },
-        child: ListView.builder(
-          itemCount: 1 + _channel!.videos.length,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 0) {
-              return _buildProfileInfo();
-            }
-            Video video = _channel!.videos[index -1];
-            return _buildVideo(video);
-          },
-        ),
-      )
-      : Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(
-            Theme.of(context).primaryColor, //Red
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Video option buttons
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.all(8.0),
+              children: activityOptions
+                  .map((option) => _buildActivityButton(context, option))
+                  .toList(),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
+
+  Widget _buildActivityButton(BuildContext context, Map<String, dynamic> option) {
+  return Padding(
+    padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+    child: GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => YouTubeScreen(id: option['channelId'], name: option['name'])),
+        );
+      },
+      child: Card(
+        elevation: 5, // Add elevation for shadow effect
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0), // Rounded corners
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)), // Rounded top corners for image
+              child: Image.asset(
+                option['image'],
+                fit: BoxFit.cover, // Image fills the available space
+                height: 200, // Adjust the height of the image
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                option['name'],
+                style: TextStyle(
+                  color: Colors.black87, // Text color
+                  fontSize: 20, // Font size
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+
+
+  // List of activity options with their corresponding channel IDs and images
+  final List<Map<String, dynamic>> activityOptions = [
+    {
+      'name': 'Exercise',
+      'channelId': 'UCkWYei5MULuRDhH7uxtZqqA',
+      'image': 'assets/images/exercise_image.jpg',
+    },
+    {
+      'name': 'Puzzle Games',
+      'channelId': 'UCW7f0bXf4kXedQ6wP-QNl7Q',
+      'image': 'assets/images/puzzle_games_image.jpg',
+    },
+    {
+      'name': 'Music Therapy',
+      'channelId': 'UC4B4KZ-_PtVSTvL67Fhfa8Q',
+      'image': 'assets/images/music_therapy_image.png',
+    },
+    {
+      'name': 'Art and Crafts',
+      'channelId': 'UCjz0bp1sxpbtXNQ7vCwJ-gw',
+      'image': 'assets/images/art_and_crafts_image.jpg',
+    },
+  ];
 }

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:senjorams/activities_ui.dart';
+import 'package:senjorams/youtube_ui.dart';
 import 'package:senjorams/food_ui.dart';
 import 'package:senjorams/medicine_page_ui.dart';
 import 'package:senjorams/start_sreen_ui.dart';
@@ -105,7 +106,7 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ActivitiesScreen())
+                  MaterialPageRoute(builder: (context) => ActivitiesScreen())
                 );
               },
               child: const FittedBox(
