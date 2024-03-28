@@ -12,6 +12,8 @@ import 'package:senjorams/medicine_page_ui.dart';
 import 'package:senjorams/social_events.dart';
 import 'package:senjorams/start_sreen_ui.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:senjorams/sleep_ui.dart';
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -103,7 +105,10 @@ class _MainScreenState extends State<MainScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
               onPressed: () {
-                // Navigate to another page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SleepScreen())
+                );
               },
               child: const FittedBox(
                 fit: BoxFit.fitWidth,
