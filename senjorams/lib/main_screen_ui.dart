@@ -137,22 +137,6 @@ class _MainScreenState extends State<MainScreen> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(100, 75)
               ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => (const FoodScreen()))
-                );
-              },
-              child: const FittedBox(
-                fit: BoxFit.fitWidth,
-                child: Icon(Icons.fastfood, color: Color.fromARGB(255, 206, 178, 129), size: 50),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(100, 75)
-              ),
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
                 Navigator.pushReplacement(

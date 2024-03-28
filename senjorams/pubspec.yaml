@@ -57,9 +57,6 @@ dependencies:
   shared_preferences: ^2.2.2
   uuid: ^4.3.3
   icons_plus: ^5.0.0
-  font_awesome_flutter: ^10.7.0
-  translator: ^1.0.0
-
 
 
 
