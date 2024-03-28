@@ -29,6 +29,12 @@ class _MedicineScreenState extends State<MedicineScreen> {
     loadMedicines(); // Load medicines when the screen is initialized
   }
 
+  @override
+  void dispose() {
+    Medicine.saveMedicines(medicines);
+    super.dispose();
+  }
+
   Future<void> loadMedicines() async {
     // Load medicines from storage
     medicines = await Medicine.loadMedicines();
@@ -127,6 +133,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
   @override
   void dispose() {
     _medicineController.dispose();
+
     super.dispose();
   }
 

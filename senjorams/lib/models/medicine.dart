@@ -42,16 +42,16 @@ class Medicine {
 
   // Save list of medicines to SharedPreferences
   static Future<void> saveMedicines(List<Medicine> medicines) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs_ = await SharedPreferences.getInstance();
     List<String> medicineStrings =
         medicines.map((med) => json.encode(med.toJson())).toList();
-    await prefs.setStringList('medicines', medicineStrings);
+    await prefs_.setStringList('medicines', medicineStrings);
   }
 
   // Retrieve list of medicines from SharedPreferences
   static Future<List<Medicine>> loadMedicines() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? medicineStrings = prefs.getStringList('medicines');
+    SharedPreferences prefs_ = await SharedPreferences.getInstance();
+    List<String>? medicineStrings = prefs_.getStringList('medicines');
     if (medicineStrings != null) {
       return medicineStrings
           .map((str) => Medicine.fromJson(json.decode(str)))
