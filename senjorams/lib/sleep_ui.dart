@@ -93,8 +93,8 @@ class _SleepScreenState extends State<SleepScreen> {
                               _alarmList.add(Alarm(
                                 time: [_selectedTimeSleep,_selectedTimeWakeUp],
                                  alarmId: UuidV1().hashCode,
-                                  title: ['sample title', 'sample title'],
-                                  body: ['sample body','sample body'],
+                                  title: ['Miegas', 'Keltis'],
+                                  body: ['Miegas','Keltis'],
                                   enabled: true,
                                   linkedAlarmAmm: 1
                                   ));
@@ -114,8 +114,8 @@ class _SleepScreenState extends State<SleepScreen> {
                               _alarmList.add(Alarm(
                                 time: [_selectedTime ?? TimeOfDay.now()],
                                   alarmId: UuidV1().hashCode,
-                                  title: ['sample title'], body:
-                                  ['sample body'], 
+                                  title: ['Miegas'], 
+                                  body: ['Miegas'], 
                                   enabled: true
                                   ));
                             }
@@ -157,7 +157,7 @@ class _SleepScreenState extends State<SleepScreen> {
                 _inkButtons(
                   isSelected: _visableSleepSchedule,
                   setModalState: setModalState,
-                  buttonText: ["Ring Once", "Schedule"],
+                  buttonText: ["Vieną kartą", "Tvarkaraštis"],
                   spacing: MediaQuery.of(context).size.width * 0.3
                  ),
               ],
@@ -191,7 +191,7 @@ class _SleepScreenState extends State<SleepScreen> {
                 ),
               ),
               subtitle: Text(
-                _alarmList[index].linkedAlarmAmm == 0 ? "Ring once" : "Daily reminder | ${_alarmList[index].time[0].format(context)}"
+                _alarmList[index].linkedAlarmAmm == 0 ? "Vieną kartą" : "Kasdienis | ${_alarmList[index].time[0].format(context)}"
               ),
               trailing:_alarmTrachCan.isEmpty ? Switch(
                 value: _alarmList[index].enabled,
