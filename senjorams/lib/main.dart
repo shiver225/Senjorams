@@ -7,6 +7,7 @@ import 'package:senjorams/main_screen_ui.dart';
 import 'package:senjorams/services/notification_service.dart';
 import 'package:senjorams/start_sreen_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 
 // void main() {
 //   runApp(const MyApp());
@@ -21,6 +22,7 @@ Future<void> main() async {
   );
   await prefs!.clear();
   NotificationService().cancelAllScheduledNotification();
+  await AndroidAlarmManager.initialize();
   runApp(const MyApp());
 }
 
