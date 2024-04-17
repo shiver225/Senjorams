@@ -57,7 +57,8 @@ dependencies:
   shared_preferences: ^2.2.2
   uuid: ^4.3.3
   icons_plus: ^5.0.0
-
+  google_maps_flutter: ^2.6.1
+  permission_handler: ^11.3.1
 
 
 

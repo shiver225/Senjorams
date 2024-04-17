@@ -8,7 +8,18 @@ import 'package:senjorams/services/notification_service.dart';
 import 'package:senjorams/start_sreen_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+Future<void> setPermissions() async{
+  if (await Permission.location.request().isGranted) {
+    // Either the permission was already granted before or the user just granted it.
+  }
+
+  // You can request multiple permissions at once.
+  Map<Permission, PermissionStatus> statuses = await [
+    Permission.location,
+  ].request();
+}
 // void main() {
 //   runApp(const MyApp());
 // }
@@ -23,6 +34,7 @@ Future<void> main() async {
   await prefs!.clear();
   NotificationService().cancelAllScheduledNotification();
   await AndroidAlarmManager.initialize();
+  await setPermissions();
   runApp(const MyApp());
 }
 
