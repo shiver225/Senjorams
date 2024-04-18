@@ -190,8 +190,6 @@ class _FoodScreenState extends State<FoodScreen> {
     }
   }
 
-  //TODO: padaryt kad visa nutrition butu lietuviskai, kad textbox leistu lietuviskas raides, kad turetu history apie siandien suvartota maista
-
   Widget _buildFoodNutrition() {
     if (_foodData != null) {
       return Expanded(
