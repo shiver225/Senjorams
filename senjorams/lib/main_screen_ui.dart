@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:senjorams/activities_ui.dart';
+import 'package:senjorams/map_ui.dart';
 import 'package:senjorams/test.dart';
 import 'package:senjorams/youtube_ui.dart';
 import 'package:senjorams/food_ui.dart';
@@ -130,6 +131,22 @@ class _MainScreenState extends State<MainScreen> {
               child: const FittedBox(
                 fit: BoxFit.fitWidth,
                 child: Icon(FontAwesomeIcons.brain, color: Color.fromARGB(255, 206, 178, 129), size: 50),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(100, 75)
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MapSample())
+                );
+              },
+              child: const FittedBox(
+                fit: BoxFit.fitWidth,
+                child: Icon(FontAwesomeIcons.map, color: Color.fromARGB(255, 206, 178, 129), size: 50),
               ),
             ),
             const SizedBox(height: 20),
