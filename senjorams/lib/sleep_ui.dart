@@ -26,7 +26,6 @@ class _SleepScreenState extends State<SleepScreen> {
   void initState() {
     super.initState();
     _loadData();
-    // Set the login code from the widget parameter when available
   }
   void _loadData() {
     final String? saved = prefs?.getString('alarmList');

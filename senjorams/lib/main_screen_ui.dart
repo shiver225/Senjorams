@@ -58,113 +58,129 @@ class _MainScreenState extends State<MainScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const MedicineScreen()));
-              },
-              child: const FittedBox(
-                fit: BoxFit.fitWidth,
-                child: Icon(Icons.medical_information,
-                    color: Color.fromARGB(255, 206, 178, 129), size: 50),
-              ),
+            Row(
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const MedicineScreen()));
+                  },
+                  child: const FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: Icon(Icons.medical_information,
+                        color: Color.fromARGB(255, 206, 178, 129), size: 50),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const FoodScreen()));
+                  },
+                  child: const FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: Icon(Icons.restaurant,
+                        color: Color.fromARGB(255, 206, 178, 129), size: 50),
+                  ),
+                ),
+              ]
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const FoodScreen()));
-              },
-              child: const FittedBox(
-                fit: BoxFit.fitWidth,
-                child: Icon(Icons.restaurant,
-                    color: Color.fromARGB(255, 206, 178, 129), size: 50),
-              ),
+            Row(
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SocialEventScreen()));
+                  },
+                  child: const FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: Icon(Icons.attractions,
+                        color: Color.fromARGB(255, 206, 178, 129), size: 50),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SleepScreen())
+                    );
+                  },
+                  child: const FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: Icon(Icons.alarm,
+                        color: Color.fromARGB(255, 206, 178, 129), size: 50),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const SocialEventScreen()));
-              },
-              child: const FittedBox(
-                fit: BoxFit.fitWidth,
-                child: Icon(Icons.attractions,
-                    color: Color.fromARGB(255, 206, 178, 129), size: 50),
-              ),
+            Row(
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(100, 75)
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ActivitiesScreen())
+                    );
+                  },
+                  child: const FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: Icon(FontAwesomeIcons.brain, color: Color.fromARGB(255, 206, 178, 129), size: 50),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(100, 75)
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MapSample())
+                    );
+                  },
+                  child: const FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: Icon(FontAwesomeIcons.map, color: Color.fromARGB(255, 206, 178, 129), size: 50),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SleepScreen())
-                );
-              },
-              child: const FittedBox(
-                fit: BoxFit.fitWidth,
-                child: Icon(Icons.alarm,
-                    color: Color.fromARGB(255, 206, 178, 129), size: 50),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(100, 75)
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ActivitiesScreen())
-                );
-              },
-              child: const FittedBox(
-                fit: BoxFit.fitWidth,
-                child: Icon(FontAwesomeIcons.brain, color: Color.fromARGB(255, 206, 178, 129), size: 50),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(100, 75)
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MapSample())
-                );
-              },
-              child: const FittedBox(
-                fit: BoxFit.fitWidth,
-                child: Icon(FontAwesomeIcons.map, color: Color.fromARGB(255, 206, 178, 129), size: 50),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(100, 75)
-              ),
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const StartScreen()),
-                );
-              },
-              child: const FittedBox(
-                fit: BoxFit.fitWidth,
-                child: Icon(Icons.logout, color: Colors.black, size: 50),
-              ),
+            Row(
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(100, 75)
+                  ),
+                  onPressed: () async {
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const StartScreen()),
+                    );
+                  },
+                  child: const FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: Icon(Icons.logout, color: Colors.black, size: 50),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
