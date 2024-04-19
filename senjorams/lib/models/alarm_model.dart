@@ -39,7 +39,7 @@ class Alarm{
         'linkedAlarmAmm' : linkedAlarmAmm,
         'activationDate' : activationDate.toString(),
       };
-      
+  
   Future<void> updateScheduledNotification() async{
     if(linkedAlarmAmm == 0){
       DateTime date = DateTime(activationDate.year, activationDate.month, activationDate.day, time[0].hour, time[0].minute);
@@ -49,12 +49,12 @@ class Alarm{
     }
     if(enabled){
       for(int i = 0; i <= linkedAlarmAmm; i++){
-        NotificationService().scheduledNotification(id: alarmId+i, hour: time[i].hour, minutes: time[i].minute, title: title[i], body: body[i], component: linkedAlarmAmm == 0 ? DateTimeComponents.dateAndTime : DateTimeComponents.time);
+        NotificationService.scheduledNotification(id: alarmId+i, hour: time[i].hour, minutes: time[i].minute, title: title[i], body: body[i], repeat: linkedAlarmAmm > 0 );
       }
     }
     else{
       for(int i = 0; i <= linkedAlarmAmm; i++){
-        await NotificationService().cancelScheduledNotification(alarmId+i);
+        await NotificationService.cancelScheduledNotification(alarmId+i);
       }
     }
   }
