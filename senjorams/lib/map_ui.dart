@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:senjorams/utilities/place.dart';
 
 const apiKey="AIzaSyD3HD7vNTtRChKOhf3J6SN0niAiT_apYSk"; //not safe i bet
+
 extension  HexColor on Color {
   static Color fromHex(String hexString) {
     final buffer = StringBuffer();

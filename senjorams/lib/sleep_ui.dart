@@ -39,6 +39,7 @@ class _SleepScreenState extends State<SleepScreen> {
     final String alarmL = json.encode(_alarmList);
     await prefs?.setString('alarmList', alarmL);
   }
+  
   void _toggleSelection(Alarm alarm) {
     setState(() {
       if (alarm.isSelected) {
@@ -72,7 +73,7 @@ class _SleepScreenState extends State<SleepScreen> {
                       child: const Icon(Icons.clear),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.65),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.55),
                     TextButton(
                       child: const Icon(Icons.check),
                       onPressed: () async {

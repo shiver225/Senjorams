@@ -18,21 +18,24 @@ import 'package:senjorams/sleep_ui.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
-
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
   late String _timeString = '';
-
+  late var timer;
   @override
   void initState() {
     super.initState();
     _updateTime(); // Update time initially
-    Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
   }
-
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
   void _updateTime() {
     final DateTime now = DateTime.now();
     setState(() {
