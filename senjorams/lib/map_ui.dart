@@ -1,11 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:senjorams/utilities/place.dart';
 
@@ -28,14 +29,22 @@ class MapSample extends StatefulWidget {
 }
 
 class _MapSampleState extends State<MapSample> {
-  late GoogleMapController mapController;
-  LatLng? _currentPosition;
+  final Completer<GoogleMapController> _mapController = Completer();
+  
+  LocationData? _currentLocation; 
   GlobalKey _globalKey = GlobalKey();
+
   @override
-    void initState() {
-      super.initState();
-      _getLocation();
+  void initState() {
+    super.initState();
+    getCurrentLocation();
+  }
+  @override
+  void setState(fn){
+    if(mounted) {
+      super.setState(fn);
     }
+  }
 
   Future<Place> fetchPoi(LatLng position) async{
     print('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${position.latitude}%2C${position.longitude}&radius=200&key=$apiKey');
@@ -47,37 +56,47 @@ class _MapSampleState extends State<MapSample> {
         "center": {
           "latitude": position.latitude,
           "longitude": position.longitude},
-        "radius": 10.0
+        "radius": 50.0
       }
-    }
+    },
+    "rankPreference": "DISTANCE"
     };
     http.Response response =  await http.post(Uri.parse('https://places.googleapis.com/v1/places:searchNearby'),
       headers: {
         "Content-Type": "application/json",
-       "X-Goog-Api-Key": apiKey,
-       "X-Goog-FieldMask": "places.displayName,places.iconBackgroundColor,places.formattedAddress,places.reviews,places.regularOpeningHours,places.rating,places.photos,places.userRatingCount,places.iconMaskBaseUri"
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask": "places.displayName,places.iconBackgroundColor,places.formattedAddress,places.reviews,places.regularOpeningHours,places.rating,places.photos,places.userRatingCount,places.iconMaskBaseUri"
        },
       body: json.encode(data),
     );
     Map values = jsonDecode(response.body);
     log(response.body);
-    return Place.fromJson(values["places"][0]);//replace with class
+    return Place.fromJson(values["places"][0]);
   }
-  _getLocation() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    double lat = position.latitude;
-    double long = position.longitude;
+  
+  void getCurrentLocation() async{
+    Location location = Location();
 
-    LatLng location = LatLng(lat, long);
-
-    setState(() {
-      _currentPosition = location;
-      _globalKey=GlobalKey();
+    location.getLocation().then((location){
+      _currentLocation=location;
     });
-  }
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
+
+    GoogleMapController googleMapController = await _mapController.future;
+
+    location.onLocationChanged.listen((newLocation) {
+      setState(() {
+        _currentLocation=newLocation;
+        
+        googleMapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              zoom: 13.5,
+              target: LatLng(newLocation.latitude!, newLocation.longitude!)
+            )
+          )
+        );
+      });
+     });
   }
 
   final CarouselController _controller = CarouselController();
@@ -228,18 +247,25 @@ class _MapSampleState extends State<MapSample> {
           title: const Text('Maps Sample App'),
           elevation: 2,
         ),
-        body: GoogleMap(
+        body: _currentLocation==null ? const Center(child: Text("Loading"),) : GoogleMap(
           key: _globalKey,
-          onMapCreated: _onMapCreated,
           initialCameraPosition: CameraPosition(
-            target: _currentPosition ?? LatLng(0, 0),
+            target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
             zoom: 15.0,
           ),
+          markers: {
+            Marker(
+              markerId: const MarkerId("currentLocation"),
+              position:LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)
+              )
+          },
           onTap: (argument) async {
             Place poi = await fetchPoi(argument);
             _modalScrollPicker(context: context, place: poi);
           },
-        ),
-    );
+          onMapCreated: (mapController) {
+            _mapController.complete(mapController);
+          }),
+        );
   }
 }
