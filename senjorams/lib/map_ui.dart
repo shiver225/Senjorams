@@ -44,7 +44,7 @@ class _MapSampleState extends State<MapSample> {
   @override
   void initState() {
     super.initState();
-    getCurrentLocation();
+    _getCurrentLocation();
     _loadData();
   }
   @override
@@ -99,7 +99,7 @@ class _MapSampleState extends State<MapSample> {
     }
   }
   
-  void getCurrentLocation() async{
+  void _getCurrentLocation() async{
     Location location = Location();
 
     location.getLocation().then((location){
@@ -107,7 +107,6 @@ class _MapSampleState extends State<MapSample> {
         _currentLocation=location;
       });
     });
-
 
     location.onLocationChanged.listen((newLocation) {
       setState(() {
@@ -341,7 +340,13 @@ class _MapSampleState extends State<MapSample> {
         child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-            const Text("Saved places"),
+            Container(
+             height: 100,
+             alignment: AlignmentDirectional.center,
+             width: double.infinity,
+             decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: Colors.deepPurple),
+             child: const Text("SAVED PLACES", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),),
+            ),
             Expanded(
               child: ListView.builder(
                 itemCount: _places.length,
@@ -363,7 +368,7 @@ class _MapSampleState extends State<MapSample> {
                     _isPoiMarkerVisible = false;
                   });
                 },
-                icon: const Icon(Icons.delete)
+                icon: const Icon(Icons.delete, size: 100,)
               )
             )
         ],
@@ -384,6 +389,7 @@ class _MapSampleState extends State<MapSample> {
         body: _currentLocation==null ? const Center(child: Text("Loading..."),) : GoogleMap(
           myLocationEnabled: true,
           zoomControlsEnabled: false,
+          myLocationButtonEnabled: false,
           initialCameraPosition: CameraPosition(
             target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
             zoom: 15.0,
@@ -403,7 +409,12 @@ class _MapSampleState extends State<MapSample> {
           },
           onMapCreated: (mapController) {
             _mapController.complete(mapController);
-          })
+          }),
+          floatingActionButton: _currentLocation!=null ? FloatingActionButton.extended(
+            onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
+            label: Text('My Location'),
+            icon: Icon(Icons.location_on),
+          ) : null,
     );
   }
 }
