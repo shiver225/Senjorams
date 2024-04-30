@@ -54,13 +54,13 @@ class Place {
         "id": id,
         "formattedAddress": formattedAddress,
         "rating": rating,
-        "regularOpeningHours": regularOpeningHours?.toJson(),
+        if (regularOpeningHours != null) "regularOpeningHours": regularOpeningHours!.toJson(),
         "userRatingCount": userRatingCount,
         "iconMaskBaseUri": iconMaskBaseUri,
         "iconBackgroundColor": iconBackgroundColor,
-        "displayName": displayName?.toJson(),
-        "reviews": reviews!=null ? List<dynamic>.from(reviews!.map((x) => x.toJson())) : "",
-        "photos": photos!=null ? List<dynamic>.from(photos!.map((x) => x.toJson())): "",
+        if (displayName != null) "displayName": displayName!.toJson(),
+        if (reviews != null) "reviews": List<dynamic>.from(reviews!.map((x) => x.toJson())),
+        if (photos != null) "photos": List<dynamic>.from(photos!.map((x) => x.toJson())),
     };
 }
 

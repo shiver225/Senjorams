@@ -31,13 +31,15 @@ class MapSample extends StatefulWidget {
 
 class _MapSampleState extends State<MapSample> {
   final Completer<GoogleMapController> _mapController = Completer();
-  GlobalKey _globalKey = GlobalKey();
+  //GlobalKey _globalKey = GlobalKey();
+  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   List<Place> _places = [];
   List<Place> _placesTrashCan = [];
 
   LocationData? _currentLocation; 
-  Marker poiMarker = Marker(markerId: const MarkerId("currentLocation"), alpha: 0);
+  LatLng? _poiMarkerLocation;
+  bool _isPoiMarkerVisible = false;
 
   @override
   void initState() {
@@ -76,7 +78,7 @@ class _MapSampleState extends State<MapSample> {
         "radius": 50.0
       }
     },
-    "rankPreference": "DISTANCE"
+    "excludedTypes": ["parking", "atm"],
     };
     http.Response response =  await http.post(Uri.parse('https://places.googleapis.com/v1/places:searchNearby'),
       headers: {
@@ -197,7 +199,7 @@ class _MapSampleState extends State<MapSample> {
           ]),
         );
   }
-  void _modalBottomSheet({required BuildContext context, required Place place}){
+  void _modalBottomSheet({required Place place}){
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled:true,
@@ -217,13 +219,11 @@ class _MapSampleState extends State<MapSample> {
                       onPressed: () => Navigator.pop(context),
                     ),
                     SizedBox(width: MediaQuery.of(context).size.width * 0.55),
-                    TextButton(
-                      child: const Icon(Icons.check),
+                    if(!_places.any((pl) => pl.id == place.id)) TextButton(
+                      child: const Text("SAVE"),
                       onPressed: () async {
-                        if(_places.any((pl) => pl.id == place.id)){
-                          return;
-                        }
                         setState(() {_places.add(place); _saveData();});
+                        Navigator.pop(context);
                       }
                     )]
                 ),
@@ -305,13 +305,14 @@ class _MapSampleState extends State<MapSample> {
           InkWell(
             onTap: _placesTrashCan.isEmpty ? () {
                 _moveCameraToPosition(_places[index].location!); 
+                _modalBottomSheet(place: _places[index]);
                 setState(() {
-                    poiMarker = Marker(
-                    markerId: poiMarker.markerId, 
-                    alpha: 1,
-                    position: _places[index].location!
-                  );
+                    _poiMarkerLocation = _places[index].location;
+                    _isPoiMarkerVisible = true;
                 });
+                if(_scaffoldKey.currentState!.isEndDrawerOpen){
+                  _scaffoldKey.currentState!.closeEndDrawer();
+                }
               } : () => _toggleSelection(_places[index]),
             onLongPress: () {_toggleSelection(_places[index]);Feedback.forTap(context);},
             borderRadius: BorderRadius.circular(14),
@@ -334,24 +335,39 @@ class _MapSampleState extends State<MapSample> {
       );
   }
   Widget _sideNavigationBar(){
-    return Container(
-      child: Drawer(
-        child: Container(
-          color: Colors.white,
-          child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _places.length,
-                  itemBuilder: (context, index){
-                    return _placesCard(index);
-                  },
-                ),
+    return Drawer(
+      child: Container(
+        color: Colors.white,
+        child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+            const Text("Saved places"),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _places.length,
+                itemBuilder: (_, index){
+                  return _placesCard(index);
+                },
               ),
-          ],
-        ),
-        ),
+            ),
+            if (_placesTrashCan.isNotEmpty) ButtonTheme(
+              minWidth: 200.0,
+              height: 100.0,
+              child: IconButton(
+                onPressed: () async {
+                  _places.removeWhere((item) => _placesTrashCan.contains(item));
+                  //disable alarm
+                  await _saveData();
+                  setState(() {
+                    _placesTrashCan.clear();
+                    _isPoiMarkerVisible = false;
+                  });
+                },
+                icon: const Icon(Icons.delete)
+              )
+            )
+        ],
+      ),
       ),
     );
   }
@@ -359,13 +375,13 @@ class _MapSampleState extends State<MapSample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: _scaffoldKey,
         endDrawer: _sideNavigationBar(),
         appBar: AppBar(
           title: const Text('Maps Sample App'),
           elevation: 2,
         ),
-        body: _currentLocation==null ? const Center(child: Text("Loading"),) : GoogleMap(
-          key: _globalKey,
+        body: _currentLocation==null ? const Center(child: Text("Loading..."),) : GoogleMap(
           myLocationEnabled: true,
           zoomControlsEnabled: false,
           initialCameraPosition: CameraPosition(
@@ -373,12 +389,16 @@ class _MapSampleState extends State<MapSample> {
             zoom: 15.0,
           ),
           markers: {
-            poiMarker
+             if (_poiMarkerLocation != null) Marker(
+              markerId: const MarkerId("selectedPlace"), 
+              visible: _isPoiMarkerVisible,
+              position: _poiMarkerLocation!
+            )
           },
           onTap: (argument) async {
             Place? poi = await fetchPoi(argument);
-            if(poi != null && context.mounted) {
-              _modalBottomSheet(context: context, place: poi);
+            if(poi != null) {
+              _modalBottomSheet(place: poi);
             }
           },
           onMapCreated: (mapController) {
