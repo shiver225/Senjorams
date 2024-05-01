@@ -8,7 +8,7 @@ import 'package:senjorams/start_sreen_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-Future<void> setPermissions() async{
+Future<void> setPermissions() async {
   if (await Permission.location.request().isGranted) {
     // Either the permission was already granted before or the user just granted it.
   }
@@ -18,6 +18,7 @@ Future<void> setPermissions() async{
     Permission.location,
   ].request();
 }
+
 // void main() {
 //   runApp(const MyApp());
 // }
@@ -29,12 +30,14 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await prefs!.clear();
+  //await prefs!.clear();
   NotificationService.cancelAllScheduledNotification();
   await setPermissions();
   runApp(const MyApp());
 }
+
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -74,7 +77,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-        locale: const Locale('lt', 'LT'),
-        home: MainScreen());
+        locale: const Locale('lt', 'LT'), home: MainScreen());
   }
 }
