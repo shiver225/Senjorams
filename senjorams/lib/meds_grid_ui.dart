@@ -13,7 +13,8 @@ class MedicineGridWidget extends StatelessWidget {
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2, // Number of columns in the grid
           crossAxisSpacing: 8.0, // Spacing between columns
-          mainAxisSpacing: 8.0, // Spacing between rows
+          mainAxisSpacing: 5.0, // Spacing between rows
+          childAspectRatio: 0.8,
         ),
         itemCount: medicines.length,
         itemBuilder: (context, index) {
@@ -58,6 +59,9 @@ class MedicineItemWidget extends StatelessWidget {
             Text('Time: ${medicine.startTime}'),
             SizedBox(height: 4.0),
             Text('Since: ${medicine.startDate}'),
+            SizedBox(height: 4.0),
+            Text('Take ${medicine.mealDepend}'),
+            SizedBox(height: 10.0),
             Center(
               child: IconButton(
                   icon: Icon(Icons.delete), onPressed: onDelete, iconSize: 32),
