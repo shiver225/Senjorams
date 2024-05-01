@@ -14,7 +14,7 @@ class SleepScreen extends StatefulWidget {
 class _SleepScreenState extends State<SleepScreen> {
   final List<bool> _visableSleepSchedule = <bool> [true, false];
   final List<bool> _timeSelection = <bool> [true, false];
-  final List<Alarm> _alarmTrachCan = [];
+  final List<Alarm> _alarmTrashCan = [];
   
   var _globalKey = GlobalKey();
   List<Alarm> _alarmList = [];
@@ -26,7 +26,6 @@ class _SleepScreenState extends State<SleepScreen> {
   void initState() {
     super.initState();
     _loadData();
-    // Set the login code from the widget parameter when available
   }
   void _loadData() {
     final String? saved = prefs?.getString('alarmList');
@@ -40,17 +39,18 @@ class _SleepScreenState extends State<SleepScreen> {
     final String alarmL = json.encode(_alarmList);
     await prefs?.setString('alarmList', alarmL);
   }
+  
   void _toggleSelection(Alarm alarm) {
     setState(() {
       if (alarm.isSelected) {
         alarm.cardColor=Colors.white;
         alarm.isSelected = false;
-        _alarmTrachCan.remove(alarm);
+        _alarmTrashCan.remove(alarm);
       } else {
         alarm.cardColor=const Color.fromARGB(255, 223, 222, 222);
         alarm.isSelected = true;
         alarm.activationDate = DateTime.now();
-        _alarmTrachCan.add(alarm);
+        _alarmTrashCan.add(alarm);
       }
     });
   }
@@ -73,7 +73,7 @@ class _SleepScreenState extends State<SleepScreen> {
                       child: const Icon(Icons.clear),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.65),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.55),
                     TextButton(
                       child: const Icon(Icons.check),
                       onPressed: () async {
@@ -176,7 +176,7 @@ class _SleepScreenState extends State<SleepScreen> {
         mainAxisSize: MainAxisSize.min, 
         children: <Widget>[
           InkWell(
-            onTap: _alarmTrachCan.isEmpty ? () => _modalScrollPicker(context: context, index: index) : () => _toggleSelection(_alarmList[index]),
+            onTap: _alarmTrashCan.isEmpty ? () => _modalScrollPicker(context: context, index: index) : () => _toggleSelection(_alarmList[index]),
             onLongPress: () {_toggleSelection(_alarmList[index]);Feedback.forTap(context);},
             borderRadius: BorderRadius.circular(14),
             child: ListTile(
@@ -193,7 +193,7 @@ class _SleepScreenState extends State<SleepScreen> {
               subtitle: Text(
                 _alarmList[index].linkedAlarmAmm == 0 ? "Vieną kartą" : "Kasdienis | ${_alarmList[index].time[0].format(context)}"
               ),
-              trailing:_alarmTrachCan.isEmpty ? Switch(
+              trailing:_alarmTrashCan.isEmpty ? Switch(
                 value: _alarmList[index].enabled,
                 onChanged: (bool value) async {
                   // This is called when the user toggles the switch.
@@ -368,7 +368,7 @@ class _SleepScreenState extends State<SleepScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _alarmTrachCan.isEmpty ? 
+      appBar: _alarmTrashCan.isEmpty ? 
       AppBar(
         title: const Text('Sleep Tracker'),
       )
@@ -377,30 +377,30 @@ class _SleepScreenState extends State<SleepScreen> {
         leading: IconButton(
           icon: const Icon(Icons.clear, color: Colors.white),
           onPressed: () {
-            for (var element in _alarmTrachCan) {
+            for (var element in _alarmTrashCan) {
               element.isSelected = false;
               element.cardColor = Colors.white;
             }
             setState(() {
-              _alarmTrachCan.clear();
+              _alarmTrashCan.clear();
             });
           },
         ),
         title: Text(
-          _alarmTrachCan.length.toString(), 
+          _alarmTrashCan.length.toString(), 
           style: const TextStyle(color:Colors.white),
         ),
         actions: [
           IconButton(
               onPressed: () async {
-                for (var element in _alarmTrachCan) {
+                for (var element in _alarmTrashCan) {
                   element.enabled = false;
                   await element.updateScheduledNotification();
                 }
-                _alarmList.removeWhere((item) => _alarmTrachCan.contains(item));
+                _alarmList.removeWhere((item) => _alarmTrashCan.contains(item));
                 //disable alarm
                 await _saveData();
-                setState(() {_alarmTrachCan.clear();});
+                setState(() {_alarmTrashCan.clear();});
               },
               icon: const Icon(Icons.delete, color: Colors.white))
         ],
