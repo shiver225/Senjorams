@@ -1,13 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'package:senjorams/utilities/place.dart';
+import 'package:senjorams/main.dart';
+import 'package:senjorams/models/place_model.dart';
 
 const apiKey="AIzaSyD3HD7vNTtRChKOhf3J6SN0niAiT_apYSk"; //not safe i bet
 
@@ -28,18 +30,44 @@ class MapSample extends StatefulWidget {
 }
 
 class _MapSampleState extends State<MapSample> {
-  late GoogleMapController mapController;
-  LatLng? _currentPosition;
-  GlobalKey _globalKey = GlobalKey();
+  final Completer<GoogleMapController> _mapController = Completer();
+  //GlobalKey _globalKey = GlobalKey();
+  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  List<Place> _places = [];
+  List<Place> _placesTrashCan = [];
+
+  LocationData? _currentLocation; 
+  LatLng? _poiMarkerLocation;
+  bool _isPoiMarkerVisible = false;
+
   @override
-    void initState() {
-      super.initState();
-      _getLocation();
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+    _loadData();
+  }
+  @override
+  void setState(fn){
+    if(mounted) {
+      super.setState(fn);
     }
-
-  Future<Place> fetchPoi(LatLng position) async{
-    print('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${position.latitude}%2C${position.longitude}&radius=200&key=$apiKey');
-
+  }
+  void _loadData() {
+    final String? saved = prefs?.getString('savedPlaces');
+    print(saved);
+    if(saved != null){
+      final List<dynamic> decoded = json.decode(saved);
+      _places = decoded.map((place) => Place.fromJson(Map<String, dynamic>.from(place))).toList();
+    }
+  }
+  //could just use the returned json from api call instead
+  Future<void> _saveData() async {
+    final String placeL = json.encode(_places);
+    await prefs?.setString('savedPlaces', placeL);
+  }
+  
+  Future<Place?> fetchPoi(LatLng position) async{
     Map data = {
     "maxResultCount": 1,
     "locationRestriction": {
@@ -47,72 +75,88 @@ class _MapSampleState extends State<MapSample> {
         "center": {
           "latitude": position.latitude,
           "longitude": position.longitude},
-        "radius": 10.0
+        "radius": 50.0
       }
-    }
+    },
+    "excludedTypes": ["parking", "atm"],
     };
     http.Response response =  await http.post(Uri.parse('https://places.googleapis.com/v1/places:searchNearby'),
       headers: {
         "Content-Type": "application/json",
-       "X-Goog-Api-Key": apiKey,
-       "X-Goog-FieldMask": "places.displayName,places.iconBackgroundColor,places.formattedAddress,places.reviews,places.regularOpeningHours,places.rating,places.photos,places.userRatingCount,places.iconMaskBaseUri"
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask": "places.location,places.id,places.displayName,places.iconBackgroundColor,places.formattedAddress,places.reviews,places.regularOpeningHours,places.rating,places.photos,places.userRatingCount,places.iconMaskBaseUri"
        },
       body: json.encode(data),
     );
     Map values = jsonDecode(response.body);
     log(response.body);
-    return Place.fromJson(values["places"][0]);//replace with class
+    try{
+      return Place.fromJson(values["places"][0]);
+    }
+    catch(e){
+      log(e.toString());
+      return null;
+    }
   }
-  _getLocation() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    double lat = position.latitude;
-    double long = position.longitude;
+  
+  void _getCurrentLocation() async{
+    Location location = Location();
 
-    LatLng location = LatLng(lat, long);
-
-    setState(() {
-      _currentPosition = location;
-      _globalKey=GlobalKey();
+    location.getLocation().then((location){
+      setState((){
+        _currentLocation=location;
+      });
     });
+
+    location.onLocationChanged.listen((newLocation) {
+      setState(() {
+        _currentLocation=newLocation;
+      });
+     });
   }
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
+  void _moveCameraToPosition(LatLng position) async{
+    GoogleMapController googleMapController = await _mapController.future;
+    googleMapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              zoom: 15.0,
+              target: position
+            )
+          )
+        );
   }
 
   final CarouselController _controller = CarouselController();
   int _current = 0;
   Widget _imageCarouselWithInticator(Place place, StateSetter setModalState){
     final List<Widget> imageSliders = place.photos!.map((item) => Container(
-      child: Container(
-        margin: EdgeInsets.all(5.0),
-        child: ClipRRect(
-            borderRadius: BorderRadius.all(Radius.circular(5.0)),
-            child: Stack(
-              children: <Widget>[
-                Image.network('https://places.googleapis.com/v1/${item.name}/media?maxHeightPx=400&maxWidthPx=400&key=$apiKey',fit: BoxFit.cover, height: 400,), //cheap fix by setting height to 400
-                Positioned(
-                  bottom: 0.0,
-                  left: 0.0,
-                  right: 0.0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Color.fromARGB(200, 0, 0, 0),
-                          Color.fromARGB(0, 0, 0, 0)
-                        ],
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                      ),
+      margin: const EdgeInsets.all(5.0),
+      child: ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+          child: Stack(
+            children: <Widget>[
+              Image.network('https://places.googleapis.com/v1/${item.name}/media?maxHeightPx=400&maxWidthPx=400&key=$apiKey',fit: BoxFit.cover, height: 400,), //cheap fix by setting height to 400
+              Positioned(
+                bottom: 0.0,
+                left: 0.0,
+                right: 0.0,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color.fromARGB(200, 0, 0, 0),
+                        Color.fromARGB(0, 0, 0, 0)
+                      ],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
                     ),
-                    padding: EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 20.0),
                   ),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 20.0),
                 ),
-              ],
-            )),
-      ),
+              ),
+            ],
+          )),
     )).toList();
     return SizedBox(
           height: 300,
@@ -140,7 +184,7 @@ class _MapSampleState extends State<MapSample> {
                   child: Container(
                     width: 12.0,
                     height: 12.0,
-                    margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                    margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
                     decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: (Theme.of(context).brightness == Brightness.dark
@@ -154,7 +198,7 @@ class _MapSampleState extends State<MapSample> {
           ]),
         );
   }
-  void _modalScrollPicker({required BuildContext context, required Place place}){
+  void _modalBottomSheet({required Place place}){
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled:true,
@@ -166,50 +210,66 @@ class _MapSampleState extends State<MapSample> {
           child: Center(
             child: Column(
               children: <Widget>[   
-                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    TextButton(
+                      child: const Icon(Icons.clear),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.55),
+                    if(!_places.any((pl) => pl.id == place.id)) TextButton(
+                      child: const Text("SAVE"),
+                      onPressed: () async {
+                        setState(() {_places.add(place); _saveData();});
+                        Navigator.pop(context);
+                      }
+                    )]
+                ),
+                const SizedBox(height: 20),
                 Row(
                   children: [
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Image.network(
-                    place.iconMaskBaseUri! + ".png",
+                    "${place.iconMaskBaseUri!}.png",
                     color: HexColor.fromHex(place.iconBackgroundColor!),
                     scale: 5,
-                    ),
-                  SizedBox(width: 10),
+                  ),
+                  const SizedBox(width: 10),
                   Flexible(
                      child: Text(
                     place.displayName!.text,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-                  ),
-                  )
-                ],),
-                SizedBox(height: 20),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                    ),
+                  )],
+                ),
+                const SizedBox(height: 20),
                 Row(
                   children: [
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     RatingBarIndicator(
                       rating: place.rating ?? 1,
                       direction: Axis.horizontal,
                       itemCount: 5,
                       itemSize: 30.0,
-                      itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                      itemBuilder: (context, _) => Icon(
+                      itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      itemBuilder: (context, _) => const Icon(
                         Icons.star,
                         color: Colors.amber,
                       ),
                     ),
-                    SizedBox(width: 5),
+                    const SizedBox(width: 5),
                     Text(
                       place.rating != null ? place.rating.toString() : "No reviews",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
                       ),
                 ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Text(
-                  place.formattedAddress!  + " " 
+                  "${place.formattedAddress!} " 
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Text(
                   (place.regularOpeningHours != null ? (place.regularOpeningHours!.openNow ? "Open" : "Closed") : "")
                 ),
@@ -221,25 +281,140 @@ class _MapSampleState extends State<MapSample> {
         });
         });
   }
+  void _toggleSelection(Place place) {
+    setState(() {
+      if (place.isSelected) {
+        place.cardColor=Colors.white;
+        place.isSelected = false;
+        _placesTrashCan.remove(place);
+      } else {
+        place.cardColor=const Color.fromARGB(255, 223, 222, 222);
+        place.isSelected = true;
+        _placesTrashCan.add(place);
+      }
+    });
+  }
+  Widget _placesCard(int index){
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      color: _places[index].cardColor,
+      child: Column(
+        mainAxisSize: MainAxisSize.min, 
+        children: <Widget>[
+          InkWell(
+            onTap: _placesTrashCan.isEmpty ? () {
+                _moveCameraToPosition(_places[index].location!); 
+                _modalBottomSheet(place: _places[index]);
+                setState(() {
+                    _poiMarkerLocation = _places[index].location;
+                    _isPoiMarkerVisible = true;
+                });
+                if(_scaffoldKey.currentState!.isEndDrawerOpen){
+                  _scaffoldKey.currentState!.closeEndDrawer();
+                }
+              } : () => _toggleSelection(_places[index]),
+            onLongPress: () {_toggleSelection(_places[index]);Feedback.forTap(context);},
+            borderRadius: BorderRadius.circular(14),
+            child: ListTile(
+              selected: _places[index].isSelected,
+              title: Text(
+                _places[index].displayName!.text
+              ),
+              trailing: _placesTrashCan.isNotEmpty ? Checkbox(
+                value: _places[index].isSelected,
+                onChanged: (bool? value) { 
+                  Feedback.forTap(context);
+                  _toggleSelection(_places[index]);            
+                },
+              ) : null,
+              ),
+            )
+          ],
+        ),
+      );
+  }
+  Widget _sideNavigationBar(){
+    return Drawer(
+      child: Container(
+        color: Colors.white,
+        child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+            Container(
+             height: 100,
+             alignment: AlignmentDirectional.center,
+             width: double.infinity,
+             decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: Colors.deepPurple),
+             child: const Text("SAVED PLACES", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _places.length,
+                itemBuilder: (_, index){
+                  return _placesCard(index);
+                },
+              ),
+            ),
+            if (_placesTrashCan.isNotEmpty) ButtonTheme(
+              minWidth: 200.0,
+              height: 100.0,
+              child: IconButton(
+                onPressed: () async {
+                  _places.removeWhere((item) => _placesTrashCan.contains(item));
+                  //disable alarm
+                  await _saveData();
+                  setState(() {
+                    _placesTrashCan.clear();
+                    _isPoiMarkerVisible = false;
+                  });
+                },
+                icon: const Icon(Icons.delete, size: 100,)
+              )
+            )
+        ],
+      ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: _scaffoldKey,
+        endDrawer: _sideNavigationBar(),
         appBar: AppBar(
           title: const Text('Maps Sample App'),
           elevation: 2,
         ),
-        body: GoogleMap(
-          key: _globalKey,
-          onMapCreated: _onMapCreated,
+        body: _currentLocation==null ? const Center(child: Text("Loading..."),) : GoogleMap(
+          myLocationEnabled: true,
+          zoomControlsEnabled: false,
+          myLocationButtonEnabled: false,
           initialCameraPosition: CameraPosition(
-            target: _currentPosition ?? LatLng(0, 0),
+            target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
             zoom: 15.0,
           ),
-          onTap: (argument) async {
-            Place poi = await fetchPoi(argument);
-            _modalScrollPicker(context: context, place: poi);
+          markers: {
+             if (_poiMarkerLocation != null) Marker(
+              markerId: const MarkerId("selectedPlace"), 
+              visible: _isPoiMarkerVisible,
+              position: _poiMarkerLocation!
+            )
           },
-        ),
+          onTap: (argument) async {
+            Place? poi = await fetchPoi(argument);
+            if(poi != null) {
+              _modalBottomSheet(place: poi);
+            }
+          },
+          onMapCreated: (mapController) {
+            _mapController.complete(mapController);
+          }),
+          floatingActionButton: _currentLocation!=null ? FloatingActionButton.extended(
+            onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
+            label: Text('My Location'),
+            icon: Icon(Icons.location_on),
+          ) : null,
     );
   }
 }
