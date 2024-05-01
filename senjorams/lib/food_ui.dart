@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:senjorams/services/api_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -28,11 +32,24 @@ class _FoodScreenState extends State<FoodScreen> {
   Map<String, dynamic> _totalNutritionIntake = {};
   List<String> _consumedFoodsHistory = [];
 
+  late String _timeString = '';
+  late var timer;
+
   @override
   void initState() {
     super.initState();
     _fetchDailyCaloriesNeeded();
     _fetchFoodHistory();
+
+    _updateTime(); // Update time initially
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
+  }
+
+  void _updateTime() {
+    final DateTime now = DateTime.now();
+    setState(() {
+      _timeString = DateFormat.Hms().format(now);
+    });
   }
 
   // Function to retrieve daily calories needed from Firestore
@@ -95,39 +112,67 @@ class _FoodScreenState extends State<FoodScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Dienos maistinės vertės'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: _weightController,
-                decoration: const InputDecoration(labelText: 'Svoris (kg)'),
-                keyboardType: TextInputType.number,
-              ),
-              TextFormField(
-                controller: _heightController,
-                decoration: const InputDecoration(labelText: 'Ūgis (cm)'),
-                keyboardType: TextInputType.number,
-              ),
-              TextFormField(
-                controller: _ageController,
-                decoration: const InputDecoration(labelText: 'Amžius'),
-                keyboardType: TextInputType.number,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  _calculateDailyCaloriesNeeded();
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Skaičiuoti'),
-              ),
-            ],
+        return Theme(
+          data: ThemeData(
+            dialogBackgroundColor: Colors.white.withOpacity(0.9), // Change background color
+          ),
+          child: AlertDialog(
+            title: const Text(
+              'Dienos maistinės vertės',
+              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold), // Change title font and color
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _weightController,
+                  decoration: const InputDecoration(
+                    labelText: 'Svoris (kg)',
+                    labelStyle: TextStyle(color: Colors.black), // Change label text color
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                TextFormField(
+                  controller: _heightController,
+                  decoration: const InputDecoration(
+                    labelText: 'Ūgis (cm)',
+                    labelStyle: TextStyle(color: Colors.black), // Change label text color
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                TextFormField(
+                  controller: _ageController,
+                  decoration: const InputDecoration(
+                    labelText: 'Amžius',
+                    labelStyle: TextStyle(color: Colors.black), // Change label text color
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _calculateDailyCaloriesNeeded();
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF92C7CF).withOpacity(0.7), // Change button color
+                    textStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.bold), // Change button text style
+                  ),
+                  child: const Text(
+                    'Skaičiuoti',
+                    style: TextStyle(color: Colors.white, fontSize: 16.0),
+                  ),
+                ),
+              ],
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
           ),
         );
       },
     );
   }
+
 
   // Function to calculate daily calories needed and save user info to Firestore
   void _calculateDailyCaloriesNeeded() async {
@@ -194,7 +239,7 @@ class _FoodScreenState extends State<FoodScreen> {
     if (_foodData != null) {
       return Expanded(
         child: Card(
-          color: Colors.lightBlueAccent.withOpacity(0.1),
+          color: const Color(0xFF92C7CF).withAlpha(200),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
@@ -253,7 +298,7 @@ class _FoodScreenState extends State<FoodScreen> {
     return Expanded(
       child: SingleChildScrollView(
         child: Card(
-          color: Colors.lightBlueAccent.withOpacity(0.1),
+          color: const Color(0xFF92C7CF).withAlpha(200),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
@@ -336,51 +381,94 @@ class _FoodScreenState extends State<FoodScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Dienos istorija'),
-          content: Container(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: _consumedFoodsHistory.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  title: Text(_consumedFoodsHistory[index]),
-                );
-              },
+        return Theme(
+          data: ThemeData(
+            dialogBackgroundColor: Colors.white.withOpacity(0.9), // Change background color
+            textTheme: TextTheme( // Change text font and color
+              bodyText1: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16.0),
             ),
           ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Uždaryti'),
+          child: AlertDialog(
+            title: const Text(
+              'Dienos istorija',
+              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold), // Change title font and color
             ),
-          ],
+            content: Container(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _consumedFoodsHistory.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return ListTile(
+                    title: Text(
+                      _consumedFoodsHistory[index],
+                      style: TextStyle(color: Colors.black), // Change content text color
+                    ),
+                  );
+                },
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Color.fromARGB(255, 206, 178, 129).withOpacity(0.1), // Change button color
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: const Text(
+                    'Uždaryti',
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold), // Change button text style
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
   }
 
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 30), // Adjust the left padding as needed
+          child: IconButton(
+            icon: const FaIcon(FontAwesomeIcons.arrowLeft),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
-        title: const Text(
-          'Maisto medžiagos',
-          style: TextStyle(color: Colors.black),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20), // Adjust the padding as needed
+            child: IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: _openUserInfoDialog,
+            ),
+          ),
+        ],
+        automaticallyImplyLeading: false,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(50),
+          ),
+        ),
+        backgroundColor: const Color(0xFF92C7CF),
+        title: Text(
+          _timeString,
+          style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        backgroundColor: Colors.lightBlueAccent,
-        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -393,11 +481,11 @@ class _FoodScreenState extends State<FoodScreen> {
                 labelText: 'Įveskite norimą maistą ar produktą',
                 labelStyle: const TextStyle(color: Colors.black),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.black),
+                  borderSide: const BorderSide(color: const Color(0xFF92C7CF)),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.black),
+                  borderSide: const BorderSide(color: const Color(0xFF92C7CF)),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
@@ -414,9 +502,9 @@ class _FoodScreenState extends State<FoodScreen> {
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                backgroundColor: Colors.lightBlueAccent,
+                backgroundColor: Color.fromARGB(255, 206, 178, 129),
               ),
               child: _isLoading
                   ? const SizedBox(
@@ -436,10 +524,6 @@ class _FoodScreenState extends State<FoodScreen> {
               const Center(child: CircularProgressIndicator()),
             if (_foodData != null)
               _buildFoodNutrition(),
-            ElevatedButton(
-              onPressed: _openUserInfoDialog,
-              child: const Text('Apskaičiuoti dienos maistines vertes'),
-            ),
             if (_dailyCaloriesNeeded != null)
               _buildNutritionInfo('Per dieną reikia kalorijų: ', _dailyCaloriesNeeded),
             const SizedBox(height: 20.0),
@@ -449,11 +533,11 @@ class _FoodScreenState extends State<FoodScreen> {
                 labelText: 'Įveskite suvartotą maistą šiandien (atskirta kableliais)',
                 labelStyle: const TextStyle(color: Colors.black),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.black),
+                  borderSide: const BorderSide(color: const Color(0xFF92C7CF)),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.black),
+                  borderSide: const BorderSide(color: const Color(0xFF92C7CF)),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
@@ -467,7 +551,17 @@ class _FoodScreenState extends State<FoodScreen> {
                 _calculateTotalNutritionIntake(_consumedFoodController.text);
                 _consumedFoodsHistory.add(_consumedFoodController.text);
               },
-              child: const Text('Apskaičiuoti visą maistinę vertę'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                backgroundColor: Color.fromARGB(255, 206, 178, 129),
+              ),
+              child: const Text(
+                'Apskaičiuoti visas maistines medžiagas',
+                style: TextStyle(color: Colors.white, fontSize: 16.0),
+                ),
             ),
             const SizedBox(height: 20.0),
             if (_totalNutritionIntake.isNotEmpty)
@@ -477,7 +571,17 @@ class _FoodScreenState extends State<FoodScreen> {
                 onPressed: () {
                   _showConsumedFoodsHistory();
                 },
-                child: const Text('Dienos istorija'),
+                style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                backgroundColor: Color.fromARGB(255, 206, 178, 129),
+              ),
+                child: const Text(
+                  'Dienos istorija',
+                  style: TextStyle(color: Colors.white, fontSize: 16.0)
+                ),
               ),
           ],
         ),
