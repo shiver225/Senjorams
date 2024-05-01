@@ -1,17 +1,25 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 class Place {
     String? formattedAddress;
     double? rating;
     RegularOpeningHours? regularOpeningHours;
     int? userRatingCount;
+    String? id;
     String? iconMaskBaseUri;
     String? iconBackgroundColor;
     DisplayName? displayName;
     List<Review>? reviews;
     List<Photo>? photos;
-
+    Color cardColor = Colors.white;
+    bool isSelected = false;
+    LatLng? location;
     Place({
+        this.location,
+        this.id,
         this.formattedAddress,
         this.rating,
         this.regularOpeningHours,
@@ -28,6 +36,8 @@ class Place {
     String toRawJson() => json.encode(toJson());
 
     factory Place.fromJson(Map<String, dynamic> json) => Place(
+        location: LatLng(json["location"]["latitude"],json["location"]["longitude"]),
+        id: json["id"],
         formattedAddress: json["formattedAddress"],
         rating: json["rating"]?.toDouble(),
         regularOpeningHours: json.containsKey("regularOpeningHours") ? RegularOpeningHours.fromJson(json["regularOpeningHours"]) : null,
@@ -40,15 +50,17 @@ class Place {
     );
 
     Map<String, dynamic> toJson() => {
+        "location": {"latitude":location!.latitude, "longitude":location!.longitude},
+        "id": id,
         "formattedAddress": formattedAddress,
         "rating": rating,
-        "regularOpeningHours": regularOpeningHours?.toJson(),
+        if (regularOpeningHours != null) "regularOpeningHours": regularOpeningHours!.toJson(),
         "userRatingCount": userRatingCount,
         "iconMaskBaseUri": iconMaskBaseUri,
         "iconBackgroundColor": iconBackgroundColor,
-        "displayName": displayName?.toJson(),
-        "reviews": reviews!=null ? List<dynamic>.from(reviews!.map((x) => x.toJson())) : "",
-        "photos": photos!=null ? List<dynamic>.from(photos!.map((x) => x.toJson())): "",
+        if (displayName != null) "displayName": displayName!.toJson(),
+        if (reviews != null) "reviews": List<dynamic>.from(reviews!.map((x) => x.toJson())),
+        if (photos != null) "photos": List<dynamic>.from(photos!.map((x) => x.toJson())),
     };
 }
 
