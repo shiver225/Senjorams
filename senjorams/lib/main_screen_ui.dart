@@ -1,8 +1,7 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:senjorams/activities_ui.dart';
 import 'package:senjorams/map_ui.dart';
@@ -12,12 +11,11 @@ import 'package:senjorams/food_ui.dart';
 import 'package:senjorams/medicine_page_ui.dart';
 import 'package:senjorams/social_events.dart';
 import 'package:senjorams/start_sreen_ui.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:senjorams/sleep_ui.dart';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  const MainScreen({Key? key}) : super(key: key);
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
@@ -25,17 +23,20 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   late String _timeString = '';
   late var timer;
+
   @override
   void initState() {
     super.initState();
     _updateTime(); // Update time initially
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
   }
+
   @override
   void dispose() {
     timer.cancel();
     super.dispose();
   }
+
   void _updateTime() {
     final DateTime now = DateTime.now();
     setState(() {
@@ -49,12 +50,15 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(50),
-        )),
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(50),
+          ),
+        ),
         backgroundColor: const Color(0xFF92C7CF),
-        title: Text(_timeString,
-            style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+        title: Text(
+          _timeString,
+          style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: Center(
@@ -62,14 +66,15 @@ class _MainScreenState extends State<MainScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
                   onPressed: () {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const MedicineScreen()));
+                      context,
+                      MaterialPageRoute(builder: (context) => const MedicineScreen()),
+                    );
                   },
                   child: const FittedBox(
                     fit: BoxFit.fitWidth,
@@ -77,33 +82,34 @@ class _MainScreenState extends State<MainScreen> {
                         color: Color.fromARGB(255, 206, 178, 129), size: 50),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(width: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
                   onPressed: () {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const FoodScreen()));
+                      context,
+                      MaterialPageRoute(builder: (context) => const FoodScreen()),
+                    );
                   },
                   child: const FittedBox(
                     fit: BoxFit.fitWidth,
-                    child: Icon(Icons.restaurant,
-                        color: Color.fromARGB(255, 206, 178, 129), size: 50),
+                    child: FaIcon(FontAwesomeIcons.appleWhole, 
+                    color: Color.fromARGB(255, 206, 178, 129), size: 50),
                   ),
                 ),
-              ]
+              ],
             ),
             const SizedBox(height: 20),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
                   onPressed: () {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const SocialEventScreen()));
+                      context,
+                      MaterialPageRoute(builder: (context) => const SocialEventScreen()),
+                    );
                   },
                   child: const FittedBox(
                     fit: BoxFit.fitWidth,
@@ -111,13 +117,13 @@ class _MainScreenState extends State<MainScreen> {
                         color: Color.fromARGB(255, 206, 178, 129), size: 50),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(width: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const SleepScreen())
+                      MaterialPageRoute(builder: (context) => const SleepScreen()),
                     );
                   },
                   child: const FittedBox(
@@ -130,47 +136,45 @@ class _MainScreenState extends State<MainScreen> {
             ),
             const SizedBox(height: 20),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(100, 75)
-                  ),
+                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ActivitiesScreen())
+                      MaterialPageRoute(builder: (context) => ActivitiesScreen()),
                     );
                   },
                   child: const FittedBox(
                     fit: BoxFit.fitWidth,
-                    child: Icon(FontAwesomeIcons.brain, color: Color.fromARGB(255, 206, 178, 129), size: 50),
+                    child: Icon(FontAwesomeIcons.brain,
+                        color: Color.fromARGB(255, 206, 178, 129), size: 50),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(width: 20),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(100, 75)
-                  ),
+                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => MapSample())
+                      MaterialPageRoute(builder: (context) => const MapSample()),
                     );
                   },
                   child: const FittedBox(
                     fit: BoxFit.fitWidth,
-                    child: Icon(FontAwesomeIcons.map, color: Color.fromARGB(255, 206, 178, 129), size: 50),
+                    child: Icon(FontAwesomeIcons.map,
+                        color: Color.fromARGB(255, 206, 178, 129), size: 50),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(100, 75)
-                  ),
+                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
                   onPressed: () async {
                     await FirebaseAuth.instance.signOut();
                     Navigator.pushReplacement(
