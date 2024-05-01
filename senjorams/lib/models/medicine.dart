@@ -8,18 +8,21 @@ class Medicine {
   final String interval;
   final String startTime;
   final String startDate;
+  final String mealDepend;
 
   Medicine(
       {required this.notificationID,
       required this.medicineName,
       required this.startTime,
       required this.startDate,
-      required this.interval});
+      required this.interval,
+      required this.mealDepend});
 
   String get getName => medicineName;
   String get getInterval => interval;
   String get getStartTime => startTime;
   int get getIDs => notificationID;
+  String get getMealDepend => mealDepend;
 
   Map<String, dynamic> toJson() {
     return {
@@ -28,6 +31,7 @@ class Medicine {
       "interval": this.interval,
       "start_time": this.startTime,
       "start_date": this.startDate,
+      'meal_dependency': this.mealDepend
     };
   }
 
@@ -37,7 +41,8 @@ class Medicine {
         medicineName: parsedJson['name'],
         interval: parsedJson['interval'],
         startTime: parsedJson['start_time'],
-        startDate: parsedJson['start_date']);
+        startDate: parsedJson['start_date'],
+        mealDepend: parsedJson['meal_dependency']);
   }
 
   // Save list of medicines to SharedPreferences

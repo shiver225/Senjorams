@@ -22,6 +22,13 @@ class _MedicineScreenState extends State<MedicineScreen> {
     'Once per day',
     'Once per week',
   ];
+
+  Map<int, String> mealDependencies = {
+    0: "Before meal",
+    1: "During meal",
+    2: "After meal"
+  };
+
   String selectedValue = 'Every 6 hours';
   @override
   void initState() {
@@ -80,14 +87,16 @@ class _MedicineScreenState extends State<MedicineScreen> {
             builder: (BuildContext context) {
               return AddMedicineDialog(
                 items: items,
-                onMedicineAdded: (medicineName, frequency, date, time) {
+                mealDependencies: mealDependencies,
+                onMedicineAdded: (medicineName, frequency, date, time, meal) {
                   setState(() {
                     Medicine newMedicine = Medicine(
                         notificationID: generateInteger(),
                         medicineName: medicineName,
                         startTime: time,
                         startDate: date,
-                        interval: frequency);
+                        interval: frequency,
+                        mealDepend: meal);
                     medicines.add(newMedicine);
                     Medicine.saveMedicines(medicines);
                   });
@@ -104,12 +113,14 @@ class _MedicineScreenState extends State<MedicineScreen> {
 
 class AddMedicineDialog extends StatefulWidget {
   final List<String> items;
-  final Function(String, String, String, String) onMedicineAdded;
+  final Function(String, String, String, String, String) onMedicineAdded;
+  final Map<int, String> mealDependencies;
 
   const AddMedicineDialog({
     Key? key,
     required this.items,
     required this.onMedicineAdded,
+    required this.mealDependencies,
   }) : super(key: key);
 
   @override
@@ -121,6 +132,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
   late DateTime _selectedDate;
   late TimeOfDay _selectedTime;
   late TextEditingController _medicineController;
+  String mealDepend = mealDependencies[0]!;
 
   @override
   void initState() {
@@ -196,6 +208,24 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
             ),
           ),
           SizedBox(height: 20),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: mealDepend,
+              items: widget.mealDependencies.keys.toList().map((int mealD) {
+                return DropdownMenuItem<String>(
+                  value: mealDependencies[mealD]!,
+                  child: Text(mealDependencies[mealD]!),
+                );
+              }).toList(),
+              onChanged: (String? value) {
+                setState(() {
+                  mealDepend = value!;
+                });
+              },
+            ),
+          ),
+          SizedBox(height: 20),
           Row(
             children: [
               ElevatedButton(
@@ -229,11 +259,11 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
         ElevatedButton(
           onPressed: () {
             widget.onMedicineAdded(
-              _medicineController.text,
-              selectedValue,
-              _selectedDate.toString().split(' ')[0],
-              _selectedTime.format(context),
-            );
+                _medicineController.text,
+                selectedValue,
+                _selectedDate.toString().split(' ')[0],
+                _selectedTime.format(context),
+                mealDepend);
             Navigator.of(context).pop();
           },
           child: Text('Save'),
@@ -265,3 +295,9 @@ int generateInteger() {
 
   return result;
 }
+
+Map<int, String> mealDependencies = {
+  0: "Before meal",
+  1: "During meal",
+  2: "After meal"
+};
