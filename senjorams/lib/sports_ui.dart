@@ -80,7 +80,12 @@ class ExercisePlanScreen extends StatelessWidget {
                   ? ElevatedButton(
                       style:
                           ElevatedButton.styleFrom(minimumSize: Size(200, 60)),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ChoosePlanScreen()));
+                      },
                       child: Text("CHANGE",
                           style: TextStyle(
                               fontSize: 30, fontWeight: FontWeight.bold)),
@@ -88,7 +93,14 @@ class ExercisePlanScreen extends StatelessWidget {
                   : ElevatedButton(
                       style:
                           ElevatedButton.styleFrom(minimumSize: Size(200, 60)),
-                      onPressed: () {},
+                      onPressed: () {
+                        ExercisePlan.saveExercisePlan(plan);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ExercisePlanScreen(
+                                    plan: plan, isChosen: true)));
+                      },
                       child: Text("CHOOSE",
                           style: TextStyle(
                               fontSize: 30, fontWeight: FontWeight.bold)),
@@ -165,8 +177,8 @@ Widget _displayExerciseInfo(
               children: [
                 FittedBox(
                   fit: BoxFit.fitWidth,
-                  child:
-                      Icon(exercise['icon'], color: Colors.black12, size: 50),
+                  child: Icon(icons[exercise['icon']],
+                      color: Colors.black12, size: 50),
                 ),
               ],
             ),
@@ -254,7 +266,8 @@ Widget _displayIntensityButton(
               child: Column(children: [
                 FittedBox(
                   fit: BoxFit.fitWidth,
-                  child: Icon(option['icon'], color: Colors.black12, size: 50),
+                  child: Icon(icons[option['icon']],
+                      color: Colors.black12, size: 50),
                 ),
                 Text(
                   option['intensity'],
@@ -279,26 +292,16 @@ final List<Map<String, dynamic>> intensityOptions = [
   {
     'intensity': 'Light',
     'activities': [
-      {
-        'name': 'Stretching',
-        'freq': 'h',
-        'interval': 2,
-        'icon': FontAwesomeIcons.heartPulse
-      },
-      {
-        'name': 'Walking',
-        'freq': 'd',
-        'interval': 1,
-        'icon': FontAwesomeIcons.personWalking
-      },
+      {'name': 'Stretching', 'freq': 'h', 'interval': 2, 'icon': 'heartPulse'},
+      {'name': 'Walking', 'freq': 'd', 'interval': 1, 'icon': 'personWalking'},
       {
         'name': 'Fast paced / long walk',
         'freq': 'd',
         'interval': 7,
-        'icon': FontAwesomeIcons.stopwatch
+        'icon': "stopwatch"
       }
     ],
-    'icon': FontAwesomeIcons.medal
+    'icon': "medal"
   },
   {
     'intensity': 'Medium',
@@ -349,3 +352,10 @@ final List<Map<String, dynamic>> intensityOptions = [
     'icon': FontAwesomeIcons.medal
   }
 ];
+
+Map<String, IconData> icons = {
+  "heartPulse": FontAwesomeIcons.heartPulse,
+  "personWalking": FontAwesomeIcons.personWalking,
+  "stopwatch": FontAwesomeIcons.stopwatch,
+  "medal": FontAwesomeIcons.medal
+};

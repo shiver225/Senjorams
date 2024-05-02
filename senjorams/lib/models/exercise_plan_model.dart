@@ -5,12 +5,12 @@ import 'dart:convert';
 
 class ExercisePlan {
   final String name;
-  final List<Map<String, dynamic>> exercises;
+  final List<dynamic> exercises;
 
   ExercisePlan({required this.name, required this.exercises});
 
   String get getName => name;
-  List<Map<String, dynamic>> get getExercises => exercises;
+  List<dynamic> get getExercises => exercises;
 
   Map<String, dynamic> toJson() {
     return {"name": this.name, "exercises": this.exercises};
