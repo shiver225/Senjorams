@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:senjorams/activities_ui.dart';
+import 'package:senjorams/sports_ui.dart';
 import 'package:senjorams/map_ui.dart';
 import 'package:senjorams/test.dart';
 import 'package:senjorams/youtube_ui.dart';
@@ -28,7 +29,8 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _updateTime(); // Update time initially
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
+    timer =
+        Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
   }
 
   @override
@@ -69,11 +71,13 @@ class _MainScreenState extends State<MainScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(100, 75)),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const MedicineScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const MedicineScreen()),
                     );
                   },
                   child: const FittedBox(
@@ -84,17 +88,19 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(100, 75)),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const FoodScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const FoodScreen()),
                     );
                   },
                   child: const FittedBox(
                     fit: BoxFit.fitWidth,
-                    child: FaIcon(FontAwesomeIcons.appleWhole, 
-                    color: Color.fromARGB(255, 206, 178, 129), size: 50),
+                    child: FaIcon(FontAwesomeIcons.appleWhole,
+                        color: Color.fromARGB(255, 206, 178, 129), size: 50),
                   ),
                 ),
               ],
@@ -104,11 +110,13 @@ class _MainScreenState extends State<MainScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(100, 75)),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const SocialEventScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const SocialEventScreen()),
                     );
                   },
                   child: const FittedBox(
@@ -119,11 +127,13 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(100, 75)),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const SleepScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const SleepScreen()),
                     );
                   },
                   child: const FittedBox(
@@ -139,11 +149,13 @@ class _MainScreenState extends State<MainScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(100, 75)),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => ActivitiesScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => ActivitiesScreen()),
                     );
                   },
                   child: const FittedBox(
@@ -154,11 +166,13 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(100, 75)),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const MapSample()),
+                      MaterialPageRoute(
+                          builder: (context) => const MapSample()),
                     );
                   },
                   child: const FittedBox(
@@ -173,13 +187,30 @@ class _MainScreenState extends State<MainScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const SizedBox(height: 20),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(100, 75)),
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => SportScreen()));
+                  },
+                  child: const FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: Icon(Icons.sports,
+                        color: Color.fromARGB(255, 206, 178, 129), size: 50),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(100, 75)),
                   onPressed: () async {
                     await FirebaseAuth.instance.signOut();
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const StartScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const StartScreen()),
                     );
                   },
                   child: const FittedBox(

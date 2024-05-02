@@ -30,7 +30,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  //await prefs!.clear();
+  await prefs!.clear();
   NotificationService.cancelAllScheduledNotification();
   await setPermissions();
   runApp(const MyApp());
