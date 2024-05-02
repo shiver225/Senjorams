@@ -49,11 +49,8 @@ class ExercisePlanScreen extends StatelessWidget {
           SizedBox(
             height: 60,
             child: isChosen
-                ? _displayText(
-                    context,
-                    "Your current exercise plan '${plan.getName}'",
-                    40,
-                    TextAlign.center)
+                ? _displayText(context, "Your current plan '${plan.getName}'",
+                    40, TextAlign.center)
                 : _displayText(context, plan.getName, 40, TextAlign.center),
           ),
           SizedBox(
@@ -63,7 +60,7 @@ class ExercisePlanScreen extends StatelessWidget {
                 child: isChosen
                     ? _displayText(
                         context,
-                        "Details of exercises and recommended frequencies. \nClick 'Change' to see other plans",
+                        "Details of exercises and recommended frequencies for plan ${plan.getName}. \nClick 'Change' to see other plans",
                         20,
                         TextAlign.left)
                     : _displayText(
