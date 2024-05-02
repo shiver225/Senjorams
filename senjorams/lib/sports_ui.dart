@@ -128,6 +128,48 @@ class ChoosePlanScreen extends StatelessWidget {
                   .toList(),
             ),
           ),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ChoosePlanScreen()
+                        //StartSurveyScreen(),
+                        ));
+              },
+              child: Card(
+                elevation: 5, // Add elevation for shadow effect
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0), // Rounded corners
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(children: [
+                        FittedBox(
+                          fit: BoxFit.fitWidth,
+                          child: Icon(Icons.question_mark_outlined,
+                              color: Colors.black12, size: 50),
+                        ),
+                        Text(
+                          "Personalize",
+                          style: TextStyle(
+                            color: Colors.black87, // Text color
+                            fontSize: 20, // Font size
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ]),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
         ],
       ),
     );
@@ -202,7 +244,7 @@ Widget _displayExerciseInfo(
                 ),
                 SizedBox(width: 40),
                 Text(
-                  '${exercise['interval'].toString()} ${exercise['freq'].toString()}',
+                  'every ${exercise['interval'].toString()} ${exercise['freq'].toString()}',
                   style: TextStyle(
                     color: Colors.black87, // Text color
                     fontSize: 40, // Font size
@@ -217,7 +259,7 @@ Widget _displayExerciseInfo(
       ));
 }
 
-Widget build(BuildContext context) {
+/* Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
       title: Text("Intensity levels"),
@@ -236,7 +278,7 @@ Widget build(BuildContext context) {
       ],
     ),
   );
-}
+} */
 
 Widget _displayIntensityButton(
     BuildContext context, Map<String, dynamic> option) {
@@ -306,50 +348,25 @@ final List<Map<String, dynamic>> intensityOptions = [
   {
     'intensity': 'Medium',
     'activities': [
-      {
-        'name': 'Walking ',
-        'freq': 'h',
-        'interval': 4,
-        'icon': FontAwesomeIcons.personWalking
-      },
+      {'name': 'Walking ', 'freq': 'h', 'interval': 4, 'icon': "personWalking"},
       {
         'name': 'Riding a bike',
         'freq': 'd',
         'interval': 3,
-        'icon': FontAwesomeIcons.personBiking
+        'icon': "personBiking"
       },
-      {
-        'name': 'Hiking',
-        'freq': 'd',
-        'interval': 7,
-        'icon': FontAwesomeIcons.personHiking
-      }
+      {'name': 'Hiking', 'freq': 'd', 'interval': 7, 'icon': "personHiking"}
     ],
-    'icon': FontAwesomeIcons.medal
+    'icon': "medal"
   },
   {
     'intensity': 'High',
     'activities': [
-      {
-        'name': 'Walking ',
-        'freq': 'h',
-        'interval': 4,
-        'icon': FontAwesomeIcons.personWalking
-      },
-      {
-        'name': 'Running',
-        'freq': 'd',
-        'interval': 1,
-        'icon': FontAwesomeIcons.personRunning
-      },
-      {
-        'name': 'Swimming',
-        'freq': 'd',
-        'interval': 4,
-        'icon': FontAwesomeIcons.personSwimming
-      }
+      {'name': 'Walking ', 'freq': 'h', 'interval': 4, 'icon': "personWalking"},
+      {'name': 'Running', 'freq': 'd', 'interval': 1, 'icon': "personRunning"},
+      {'name': 'Swimming', 'freq': 'd', 'interval': 4, 'icon': "personSwimming"}
     ],
-    'icon': FontAwesomeIcons.medal
+    'icon': "medal"
   }
 ];
 
@@ -357,5 +374,9 @@ Map<String, IconData> icons = {
   "heartPulse": FontAwesomeIcons.heartPulse,
   "personWalking": FontAwesomeIcons.personWalking,
   "stopwatch": FontAwesomeIcons.stopwatch,
-  "medal": FontAwesomeIcons.medal
+  "medal": FontAwesomeIcons.medal,
+  "personBiking": FontAwesomeIcons.personBiking,
+  "personHiking": FontAwesomeIcons.personHiking,
+  "personRunning": FontAwesomeIcons.personRunning,
+  "personSwimming": FontAwesomeIcons.personSwimming
 };
