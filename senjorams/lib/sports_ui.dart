@@ -106,6 +106,7 @@ class ChoosePlanScreen extends StatelessWidget {
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Expanded(
             child: ListView(
@@ -124,7 +125,7 @@ class ChoosePlanScreen extends StatelessWidget {
 Widget _displayText(
     BuildContext context, String text1, double size, TextAlign align) {
   return Row(children: [
-    Expanded(
+    Flexible(
       child: Text(
         text1,
         style: TextStyle(
@@ -158,6 +159,7 @@ Widget _displayExerciseInfo(
       child: Padding(
         padding: EdgeInsets.all(8.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               children: [
