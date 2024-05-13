@@ -33,7 +33,7 @@ class MapSample extends StatefulWidget {
 
 class _MapSampleState extends State<MapSample> {
   final Completer<GoogleMapController> _mapController = Completer();
-  final TextEditingController _searchFiledController = TextEditingController();
+  final TextEditingController _searchFieldController = TextEditingController();
   final CarouselController _controller = CarouselController();
   //GlobalKey _globalKey = GlobalKey();
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
@@ -422,12 +422,47 @@ class _MapSampleState extends State<MapSample> {
         endDrawer: _sideNavigationBar(),
         appBar: AppBar(
           title: const Text("Žemėlapis"),
-          bottom: PreferredSize(preferredSize: const Size.fromHeight(50),
-            child: Container(
-              alignment: Alignment.center,
+          elevation: 2,
+        ),
+        body: _currentLocation==null ? const Center(child: const Text("Loading..."),) : 
+        Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            GoogleMap(
+              myLocationEnabled: true,
+              zoomControlsEnabled: false,
+              myLocationButtonEnabled: false,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
+                zoom: 15.0,
+              ),
+              markers: {
+                if (_poiMarkerLocation != null) Marker(
+                  markerId: const MarkerId("selectedPlace"), 
+                  visible: _isPoiMarkerVisible,
+                  position: _poiMarkerLocation!
+                )
+              },
+              onTap: (argument) {
+                if (_debounce?.isActive ?? false) _debounce!.cancel();
+                _debounce = Timer(const Duration(milliseconds: 1000), () async
+                  {
+                    Place? poi = await _fetchPoi(argument);
+                    if(poi != null) {
+                    _modalBottomSheet(place: poi);
+                    }
+                  });
+              },
+              onMapCreated: (mapController) {
+                _mapController.complete(mapController);
+              }
+            ),
+            Container(
+              width: 350,
+              height: 75,
               padding: const EdgeInsets.all(8),
               child:TypeAheadField<PlacePrediction>(
-                controller: _searchFiledController,
+                controller: _searchFieldController,
                 itemBuilder: (context, place) {
                   return ListTile(
                     title: Text(place.structuredFormat.mainText.text),
@@ -436,12 +471,32 @@ class _MapSampleState extends State<MapSample> {
                 },
                 builder: (context, controller, focusNode) {
                   return TextField(
-                    controller: _searchFiledController,
+                    controller: _searchFieldController,
                     focusNode: focusNode,
                     autofocus: false,
-                    decoration: const InputDecoration(
+                    onTapOutside: (event) => focusNode.unfocus(),
+                    style: const TextStyle(fontSize: 20),
+                    textAlignVertical: TextAlignVertical.center,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Colors.white)),
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: IconButton(onPressed: () {
+                          _searchFieldController.clear(); 
+                          setState(
+                            () {
+                              _searchResult.clear();
+                              _isPoiMarkerVisible = false;
+                            }
+                          );
+                        },
+                        icon: const Icon(Icons.cancel)
+                        ),
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       hintText: 'Paieška',
+                      hintStyle: const TextStyle(fontSize: 20)
                     )
                   );
                 },
@@ -451,7 +506,7 @@ class _MapSampleState extends State<MapSample> {
                 },
                 onSelected: (value) async {
                   //
-                  _searchFiledController.text = value.text.text;
+                  _searchFieldController.text = value.text.text;
 
                   http.Response response =  await http.get(Uri.parse('https://places.googleapis.com/v1/places/${value.placeId}'),
                     headers: {
@@ -464,41 +519,20 @@ class _MapSampleState extends State<MapSample> {
                   log(response.body);
                   _moveCameraToPosition(LatLng(values["location"]["latitude"], values["location"]["longitude"]));
                   FocusManager.instance.primaryFocus?.unfocus();
+                  setState(() {
+                    _poiMarkerLocation=LatLng(values["location"]["latitude"], values["location"]["longitude"]);
+                    _isPoiMarkerVisible = true;
+                  });
                 },
               )
             )
-          ),
-          elevation: 2,
+          ]
         ),
-        body: _currentLocation==null ? const Center(child: const Text("Loading..."),) : GoogleMap(
-          myLocationEnabled: true,
-          zoomControlsEnabled: false,
-          myLocationButtonEnabled: false,
-          initialCameraPosition: CameraPosition(
-            target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
-            zoom: 15.0,
-          ),
-          markers: {
-             if (_poiMarkerLocation != null) Marker(
-              markerId: const MarkerId("selectedPlace"), 
-              visible: _isPoiMarkerVisible,
-              position: _poiMarkerLocation!
-            )
-          },
-          onTap: (argument) async {
-            Place? poi = await _fetchPoi(argument);
-            if(poi != null) {
-              _modalBottomSheet(place: poi);
-            }
-          },
-          onMapCreated: (mapController) {
-            _mapController.complete(mapController);
-          }),
-          floatingActionButton: _currentLocation!=null ? FloatingActionButton.extended(
-            onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
-            label: Text('My Location'),
-            icon: Icon(Icons.location_on),
-          ) : null,
+        floatingActionButton: _currentLocation!=null ? FloatingActionButton.extended(
+          onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
+          label: Text('My Location'),
+          icon: Icon(Icons.location_on),
+        ) : null,
     );
   }
 }
