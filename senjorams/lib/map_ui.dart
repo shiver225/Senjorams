@@ -4,12 +4,14 @@ import 'dart:developer';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:senjorams/main.dart';
 import 'package:senjorams/models/place_model.dart';
+import 'package:senjorams/models/place_prediction_model.dart';
 
 const apiKey="AIzaSyD3HD7vNTtRChKOhf3J6SN0niAiT_apYSk"; //not safe i bet
 
@@ -31,15 +33,21 @@ class MapSample extends StatefulWidget {
 
 class _MapSampleState extends State<MapSample> {
   final Completer<GoogleMapController> _mapController = Completer();
+  final TextEditingController _searchFiledController = TextEditingController();
+  final CarouselController _controller = CarouselController();
   //GlobalKey _globalKey = GlobalKey();
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   List<Place> _places = [];
+  List<PlacePrediction> _searchResult = [];
   List<Place> _placesTrashCan = [];
 
   LocationData? _currentLocation; 
   LatLng? _poiMarkerLocation;
   bool _isPoiMarkerVisible = false;
+  Timer? _debounce;
+
+  int _current = 0; //index for image carousel
 
   @override
   void initState() {
@@ -67,7 +75,7 @@ class _MapSampleState extends State<MapSample> {
     await prefs?.setString('savedPlaces', placeL);
   }
   
-  Future<Place?> fetchPoi(LatLng position) async{
+  Future<Place?> _fetchPoi(LatLng position) async{
     Map data = {
     "maxResultCount": 1,
     "locationRestriction": {
@@ -80,17 +88,19 @@ class _MapSampleState extends State<MapSample> {
     },
     "excludedTypes": ["parking", "atm"],
     };
-    http.Response response =  await http.post(Uri.parse('https://places.googleapis.com/v1/places:searchNearby'),
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": apiKey,
-        "X-Goog-FieldMask": "places.location,places.id,places.displayName,places.iconBackgroundColor,places.formattedAddress,places.reviews,places.regularOpeningHours,places.rating,places.photos,places.userRatingCount,places.iconMaskBaseUri"
-       },
-      body: json.encode(data),
-    );
-    Map values = jsonDecode(response.body);
-    log(response.body);
+
     try{
+      http.Response response =  await http.post(Uri.parse('https://places.googleapis.com/v1/places:searchNearby'),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask": "places.location,places.id,places.displayName,places.iconBackgroundColor,places.formattedAddress,places.reviews,places.regularOpeningHours,places.rating,places.photos,places.userRatingCount,places.iconMaskBaseUri"
+          },
+        body: json.encode(data),
+      );
+      Map values = jsonDecode(response.body);
+      log(response.body);
+    
       return Place.fromJson(values["places"][0]);
     }
     catch(e){
@@ -126,8 +136,6 @@ class _MapSampleState extends State<MapSample> {
         );
   }
 
-  final CarouselController _controller = CarouselController();
-  int _current = 0;
   Widget _imageCarouselWithInticator(Place place, StateSetter setModalState){
     final List<Widget> imageSliders = place.photos!.map((item) => Container(
       margin: const EdgeInsets.all(5.0),
@@ -376,17 +384,93 @@ class _MapSampleState extends State<MapSample> {
       ),
     );
   }
+  Future<List<PlacePrediction>?> _autoCopleteSearch(String value) async{
+    Map data = {
+      "input": value,
+      "locationBias": {
+        "circle": {
+          "center": {
+            "latitude": _currentLocation?.latitude,
+            "longitude": _currentLocation?.longitude},
+          "radius": 500.0
+        }
+      },
+    };
 
+    try{
+      http.Response response =  await http.post(Uri.parse('https://places.googleapis.com/v1/places:autocomplete'),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          },
+        body: json.encode(data),
+      );
+      Map values = jsonDecode(response.body);
+      log(response.body);
+      return (values["suggestions"] as List<dynamic>).map((place) => PlacePrediction.fromJson(Map<String, dynamic>.from(place)["placePrediction"])).toList();
+    }
+    catch(e){
+      log(e.toString());
+      return null;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         key: _scaffoldKey,
+        resizeToAvoidBottomInset : false,
         endDrawer: _sideNavigationBar(),
         appBar: AppBar(
-          title: const Text('Maps Sample App'),
+          title: const Text("Žemėlapis"),
+          bottom: PreferredSize(preferredSize: const Size.fromHeight(50),
+            child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(8),
+              child:TypeAheadField<PlacePrediction>(
+                controller: _searchFiledController,
+                itemBuilder: (context, place) {
+                  return ListTile(
+                    title: Text(place.structuredFormat.mainText.text),
+                    subtitle: Text(place.structuredFormat.secondaryText.text),
+                  );
+                },
+                builder: (context, controller, focusNode) {
+                  return TextField(
+                    controller: _searchFiledController,
+                    focusNode: focusNode,
+                    autofocus: false,
+                    decoration: const InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      hintText: 'Paieška',
+                    )
+                  );
+                },
+                debounceDuration: const Duration(milliseconds: 1000),
+                suggestionsCallback: (value) async {
+                  return await _autoCopleteSearch(value);
+                },
+                onSelected: (value) async {
+                  //
+                  _searchFiledController.text = value.text.text;
+
+                  http.Response response =  await http.get(Uri.parse('https://places.googleapis.com/v1/places/${value.placeId}'),
+                    headers: {
+                      "Content-Type": "application/json",
+                      "X-Goog-Api-Key": apiKey,
+                      "X-Goog-FieldMask": "location"
+                      },
+                  );
+                  Map values = jsonDecode(response.body);
+                  log(response.body);
+                  _moveCameraToPosition(LatLng(values["location"]["latitude"], values["location"]["longitude"]));
+                  FocusManager.instance.primaryFocus?.unfocus();
+                },
+              )
+            )
+          ),
           elevation: 2,
         ),
-        body: _currentLocation==null ? const Center(child: Text("Loading..."),) : GoogleMap(
+        body: _currentLocation==null ? const Center(child: const Text("Loading..."),) : GoogleMap(
           myLocationEnabled: true,
           zoomControlsEnabled: false,
           myLocationButtonEnabled: false,
@@ -402,7 +486,7 @@ class _MapSampleState extends State<MapSample> {
             )
           },
           onTap: (argument) async {
-            Place? poi = await fetchPoi(argument);
+            Place? poi = await _fetchPoi(argument);
             if(poi != null) {
               _modalBottomSheet(place: poi);
             }

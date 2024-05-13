@@ -6,14 +6,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class Place {
     String? formattedAddress;
     double? rating;
-    RegularOpeningHours? regularOpeningHours;
+    _RegularOpeningHours? regularOpeningHours;
     int? userRatingCount;
     String? id;
     String? iconMaskBaseUri;
     String? iconBackgroundColor;
-    DisplayName? displayName;
-    List<Review>? reviews;
-    List<Photo>? photos;
+    _DisplayName? displayName;
+    List<_Review>? reviews;
+    List<_Photo>? photos;
     Color cardColor = Colors.white;
     bool isSelected = false;
     LatLng? location;
@@ -40,13 +40,13 @@ class Place {
         id: json["id"],
         formattedAddress: json["formattedAddress"],
         rating: json["rating"]?.toDouble(),
-        regularOpeningHours: json.containsKey("regularOpeningHours") ? RegularOpeningHours.fromJson(json["regularOpeningHours"]) : null,
+        regularOpeningHours: json.containsKey("regularOpeningHours") ? _RegularOpeningHours.fromJson(json["regularOpeningHours"]) : null,
         userRatingCount: json["userRatingCount"],
         iconMaskBaseUri: json["iconMaskBaseUri"],
         iconBackgroundColor: json["iconBackgroundColor"],
-        displayName: json.containsKey("displayName") ? DisplayName.fromJson(json["displayName"]): null,
-        reviews: json.containsKey("reviews") ? List<Review>.from(json["reviews"].map((x) => Review.fromJson(x))): null,
-        photos: json.containsKey("photos") ? List<Photo>.from(json["photos"].map((x) => Photo.fromJson(x))): null,
+        displayName: json.containsKey("displayName") ? _DisplayName.fromJson(json["displayName"]): null,
+        reviews: json.containsKey("reviews") ? List<_Review>.from(json["reviews"].map((x) => _Review.fromJson(x))): null,
+        photos: json.containsKey("photos") ? List<_Photo>.from(json["photos"].map((x) => _Photo.fromJson(x))): null,
     );
 
     Map<String, dynamic> toJson() => {
@@ -64,20 +64,20 @@ class Place {
     };
 }
 
-class DisplayName {
+class _DisplayName {
     String text;
     String languageCode;
 
-    DisplayName({
+    _DisplayName({
         required this.text,
         required this.languageCode,
     });
 
-    factory DisplayName.fromRawJson(String str) => DisplayName.fromJson(json.decode(str));
+    factory _DisplayName.fromRawJson(String str) => _DisplayName.fromJson(json.decode(str));
 
     String toRawJson() => json.encode(toJson());
 
-    factory DisplayName.fromJson(Map<String, dynamic> json) => DisplayName(
+    factory _DisplayName.fromJson(Map<String, dynamic> json) => _DisplayName(
         text: json["text"],
         languageCode: json["languageCode"],
     );
@@ -88,28 +88,28 @@ class DisplayName {
     };
 }
 
-class Photo {
+class _Photo {
     String name;
     int widthPx;
     int heightPx;
-    List<AuthorAttribution> authorAttributions;
+    List<_AuthorAttribution> authorAttributions;
 
-    Photo({
+    _Photo({
         required this.name,
         required this.widthPx,
         required this.heightPx,
         required this.authorAttributions,
     });
 
-    factory Photo.fromRawJson(String str) => Photo.fromJson(json.decode(str));
+    factory _Photo.fromRawJson(String str) => _Photo.fromJson(json.decode(str));
 
     String toRawJson() => json.encode(toJson());
 
-    factory Photo.fromJson(Map<String, dynamic> json) => Photo(
+    factory _Photo.fromJson(Map<String, dynamic> json) => _Photo(
         name: json["name"],
         widthPx: json["widthPx"],
         heightPx: json["heightPx"],
-        authorAttributions: List<AuthorAttribution>.from(json["authorAttributions"].map((x) => AuthorAttribution.fromJson(x))),
+        authorAttributions: List<_AuthorAttribution>.from(json["authorAttributions"].map((x) => _AuthorAttribution.fromJson(x))),
     );
 
     Map<String, dynamic> toJson() => {
@@ -120,22 +120,22 @@ class Photo {
     };
 }
 
-class AuthorAttribution {
+class _AuthorAttribution {
     String displayName;
     String uri;
     String photoUri;
 
-    AuthorAttribution({
+    _AuthorAttribution({
         required this.displayName,
         required this.uri,
         required this.photoUri,
     });
 
-    factory AuthorAttribution.fromRawJson(String str) => AuthorAttribution.fromJson(json.decode(str));
+    factory _AuthorAttribution.fromRawJson(String str) => _AuthorAttribution.fromJson(json.decode(str));
 
     String toRawJson() => json.encode(toJson());
 
-    factory AuthorAttribution.fromJson(Map<String, dynamic> json) => AuthorAttribution(
+    factory _AuthorAttribution.fromJson(Map<String, dynamic> json) => _AuthorAttribution(
         displayName: json["displayName"],
         uri: json["uri"],
         photoUri: json["photoUri"],
@@ -148,24 +148,24 @@ class AuthorAttribution {
     };
 }
 
-class RegularOpeningHours {
+class _RegularOpeningHours {
     bool openNow;
-    List<Period> periods;
+    List<_Period> periods;
     List<String> weekdayDescriptions;
 
-    RegularOpeningHours({
+    _RegularOpeningHours({
         required this.openNow,
         required this.periods,
         required this.weekdayDescriptions,
     });
 
-    factory RegularOpeningHours.fromRawJson(String str) => RegularOpeningHours.fromJson(json.decode(str));
+    factory _RegularOpeningHours.fromRawJson(String str) => _RegularOpeningHours.fromJson(json.decode(str));
 
     String toRawJson() => json.encode(toJson());
 
-    factory RegularOpeningHours.fromJson(Map<String, dynamic> json) => RegularOpeningHours(
+    factory _RegularOpeningHours.fromJson(Map<String, dynamic> json) => _RegularOpeningHours(
         openNow: json["openNow"],
-        periods: List<Period>.from(json["periods"].map((x) => Period.fromJson(x))),
+        periods: List<_Period>.from(json["periods"].map((x) => _Period.fromJson(x))),
         weekdayDescriptions: List<String>.from(json["weekdayDescriptions"].map((x) => x)),
     );
 
@@ -176,22 +176,22 @@ class RegularOpeningHours {
     };
 }
 
-class Period {
-    Time? open;
-    Time? close;
+class _Period {
+    _Time? open;
+    _Time? close;
 
-    Period({
+    _Period({
         this.open,
         this.close,
     });
 
-    factory Period.fromRawJson(String str) => Period.fromJson(json.decode(str));
+    factory _Period.fromRawJson(String str) => _Period.fromJson(json.decode(str));
 
     String toRawJson() => json.encode(toJson());
 
-    factory Period.fromJson(Map<String, dynamic> json) => Period(
-        open: json.containsKey("open") ? Time.fromJson(json["open"]) : null,
-        close: json.containsKey("close") ? Time.fromJson(json["close"]) : null,
+    factory _Period.fromJson(Map<String, dynamic> json) => _Period(
+        open: json.containsKey("open") ? _Time.fromJson(json["open"]) : null,
+        close: json.containsKey("close") ? _Time.fromJson(json["close"]) : null,
     );
 
     Map<String, dynamic> toJson() => {
@@ -200,22 +200,22 @@ class Period {
     };
 }
 
-class Time {
+class _Time {
     int day;
     int hour;
     int minute;
 
-    Time({
+    _Time({
         required this.day,
         required this.hour,
         required this.minute,
     });
 
-    factory Time.fromRawJson(String str) => Time.fromJson(json.decode(str));
+    factory _Time.fromRawJson(String str) => _Time.fromJson(json.decode(str));
 
     String toRawJson() => json.encode(toJson());
 
-    factory Time.fromJson(Map<String, dynamic> json) => Time(
+    factory _Time.fromJson(Map<String, dynamic> json) => _Time(
         day: json["day"],
         hour: json["hour"],
         minute: json["minute"],
@@ -228,16 +228,16 @@ class Time {
     };
 }
 
-class Review {
+class _Review {
     String name;
     String relativePublishTimeDescription;
     int rating;
-    DisplayName? text;
-    DisplayName? originalText;
-    AuthorAttribution authorAttribution;
+    _DisplayName? text;
+    _DisplayName? originalText;
+    _AuthorAttribution authorAttribution;
     DateTime publishTime;
 
-    Review({
+    _Review({
         required this.name,
         required this.relativePublishTimeDescription,
         required this.rating,
@@ -247,17 +247,17 @@ class Review {
         required this.publishTime,
     });
 
-    factory Review.fromRawJson(String str) => Review.fromJson(json.decode(str));
+    factory _Review.fromRawJson(String str) => _Review.fromJson(json.decode(str));
 
     String toRawJson() => json.encode(toJson());
 
-    factory Review.fromJson(Map<String, dynamic> json) => Review(
+    factory _Review.fromJson(Map<String, dynamic> json) => _Review(
         name: json["name"],
         relativePublishTimeDescription: json["relativePublishTimeDescription"],
         rating: json["rating"],
-        text: json["text"] == null ? null : DisplayName.fromJson(json["text"]),
-        originalText: json["originalText"] == null ? null : DisplayName.fromJson(json["originalText"]),
-        authorAttribution: AuthorAttribution.fromJson(json["authorAttribution"]),
+        text: json["text"] == null ? null : _DisplayName.fromJson(json["text"]),
+        originalText: json["originalText"] == null ? null : _DisplayName.fromJson(json["originalText"]),
+        authorAttribution: _AuthorAttribution.fromJson(json["authorAttribution"]),
         publishTime: DateTime.parse(json["publishTime"]),
     );
 
