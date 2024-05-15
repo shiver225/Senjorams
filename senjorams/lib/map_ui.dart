@@ -229,99 +229,126 @@ class _MapSampleState extends State<MapSample> {
   }
 
   void _modalBottomSheet({required Place place}) {
-    showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        builder: (BuildContext context) {
-          return StatefulBuilder(
-              builder: (BuildContext context, StateSetter setModalState) {
-            return FractionallySizedBox(
-              heightFactor: 0.75,
-              child: Center(
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          TextButton(
-                            child: const Icon(Icons.clear),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                          SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.55),
-                          if (!_places.any((pl) => pl.id == place.id))
-                            TextButton(
-                                child: const Text("SAVE"),
-                                onPressed: () async {
-                                  setState(() {
-                                    _places.add(place);
-                                    _saveData();
-                                  });
-                                  Navigator.pop(context);
-                                })
-                        ]),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        const SizedBox(width: 10),
-                        Image.network(
-                          "${place.iconMaskBaseUri!}.png",
-                          color: HexColor.fromHex(place.iconBackgroundColor!),
-                          scale: 5,
-                        ),
-                        const SizedBox(width: 10),
-                        Flexible(
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setModalState) {
+          return Container(
+            padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.7), // White background with opacity
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20.0),
+                topRight: Radius.circular(20.0),
+              ),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      IconButton(
+                        icon: Icon(Icons.clear, color: Colors.black),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      if (!_places.any((pl) => pl.id == place.id))
+                        TextButton(
                           child: Text(
-                            place.displayName!.text,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 24),
+                            "SAVE",
+                            style: TextStyle(color: Colors.black),
                           ),
-                        )
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        const SizedBox(width: 10),
-                        RatingBarIndicator(
-                          rating: place.rating ?? 1,
-                          direction: Axis.horizontal,
-                          itemCount: 5,
-                          itemSize: 30.0,
-                          itemPadding:
-                              const EdgeInsets.symmetric(horizontal: 4.0),
-                          itemBuilder: (context, _) => const Icon(
-                            Icons.star,
-                            color: Colors.amber,
+                          onPressed: () async {
+                            setState(() {
+                              _places.add(place);
+                              _saveData();
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                    ],
+                  ),
+                  SizedBox(height: 20.0),
+                  Row(
+                    children: [
+                      Image.network(
+                        "${place.iconMaskBaseUri!}.png",
+                        color: HexColor.fromHex(place.iconBackgroundColor!),
+                        scale: 5,
+                      ),
+                      SizedBox(width: 10.0),
+                      Expanded(
+                        child: Text(
+                          place.displayName!.text,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
                           ),
                         ),
-                        const SizedBox(width: 5),
-                        Text(
-                          place.rating != null
-                              ? place.rating.toString()
-                              : "No reviews",
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 24),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20.0),
+                  Row(
+                    children: [
+                      RatingBarIndicator(
+                        rating: place.rating ?? 1,
+                        direction: Axis.horizontal,
+                        itemCount: 5,
+                        itemSize: 30.0,
+                        itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                        itemBuilder: (context, _) => Icon(
+                          Icons.star,
+                          color: Colors.amber,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Text("${place.formattedAddress!} "),
-                    const SizedBox(height: 20),
-                    Text((place.regularOpeningHours != null
+                      ),
+                      SizedBox(width: 5.0),
+                      Text(
+                        place.rating != null
+                            ? place.rating.toString()
+                            : "No reviews",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20.0),
+                  Text("${place.formattedAddress!} "),
+                  SizedBox(height: 20.0),
+                  Text(
+                    (place.regularOpeningHours != null
                         ? (place.regularOpeningHours!.openNow
                             ? "Open"
                             : "Closed")
-                        : "")),
-                    if (place.photos != null)
-                      _imageCarouselWithInticator(place, setModalState),
-                  ],
-                ),
+                        : ""),
+                        style: TextStyle(
+                      color: place.regularOpeningHours != null
+                          ? (place.regularOpeningHours!.openNow
+                              ? const Color.fromARGB(255, 121, 190, 41) // Pastel green for "Open"
+                              : const Color.fromARGB(255, 196, 196, 74)) // Pastel yellow for "Closed"
+                          : Colors.black, // Default color
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(height: 20.0),
+                  if (place.photos != null)
+                    _imageCarouselWithInticator(place, setModalState),
+                ],
               ),
-            );
-          });
-        });
-  }
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
 
   void _toggleSelection(Place place) {
     setState(() {
