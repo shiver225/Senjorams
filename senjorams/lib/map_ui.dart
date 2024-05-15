@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:location/location.dart';
@@ -13,7 +14,7 @@ import 'package:senjorams/main.dart';
 import 'package:senjorams/models/place_model.dart';
 import 'package:senjorams/models/place_prediction_model.dart';
 
-const apiKey="AIzaSyD3HD7vNTtRChKOhf3J6SN0niAiT_apYSk"; //not safe i bet
+const apiKey="AIzaSyAVd3YlwDIiYmq1Lmq1rpXkkxaN5V0zUNc"; //not safe i bet
 
 extension  HexColor on Color {
   static Color fromHex(String hexString) {
@@ -36,11 +37,15 @@ class _MapSampleState extends State<MapSample> {
   final TextEditingController _searchFieldController = TextEditingController();
   final CarouselController _controller = CarouselController();
   //GlobalKey _globalKey = GlobalKey();
-  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  late PolylinePoints _polylinePoints;
+  final List<LatLng> _polylineCoordinates = [];
+  final Map<PolylineId, Polyline> _polylines = {};
 
   List<Place> _places = [];
-  List<PlacePrediction> _searchResult = [];
-  List<Place> _placesTrashCan = [];
+  final List<PlacePrediction> _searchResult = [];
+  final List<Place> _placesTrashCan = [];
 
   LocationData? _currentLocation; 
   LatLng? _poiMarkerLocation;
@@ -63,7 +68,6 @@ class _MapSampleState extends State<MapSample> {
   }
   void _loadData() {
     final String? saved = prefs?.getString('savedPlaces');
-    print(saved);
     if(saved != null){
       final List<dynamic> decoded = json.decode(saved);
       _places = decoded.map((place) => Place.fromJson(Map<String, dynamic>.from(place))).toList();
@@ -109,6 +113,78 @@ class _MapSampleState extends State<MapSample> {
     }
   }
   
+  Future<List<PlacePrediction>?> _autoCopleteSearch(String value) async{
+    if(value.isEmpty){
+      return null;
+    }
+    Map data = {
+      "input": value,
+      "locationBias": {
+        "circle": {
+          "center": {
+            "latitude": _currentLocation?.latitude,
+            "longitude": _currentLocation?.longitude},
+          "radius": 500.0
+        }
+      },
+    };
+
+    try{
+      http.Response response =  await http.post(Uri.parse('https://places.googleapis.com/v1/places:autocomplete'),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          },
+        body: json.encode(data),
+      );
+      Map values = jsonDecode(response.body);
+      log(response.body);
+      return (values["suggestions"] as List<dynamic>).map((place) => PlacePrediction.fromJson(Map<String, dynamic>.from(place)["placePrediction"])).toList();
+    }
+    catch(e){
+      log(e.toString());
+      return null;
+    }
+  }
+  void _createPolylines(
+    double startLatitude,
+    double startLongitude,
+    double destinationLatitude,
+    double destinationLongitude,
+  ) async {
+  // Initializing PolylinePoints
+  _polylinePoints = PolylinePoints();
+
+  // Generating the list of coordinates to be used for
+  // drawing the polylines
+  PolylineResult result = await _polylinePoints.getRouteBetweenCoordinates(
+    apiKey, // Google Maps API Key
+    PointLatLng(startLatitude, startLongitude),
+    PointLatLng(destinationLatitude, destinationLongitude),
+    travelMode: TravelMode.transit,
+  );
+
+  // Adding the coordinates to the list
+  if (result.points.isNotEmpty) {
+    result.points.forEach((PointLatLng point) {
+      _polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+    });
+  }
+
+  // Defining an ID
+  PolylineId id = PolylineId('poly');
+
+  // Initializing Polyline
+  Polyline polyline = Polyline(
+    polylineId: id,
+    color: Colors.red,
+    points: _polylineCoordinates,
+    width: 6,
+  );
+
+  // Adding the polyline to the map
+  _polylines[id] = polyline;
+}
   void _getCurrentLocation() async{
     Location location = Location();
 
@@ -208,84 +284,101 @@ class _MapSampleState extends State<MapSample> {
   }
   void _modalBottomSheet({required Place place}){
     showModalBottomSheet<void>(
+      backgroundColor: Colors.transparent,
       context: context,
       isScrollControlled:true,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState){
           return FractionallySizedBox(
-          heightFactor: 0.75,
-          child: Center(
-            child: Column(
-              children: <Widget>[   
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    TextButton(
-                      child: const Icon(Icons.clear),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.55),
-                    if(!_places.any((pl) => pl.id == place.id)) TextButton(
-                      child: const Text("SAVE"),
-                      onPressed: () async {
-                        setState(() {_places.add(place); _saveData();});
-                        Navigator.pop(context);
-                      }
-                    )]
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                  const SizedBox(width: 10),
-                  Image.network(
-                    "${place.iconMaskBaseUri!}.png",
-                    color: HexColor.fromHex(place.iconBackgroundColor!),
-                    scale: 5,
+            heightFactor: 0.85,
+           child: Stack(
+            children: [
+              Positioned(
+                top: MediaQuery.of(context).size.height *0.1,
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20)
                   ),
-                  const SizedBox(width: 10),
-                  Flexible(
-                     child: Text(
-                    place.displayName!.text,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-                    ),
-                  )],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    const SizedBox(width: 10),
-                    RatingBarIndicator(
-                      rating: place.rating ?? 1,
-                      direction: Axis.horizontal,
-                      itemCount: 5,
-                      itemSize: 30.0,
-                      itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      itemBuilder: (context, _) => const Icon(
-                        Icons.star,
-                        color: Colors.amber,
+                  child: Column(
+                    children: <Widget>[   
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          TextButton(
+                            child: const Icon(Icons.clear),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                          SizedBox(width: MediaQuery.of(context).size.width * 0.55),
+                          if(!_places.any((pl) => pl.id == place.id)) TextButton(
+                            child: const Text("SAVE"),
+                            onPressed: () async {
+                              setState(() {_places.add(place); _saveData();});
+                              Navigator.pop(context);
+                            }
+                          )]
                       ),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      place.rating != null ? place.rating.toString() : "No reviews",
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                        const SizedBox(width: 10),
+                        Image.network(
+                          "${place.iconMaskBaseUri!}.png",
+                          color: HexColor.fromHex(place.iconBackgroundColor!),
+                          scale: 5,
+                        ),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                          place.displayName!.text,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                          ),
+                        )],
                       ),
-                ],
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10),
+                          RatingBarIndicator(
+                            rating: place.rating ?? 1,
+                            direction: Axis.horizontal,
+                            itemCount: 5,
+                            itemSize: 30.0,
+                            itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            itemBuilder: (context, _) => const Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            place.rating != null ? place.rating.toString() : "No reviews",
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                            ),
+                      ],
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        "${place.formattedAddress!} " 
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        (place.regularOpeningHours != null ? (place.regularOpeningHours!.openNow ? "Open" : "Closed") : "")
+                      ),
+                      if(place.photos!=null) _imageCarouselWithInticator(place, setModalState),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  "${place.formattedAddress!} " 
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  (place.regularOpeningHours != null ? (place.regularOpeningHours!.openNow ? "Open" : "Closed") : "")
-                ),
-                if(place.photos!=null) _imageCarouselWithInticator(place, setModalState),
-              ],
-            ),
-          ),
-        );
+              ),
+              Positioned(
+                bottom: MediaQuery.of(context).size.height * 0.75,
+                child: ElevatedButton(onPressed: () => {}, child: Icon(Icons.route),)
+              )
+            ]
+        ));
         });
         });
   }
@@ -384,36 +477,6 @@ class _MapSampleState extends State<MapSample> {
       ),
     );
   }
-  Future<List<PlacePrediction>?> _autoCopleteSearch(String value) async{
-    Map data = {
-      "input": value,
-      "locationBias": {
-        "circle": {
-          "center": {
-            "latitude": _currentLocation?.latitude,
-            "longitude": _currentLocation?.longitude},
-          "radius": 500.0
-        }
-      },
-    };
-
-    try{
-      http.Response response =  await http.post(Uri.parse('https://places.googleapis.com/v1/places:autocomplete'),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": apiKey,
-          },
-        body: json.encode(data),
-      );
-      Map values = jsonDecode(response.body);
-      log(response.body);
-      return (values["suggestions"] as List<dynamic>).map((place) => PlacePrediction.fromJson(Map<String, dynamic>.from(place)["placePrediction"])).toList();
-    }
-    catch(e){
-      log(e.toString());
-      return null;
-    }
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -436,6 +499,7 @@ class _MapSampleState extends State<MapSample> {
                 target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
                 zoom: 15.0,
               ),
+              polylines: Set<Polyline>.of(_polylines.values),
               markers: {
                 if (_poiMarkerLocation != null) Marker(
                   markerId: const MarkerId("selectedPlace"), 
@@ -443,14 +507,20 @@ class _MapSampleState extends State<MapSample> {
                   position: _poiMarkerLocation!
                 )
               },
-              onTap: (argument) {
+              onTap: (location) {
                 if (_debounce?.isActive ?? false) _debounce!.cancel();
                 _debounce = Timer(const Duration(milliseconds: 1000), () async
                   {
-                    Place? poi = await _fetchPoi(argument);
+                    Place? poi = await _fetchPoi(location);
                     if(poi != null) {
                     _modalBottomSheet(place: poi);
                     }
+                  });
+                  setState(() {
+                    _poiMarkerLocation=location;
+                    _isPoiMarkerVisible = true;
+                    _polylines.clear();
+                    _createPolylines(_currentLocation!.latitude!, _currentLocation!.longitude!, location.latitude, location.longitude);
                   });
               },
               onMapCreated: (mapController) {
@@ -525,14 +595,27 @@ class _MapSampleState extends State<MapSample> {
                   });
                 },
               )
-            )
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: FloatingActionButton.extended(
+                heroTag: "btnLeft",
+                onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
+                label: Text('Nuoroda'),
+                icon: Icon(Icons.route),
+              )
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton.extended(
+                heroTag: "btnRight",
+                onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
+                label: Text('My Location'),
+                icon: Icon(Icons.location_on),
+              )
+            ),
           ]
-        ),
-        floatingActionButton: _currentLocation!=null ? FloatingActionButton.extended(
-          onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
-          label: Text('My Location'),
-          icon: Icon(Icons.location_on),
-        ) : null,
+        )
     );
   }
 }
