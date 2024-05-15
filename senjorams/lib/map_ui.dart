@@ -5,6 +5,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -41,12 +43,26 @@ class _MapSampleState extends State<MapSample> {
   LatLng? _poiMarkerLocation;
   bool _isPoiMarkerVisible = false;
 
+  late String _timeString = '';
+  late var timer;
+
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
     _loadData();
+
+    _updateTime(); // Update time initially
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
   }
+
+  void _updateTime() {
+      final DateTime now = DateTime.now();
+      setState(() {
+        _timeString = DateFormat.Hms().format(now);
+      });
+    }
+
   @override
   void setState(fn){
     if(mounted) {
@@ -379,42 +395,112 @@ class _MapSampleState extends State<MapSample> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        key: _scaffoldKey,
-        endDrawer: _sideNavigationBar(),
-        appBar: AppBar(
-          title: const Text('Maps Sample App'),
-          elevation: 2,
+  return Scaffold(
+    key: _scaffoldKey,
+    appBar: AppBar(
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 30), // Adjust the left padding as needed
+        child: IconButton(
+          icon: const FaIcon(FontAwesomeIcons.arrowLeft),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-        body: _currentLocation==null ? const Center(child: Text("Loading..."),) : GoogleMap(
-          myLocationEnabled: true,
-          zoomControlsEnabled: false,
-          myLocationButtonEnabled: false,
-          initialCameraPosition: CameraPosition(
-            target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
-            zoom: 15.0,
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20), // Adjust the padding as needed
+          child: IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () {
+              _scaffoldKey.currentState!.openEndDrawer();
+            },
           ),
-          markers: {
-             if (_poiMarkerLocation != null) Marker(
-              markerId: const MarkerId("selectedPlace"), 
-              visible: _isPoiMarkerVisible,
-              position: _poiMarkerLocation!
-            )
-          },
-          onTap: (argument) async {
-            Place? poi = await fetchPoi(argument);
-            if(poi != null) {
-              _modalBottomSheet(place: poi);
-            }
-          },
-          onMapCreated: (mapController) {
-            _mapController.complete(mapController);
-          }),
-          floatingActionButton: _currentLocation!=null ? FloatingActionButton.extended(
+        ),
+      ],
+      automaticallyImplyLeading: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(50),
+        ),
+      ),
+      backgroundColor: const Color(0xFF92C7CF),
+      title: Text(
+        _timeString,
+        style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+      ),
+      centerTitle: true,
+    ),
+    endDrawer: _sideNavigationBar(),
+    body: Stack(
+      children: [
+        _currentLocation == null
+            ? const Center(child: Text("Loading..."),)
+            : GoogleMap(
+                myLocationEnabled: true,
+                zoomControlsEnabled: false,
+                myLocationButtonEnabled: false,
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
+                  zoom: 15.0,
+                ),
+                markers: {
+                  if (_poiMarkerLocation != null) Marker(
+                    markerId: const MarkerId("selectedPlace"), 
+                    visible: _isPoiMarkerVisible,
+                    position: _poiMarkerLocation!
+                  )
+                },
+                onTap: (argument) async {
+                  Place? poi = await fetchPoi(argument);
+                  if(poi != null) {
+                    _modalBottomSheet(place: poi);
+                  }
+                },
+                onMapCreated: (mapController) {
+                  _mapController.complete(mapController);
+                }
+              ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 20,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(Icons.search),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Enter your text...',
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+    floatingActionButton: _currentLocation != null
+        ? FloatingActionButton.extended(
             onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
-            label: Text('My Location'),
-            icon: Icon(Icons.location_on),
-          ) : null,
-    );
-  }
+            label: const Text('My Location'),
+            icon: const Icon(Icons.location_on),
+          )
+        : null,
+  );
+}
+
 }
