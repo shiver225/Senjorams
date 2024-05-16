@@ -5,13 +5,14 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:senjorams/main.dart';
 import 'package:senjorams/models/place_model.dart';
 import 'package:shimmer/shimmer.dart';
-
 const apiKey = "AIzaSyD3HD7vNTtRChKOhf3J6SN0niAiT_apYSk"; //not safe i bet
 extension HexColor on Color {
   static Color fromHex(String hexString) {
@@ -43,7 +44,6 @@ class _MapSampleState extends State<MapSample> {
     super.initState();
     _getCurrentLocation();
     _loadData();
-    
     _updateTime(); // Update time initially
     timer =
         Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
@@ -56,8 +56,8 @@ class _MapSampleState extends State<MapSample> {
     });
   }
   @override
-  void setState(fn){
-    if(mounted) {
+  void setState(fn) {
+    if (mounted) {
       super.setState(fn);
     }
   }
@@ -66,7 +66,9 @@ class _MapSampleState extends State<MapSample> {
     print(saved);
     if (saved != null) {
       final List<dynamic> decoded = json.decode(saved);
-      _places = decoded.map((place) => Place.fromJson(Map<String, dynamic>.from(place))).toList();
+      _places = decoded
+          .map((place) => Place.fromJson(Map<String, dynamic>.from(place)))
+          .toList();
     }
   }
   //could just use the returned json from api call instead
@@ -76,16 +78,17 @@ class _MapSampleState extends State<MapSample> {
   }
   Future<Place?> fetchPoi(LatLng position) async {
     Map data = {
-    "maxResultCount": 1,
-    "locationRestriction": {
-      "circle": {
-        "center": {
-          "latitude": position.latitude,
-          "longitude": position.longitude},
-        "radius": 50.0
-      }
-    },
-    "excludedTypes": ["parking", "atm"],
+      "maxResultCount": 1,
+      "locationRestriction": {
+        "circle": {
+          "center": {
+            "latitude": position.latitude,
+            "longitude": position.longitude
+          },
+          "radius": 50.0
+        }
+      },
+      "excludedTypes": ["parking", "atm"],
     };
     http.Response response = await http.post(
       Uri.parse('https://places.googleapis.com/v1/places:searchNearby'),
@@ -101,6 +104,9 @@ class _MapSampleState extends State<MapSample> {
     log(response.body);
     try {
       return Place.fromJson(values["places"][0]);
+    } catch (e) {
+      log(e.toString());
+      return null;
     }
   }
   void _getCurrentLocation() async {
@@ -112,20 +118,14 @@ class _MapSampleState extends State<MapSample> {
     });
     location.onLocationChanged.listen((newLocation) {
       setState(() {
-        _currentLocation=newLocation;
+        _currentLocation = newLocation;
       });
-     });
+    });
   }
   void _moveCameraToPosition(LatLng position) async {
     GoogleMapController googleMapController = await _mapController.future;
-    googleMapController.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-              zoom: 15.0,
-              target: position
-            )
-          )
-        );
+    googleMapController.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(zoom: 15.0, target: position)));
   }
   final CarouselController _controller = CarouselController();
   int _current = 0;
@@ -327,14 +327,15 @@ class _MapSampleState extends State<MapSample> {
   );
 }
 
+
   void _toggleSelection(Place place) {
     setState(() {
       if (place.isSelected) {
-        place.cardColor=Colors.white;
+        place.cardColor = Colors.white;
         place.isSelected = false;
         _placesTrashCan.remove(place);
       } else {
-        place.cardColor=const Color.fromARGB(255, 223, 222, 222);
+        place.cardColor = const Color.fromARGB(255, 223, 222, 222);
         place.isSelected = true;
         _placesTrashCan.add(place);
       }
@@ -503,47 +504,105 @@ Widget build(BuildContext context) {
                 if (poi != null) {
                   _modalBottomSheet(place: poi);
                 }
-              } : () => _toggleSelection(_places[index]),
-            onLongPress: () {_toggleSelection(_places[index]);Feedback.forTap(context);},
-            borderRadius: BorderRadius.circular(14),
-            child: ListTile(
-              selected: _places[index].isSelected,
-              title: Text(
-                _places[index].displayName!.text
-              ),
-              trailing: _placesTrashCan.isNotEmpty ? Checkbox(
-                value: _places[index].isSelected,
-                onChanged: (bool? value) { 
-                  Feedback.forTap(context);
-                  _toggleSelection(_places[index]);            
-                },
-              ) : null,
-              ),
-            )
-          ],
-        ),
-      );
-  }
-  Widget _sideNavigationBar(){
-    return Drawer(
-      child: Container(
-        color: Colors.white,
-        child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-            Container(
-             height: 100,
-             alignment: AlignmentDirectional.center,
-             width: double.infinity,
-             decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: Colors.deepPurple),
-             child: const Text("SAVED PLACES", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),),
+              },
+              onMapCreated: (mapController) {
+                _mapController.complete(mapController);
+              },
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _places.length,
-                itemBuilder: (_, index){
-                  return _placesCard(index);
-                },
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: AppBar(
+              leading: Padding(
+                padding: const EdgeInsets.only(
+                    left: 30), // Adjust the left padding as needed
+                child: IconButton(
+                  icon: const FaIcon(FontAwesomeIcons.arrowLeft),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20), // Adjust the padding as needed
+                  child: IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () {
+                      _scaffoldKey.currentState!.openEndDrawer();
+                    },
+                  ),
+                ),
+              ],
+              automaticallyImplyLeading: false,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(50),
+                ),
+              ),
+              backgroundColor: const Color(0xFF92C7CF),
+              title: Text(
+                _timeString,
+                style:
+                    const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+              ),
+              centerTitle: true,
+            ),
+          ),
+          if (mapLoaded) // Render text field and my location button only if map has finished loading
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 80, // Adjusted to leave space for the text input field
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  width: MediaQuery.of(context).size.width, // Adjusted width
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFF92C7CF), width: 3),
+                  ),
+                  child: Row(
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Icon(Icons.search),
+                      ),
+                      Expanded(
+                        child: Container(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width - 100, // Adjusted width
+                          ),
+                          height: 40, // Adjust the height of the text field
+                          child: TextFormField(
+                            decoration: const InputDecoration(
+                              hintText: 'Enter your text...',
+                              labelStyle: TextStyle(color: Colors.black),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (mapLoaded) // Render my location button only if map has finished loading
+            Positioned(
+              top: 100, // Position below the app bar
+              right: 0, // Align to the top right corner
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: FloatingActionButton(
+                  backgroundColor: const Color(0xFFECD9B1), // Light sand color
+                  onPressed: () => _moveCameraToPosition(LatLng(
+                      _currentLocation!.latitude!, _currentLocation!.longitude!)),
+                  child: const Icon(Icons.location_on, color: Colors.black),
+                ),
               ),
             ),
         ],
@@ -552,5 +611,4 @@ Widget build(BuildContext context) {
     ),
   );
 }
-
 }
