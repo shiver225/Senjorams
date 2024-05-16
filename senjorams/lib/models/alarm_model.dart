@@ -12,7 +12,6 @@ class Alarm{
   List<String> body;
   bool isSelected = false;
   Color cardColor = Colors.white;
-  Color textColor = Colors.black;
 
   Alarm({
     required this.time,
