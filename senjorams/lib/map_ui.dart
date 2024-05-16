@@ -2,18 +2,23 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:senjorams/main.dart';
 import 'package:senjorams/models/place_model.dart';
+import 'package:senjorams/models/place_prediction_model.dart';
+import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
-const apiKey = "AIzaSyD3HD7vNTtRChKOhf3J6SN0niAiT_apYSk"; //not safe i bet
+
+const apiKey="AIzaSyAVd3YlwDIiYmq1Lmq1rpXkkxaN5V0zUNc"; //not safe i bet
 extension HexColor on Color {
   static Color fromHex(String hexString) {
     final buffer = StringBuffer();
@@ -29,16 +34,28 @@ class MapSample extends StatefulWidget {
 }
 class _MapSampleState extends State<MapSample> {
   final Completer<GoogleMapController> _mapController = Completer();
+  final TextEditingController _searchFieldController = TextEditingController();
+  final CarouselController _controller = CarouselController();
   //GlobalKey _globalKey = GlobalKey();
-  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  final Map<PolylineId, Polyline> _polylines = {};
+
   List<Place> _places = [];
-  List<Place> _placesTrashCan = [];
-  LocationData? _currentLocation;
+  final List<PlacePrediction> _searchResult = [];
+  final List<Place> _placesTrashCan = [];
+  Place? _markedPlace;
+
+  LocationData? _currentLocation; 
   LatLng? _poiMarkerLocation;
   bool _isPoiMarkerVisible = false;
+  Timer? _debounce;
+
+  int _current = 0; //index for image carousel
   late String _timeString = '';
   late var timer;
   late FocusNode _mapFocusNode;
+
   @override
   void initState() {
     super.initState();
@@ -76,39 +93,133 @@ class _MapSampleState extends State<MapSample> {
     final String placeL = json.encode(_places);
     await prefs?.setString('savedPlaces', placeL);
   }
-  Future<Place?> fetchPoi(LatLng position) async {
+  Future<Place?> _nearbySearch(LatLng position) async{
     Map data = {
-      "maxResultCount": 1,
-      "locationRestriction": {
-        "circle": {
-          "center": {
-            "latitude": position.latitude,
-            "longitude": position.longitude
-          },
-          "radius": 50.0
-        }
-      },
-      "excludedTypes": ["parking", "atm"],
+    "maxResultCount": 1,
+    "locationRestriction": {
+      "circle": {
+        "center": {
+          "latitude": position.latitude,
+          "longitude": position.longitude},
+        "radius": 50.0
+      }
+    },
+    "excludedTypes": ["parking", "atm"],
     };
-    http.Response response = await http.post(
-      Uri.parse('https://places.googleapis.com/v1/places:searchNearby'),
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": apiKey,
-        "X-Goog-FieldMask":
-            "places.location,places.id,places.displayName,places.iconBackgroundColor,places.formattedAddress,places.reviews,places.regularOpeningHours,places.rating,places.photos,places.userRatingCount,places.iconMaskBaseUri"
-      },
-      body: json.encode(data),
-    );
-    Map values = jsonDecode(response.body);
-    log(response.body);
-    try {
+
+    try{
+      http.Response response =  await http.post(Uri.parse('https://places.googleapis.com/v1/places:searchNearby'),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask": "places.location,places.id,places.displayName,places.iconBackgroundColor,places.formattedAddress,places.reviews,places.regularOpeningHours,places.rating,places.photos,places.userRatingCount,places.iconMaskBaseUri"
+          },
+        body: json.encode(data),
+      );
+      Map values = jsonDecode(response.body);
+      log(response.body);
+    
       return Place.fromJson(values["places"][0]);
-    } catch (e) {
+    }
+    catch(e){
       log(e.toString());
       return null;
     }
   }
+  Future<Place?> _fetchPoi(String placeId) async{
+    try{
+      http.Response response =  await http.get(Uri.parse('https://places.googleapis.com/v1/places/$placeId'),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask": "location,id,displayName,iconBackgroundColor,formattedAddress,reviews,regularOpeningHours,rating,photos,userRatingCount,iconMaskBaseUri"
+          },
+      );
+      Map<String,dynamic> value = jsonDecode(response.body);
+      log(response.body);
+
+      return Place.fromJson(value);
+      }
+    catch(e){
+      log(e.toString());
+      return null;
+    }
+  }
+  
+  Future<List<PlacePrediction>?> _autoCopleteSearch(String value) async{
+    if(value.isEmpty){
+      return null;
+    }
+    Map data = {
+      "input": value,
+      "locationBias": {
+        "circle": {
+          "center": {
+            "latitude": _currentLocation?.latitude,
+            "longitude": _currentLocation?.longitude},
+          "radius": 500.0
+        }
+      },
+    };
+
+    try{
+      http.Response response =  await http.post(Uri.parse('https://places.googleapis.com/v1/places:autocomplete'),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          },
+        body: json.encode(data),
+      );
+      Map values = jsonDecode(response.body);
+      log(response.body);
+      return (values["suggestions"] as List<dynamic>).map((place) => PlacePrediction.fromJson(Map<String, dynamic>.from(place)["placePrediction"])).toList();
+    }
+    catch(e){
+      log(e.toString());
+      return null;
+    }
+  }
+  void _createPolylines(
+    double startLatitude,
+    double startLongitude,
+    double destinationLatitude,
+    double destinationLongitude,
+  ) async {
+    PolylinePoints _polylinePoints;
+    List<LatLng> _polylineCoordinates = [];
+    // Initializing PolylinePoints
+    _polylinePoints = PolylinePoints();
+
+    // Generating the list of coordinates to be used for
+    // drawing the polylines
+    PolylineResult result = await _polylinePoints.getRouteBetweenCoordinates(
+      apiKey, // Google Maps API Key
+      PointLatLng(startLatitude, startLongitude),
+      PointLatLng(destinationLatitude, destinationLongitude),
+      travelMode: TravelMode.transit,
+    );
+
+    // Adding the coordinates to the list
+    if (result.points.isNotEmpty) {
+      result.points.forEach((PointLatLng point) {
+        _polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      });
+    }
+
+    // Defining an ID
+    PolylineId id = PolylineId('poly');
+
+    // Initializing Polyline
+    Polyline polyline = Polyline(
+      polylineId: id,
+      color: Colors.red,
+      points: _polylineCoordinates,
+      width: 6,
+    );
+
+    // Adding the polyline to the map
+    _polylines[id] = polyline;
+}
   void _getCurrentLocation() async {
     Location location = Location();
     location.getLocation().then((location) {
@@ -127,8 +238,6 @@ class _MapSampleState extends State<MapSample> {
     googleMapController.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(zoom: 15.0, target: position)));
   }
-  final CarouselController _controller = CarouselController();
-  int _current = 0;
   Widget _imageCarouselWithInticator(Place place, StateSetter setModalState) {
     final List<Widget> imageSliders = place.photos!
         .map((item) => Container(
@@ -206,127 +315,130 @@ class _MapSampleState extends State<MapSample> {
     );
   }
 
-  void _modalBottomSheet({required Place place}) {
+  void _modalBottomSheet({required Place place}){
     showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setModalState) {
-          return Container(
-            padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.7), // White background with opacity
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20.0),
-                topRight: Radius.circular(20.0),
-              ),
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      IconButton(
-                        icon: Icon(Icons.clear, color: Colors.black),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      if (!_places.any((pl) => pl.id == place.id))
-                        TextButton(
-                          child: Text(
-                             "SAVE",
-                            style: TextStyle(color: Colors.black),
+      backgroundColor: Colors.transparent,
+      context: context,
+      isScrollControlled:true,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState){
+          return FractionallySizedBox(
+            heightFactor: 0.85,
+           child: Stack(
+            children: [
+              Positioned(
+                top: MediaQuery.of(context).size.height *0.1,
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20)
+                  ),
+                  child: Column(
+                    children: <Widget>[   
+                      Row(
+                        children: <Widget>[
+                          TextButton(
+                          child: const Icon(Icons.clear),
+                          onPressed: () => Navigator.pop(context),
                           ),
-                           onPressed: () async {
-                            setState(() {
-                              _places.add(place);
-                              _saveData();
-                            });
-                            Navigator.pop(context);
-                          },
-                        ),
-                    ],
-                  ),
-                  SizedBox(height: 20.0),
-                  Row(
-                    children: [
-                      Image.network(
-                        "${place.iconMaskBaseUri!}.png",
-                        color: HexColor.fromHex(place.iconBackgroundColor!),
-                        scale: 5,
+                          const Spacer(),
+                          if(!_places.any((pl) => pl.id == place.id)) 
+                          TextButton(
+                            child: const Text("SAVE"),
+                            onPressed: () async {
+                              setState(() {_places.add(place); _saveData();});
+                              Navigator.pop(context);
+                            }
+                          )
+                          ]
                       ),
-                      SizedBox(width: 10.0),
-                      Expanded(
-                        child: Text(
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                        const SizedBox(width: 10),
+                        Image.network(
+                          "${place.iconMaskBaseUri!}.png",
+                          color: HexColor.fromHex(place.iconBackgroundColor!),
+                          scale: 5,
+                        ),
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
                           place.displayName!.text,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                          ),
+                        )],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          const SizedBox(width: 10),
+                          RatingBarIndicator(
+                            rating: place.rating ?? 1,
+                            direction: Axis.horizontal,
+                            itemCount: 5,
+                            itemSize: 30.0,
+                            itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            itemBuilder: (context, _) => const Icon(
+                              Icons.star,
+                              color: Colors.amber,
                             ),
-                        ),
-                        ),
-                    ],
-                  ),
-                  SizedBox(height: 20.0),
-                  Row(
-                    children: [
-                      RatingBarIndicator(
-                        rating: place.rating ?? 1,
-                        direction: Axis.horizontal,
-                        itemCount: 5,
-                        itemSize: 30.0,
-                        itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                        itemBuilder: (context, _) => Icon(
-                          Icons.star,
-                          color: Colors.amber,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            place.rating != null ? place.rating.toString() : "No reviews",
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                            ),
+                      ],
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        "${place.formattedAddress!} " 
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        (place.regularOpeningHours != null
+                            ? (place.regularOpeningHours!.openNow
+                                ? "Open"
+                                : "Closed")
+                                : ""),
+                            style: TextStyle(
+                          color: place.regularOpeningHours != null
+                              ? (place.regularOpeningHours!.openNow
+                                  ? const Color.fromARGB(255, 121, 190, 41) // Pastel green for "Open"
+                                  : const Color.fromARGB(255, 196, 196, 74)) // Pastel yellow for "Closed"
+                              : Colors.black, // Default color
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
                         ),
                       ),
-                      SizedBox(width: 5.0),
-                      Text(
-                        place.rating != null
-                            ? place.rating.toString()
-                            : "No reviews",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 24,
-                        ),
-                        ),
+                      if(place.photos!=null) _imageCarouselWithInticator(place, setModalState),
                     ],
                   ),
-                  SizedBox(height: 20.0),
-                  Text("${place.formattedAddress!} "),
-                  SizedBox(height: 20.0),
-                  Text(
-                    (place.regularOpeningHours != null
-                        ? (place.regularOpeningHours!.openNow
-                            ? "Open"
-                            : "Closed")
-                            : ""),
-                        style: TextStyle(
-                      color: place.regularOpeningHours != null
-                          ? (place.regularOpeningHours!.openNow
-                              ? const Color.fromARGB(255, 121, 190, 41) // Pastel green for "Open"
-                              : const Color.fromARGB(255, 196, 196, 74)) // Pastel yellow for "Closed"
-                          : Colors.black, // Default color
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                  SizedBox(height: 20.0),
-                  if (place.photos != null)
-                    _imageCarouselWithInticator(place, setModalState),
-                ],
+                ),
               ),
-               ),
-          );
-        },
-      );
-    },
-  );
-}
-
+              Positioned(
+                left:10,
+                bottom: MediaQuery.of(context).size.height * 0.75,
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState((){
+                      if(!_isPoiMarkerVisible) {return;}
+                      _polylines.clear();
+                      _createPolylines(_currentLocation!.latitude!, _currentLocation!.longitude!, _poiMarkerLocation!.latitude, _poiMarkerLocation!.longitude);
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: const Icon(Icons.directions),)
+              )
+            ]
+        ));
+        });
+        });
+  }
 
   void _toggleSelection(Place place) {
     setState(() {
@@ -437,6 +549,7 @@ class _MapSampleState extends State<MapSample> {
                 setState(() {
                   _placesTrashCan.clear();
                   _isPoiMarkerVisible = false;
+                  _polylines.clear();
                 });
               },
               icon: const Icon(
@@ -459,6 +572,8 @@ Widget build(BuildContext context) {
     },
     child: Scaffold(
       key: _scaffoldKey,
+      resizeToAvoidBottomInset : false,
+      endDrawer: _sideNavigationBar(),
       body: Stack(
         children: [
           // Shimmer effect while loading the map
@@ -472,7 +587,7 @@ Widget build(BuildContext context) {
                 color: Colors.white,
               ),
             ),
-            if (!mapLoaded)
+          if (!mapLoaded)
             const Center(
               child: Text(
                 'Loading...',
@@ -488,26 +603,37 @@ Widget build(BuildContext context) {
               zoomControlsEnabled: false,
               myLocationButtonEnabled: false,
               initialCameraPosition: CameraPosition(
-                target: LatLng(_currentLocation!.latitude!,
-                    _currentLocation!.longitude!),
+                target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
                 zoom: 15.0,
               ),
+              polylines: Set<Polyline>.of(_polylines.values),
               markers: {
-                if (_poiMarkerLocation != null)
-                  Marker(
-                      markerId: const MarkerId("selectedPlace"),
-                      visible: _isPoiMarkerVisible,
-                      position: _poiMarkerLocation!)
+                if (_poiMarkerLocation != null) Marker(
+                  markerId: const MarkerId("selectedPlace"), 
+                  visible: _isPoiMarkerVisible,
+                  position: _poiMarkerLocation!,
+                  onTap: () => {if(_markedPlace!=null && _isPoiMarkerVisible) {_modalBottomSheet(place: _markedPlace!)}},
+                )
               },
-              onTap: (argument) async {
-                Place? poi = await fetchPoi(argument);
-                if (poi != null) {
-                  _modalBottomSheet(place: poi);
-                }
+              onTap: (location) {
+                if(_polylines.isNotEmpty){return;}
+                if (_debounce?.isActive ?? false) _debounce!.cancel();
+                _debounce = Timer(const Duration(milliseconds: 1000), () async
+                  {
+                    Place? poi = await _nearbySearch(location);
+                    if(poi == null) {return;}
+                    _modalBottomSheet(place: poi);
+                    _markedPlace=poi;
+                    
+                  });
+                  setState(() {
+                    _poiMarkerLocation=location;
+                    _isPoiMarkerVisible = true;
+                  });
               },
               onMapCreated: (mapController) {
                 _mapController.complete(mapController);
-              },
+              }
             ),
           Positioned(
             top: 0,
@@ -555,59 +681,100 @@ Widget build(BuildContext context) {
             Positioned(
               left: 0,
               right: 0,
-              bottom: 80, // Adjusted to leave space for the text input field
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  width: MediaQuery.of(context).size.width, // Adjusted width
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF92C7CF), width: 3),
-                  ),
-                  child: Row(
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Icon(Icons.search),
-                      ),
-                      Expanded(
-                        child: Container(
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width - 100, // Adjusted width
-                          ),
-                          height: 40, // Adjust the height of the text field
-                          child: TextFormField(
-                            decoration: const InputDecoration(
-                              hintText: 'Enter your text...',
-                              labelStyle: TextStyle(color: Colors.black),
-                              border: InputBorder.none,
-                            ),
-                          ),
+              top: 100, // Adjusted to leave space for the text input field
+              child: Container(
+              width: 350,
+              height: 75,
+              padding: const EdgeInsets.all(8),
+              child:TypeAheadField<PlacePrediction>(
+                controller: _searchFieldController,
+                itemBuilder: (context, place) {
+                  return ListTile(
+                    title: Text(place.structuredFormat.mainText.text),
+                    subtitle: Text(place.structuredFormat.secondaryText.text),
+                  );
+                },
+                builder: (context, controller, focusNode) {
+                  return TextField(
+                    controller: _searchFieldController,
+                    focusNode: focusNode,
+                    autofocus: false,
+                    onTapOutside: (event) => {focusNode.unfocus()},
+                    style: const TextStyle(fontSize: 20),
+                    textAlignVertical: TextAlignVertical.center,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Colors.white)),
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: IconButton(onPressed: () {
+                          _searchFieldController.clear(); 
+                          setState(
+                            () {
+                              _searchResult.clear();
+                            }
+                          );
+                        },
+                        icon: const Icon(Icons.cancel)
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      hintText: 'Paieška',
+                      hintStyle: const TextStyle(fontSize: 20)
+                    )
+                  );
+
+                },
+                debounceDuration: const Duration(milliseconds: 1000),
+                suggestionsCallback: (value) async {
+                  return await _autoCopleteSearch(value);
+                },
+                onSelected: (value) async {
+                  //
+                  _searchFieldController.text = value.text.text;
+
+                  Place? place = await _fetchPoi(value.placeId);
+                  if(place == null){return;}
+                  _moveCameraToPosition(LatLng(place.location!.latitude, place.location!.longitude));
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  setState(() {
+                    _poiMarkerLocation=LatLng(place.location!.latitude, place.location!.longitude);
+                    _isPoiMarkerVisible = true;
+                    _markedPlace=place;
+                  });
+                  _modalBottomSheet(place: place);
+                },
+              )
             ),
+          ),
           if (mapLoaded) // Render my location button only if map has finished loading
             Positioned(
-              top: 100, // Position below the app bar
-              right: 0, // Align to the top right corner
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: FloatingActionButton(
-                  backgroundColor: const Color(0xFFECD9B1), // Light sand color
-                  onPressed: () => _moveCameraToPosition(LatLng(
-                      _currentLocation!.latitude!, _currentLocation!.longitude!)),
-                  child: const Icon(Icons.location_on, color: Colors.black),
-                ),
-              ),
+              bottom: 10,
+              left: 10,
+              child: FloatingActionButton.extended(
+                heroTag: "btnLeft",
+                onPressed: () {
+                  setState((){
+                    _isPoiMarkerVisible=false;
+                    _polylines.clear();
+                  });
+                },
+                label: const Icon(Icons.directions_off),
+              )
             ),
+            if (mapLoaded) 
+              Positioned(
+                bottom: 10,
+                right: 10,
+                child: FloatingActionButton.extended(
+                  heroTag: "btnRight",
+                  onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
+                  label: const Text('My Location'),
+                  icon: const Icon(Icons.location_on),
+                )
+              ),
         ],
       ),
-      endDrawer: _sideNavigationBar(),
     ),
   );
 }
