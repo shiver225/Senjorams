@@ -10,10 +10,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:senjorams/main.dart';
 import 'package:senjorams/models/place_model.dart';
+import 'package:shimmer/shimmer.dart';
 
-const apiKey="AIzaSyD3HD7vNTtRChKOhf3J6SN0niAiT_apYSk"; //not safe i bet
-
-extension  HexColor on Color {
+const apiKey = "AIzaSyD3HD7vNTtRChKOhf3J6SN0niAiT_apYSk"; //not safe i bet
+extension HexColor on Color {
   static Color fromHex(String hexString) {
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
@@ -21,31 +21,39 @@ extension  HexColor on Color {
     return Color(int.parse(buffer.toString(), radix: 16));
   }
 }
-
 class MapSample extends StatefulWidget {
   const MapSample({super.key});
-
   @override
   State<MapSample> createState() => _MapSampleState();
 }
-
 class _MapSampleState extends State<MapSample> {
   final Completer<GoogleMapController> _mapController = Completer();
   //GlobalKey _globalKey = GlobalKey();
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
   List<Place> _places = [];
   List<Place> _placesTrashCan = [];
-
-  LocationData? _currentLocation; 
+  LocationData? _currentLocation;
   LatLng? _poiMarkerLocation;
   bool _isPoiMarkerVisible = false;
-
+  late String _timeString = '';
+  late var timer;
+  late FocusNode _mapFocusNode;
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
     _loadData();
+    
+    _updateTime(); // Update time initially
+    timer =
+        Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
+    _mapFocusNode = FocusNode();
+  }
+  void _updateTime() {
+    final DateTime now = DateTime.now();
+    setState(() {
+      _timeString = DateFormat.Hms().format(now);
+    });
   }
   @override
   void setState(fn){
@@ -56,7 +64,7 @@ class _MapSampleState extends State<MapSample> {
   void _loadData() {
     final String? saved = prefs?.getString('savedPlaces');
     print(saved);
-    if(saved != null){
+    if (saved != null) {
       final List<dynamic> decoded = json.decode(saved);
       _places = decoded.map((place) => Place.fromJson(Map<String, dynamic>.from(place))).toList();
     }
@@ -66,8 +74,7 @@ class _MapSampleState extends State<MapSample> {
     final String placeL = json.encode(_places);
     await prefs?.setString('savedPlaces', placeL);
   }
-  
-  Future<Place?> fetchPoi(LatLng position) async{
+  Future<Place?> fetchPoi(LatLng position) async {
     Map data = {
     "maxResultCount": 1,
     "locationRestriction": {
@@ -80,41 +87,36 @@ class _MapSampleState extends State<MapSample> {
     },
     "excludedTypes": ["parking", "atm"],
     };
-    http.Response response =  await http.post(Uri.parse('https://places.googleapis.com/v1/places:searchNearby'),
+    http.Response response = await http.post(
+      Uri.parse('https://places.googleapis.com/v1/places:searchNearby'),
       headers: {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": apiKey,
-        "X-Goog-FieldMask": "places.location,places.id,places.displayName,places.iconBackgroundColor,places.formattedAddress,places.reviews,places.regularOpeningHours,places.rating,places.photos,places.userRatingCount,places.iconMaskBaseUri"
-       },
+        "X-Goog-FieldMask":
+            "places.location,places.id,places.displayName,places.iconBackgroundColor,places.formattedAddress,places.reviews,places.regularOpeningHours,places.rating,places.photos,places.userRatingCount,places.iconMaskBaseUri"
+      },
       body: json.encode(data),
     );
     Map values = jsonDecode(response.body);
     log(response.body);
-    try{
+    try {
       return Place.fromJson(values["places"][0]);
     }
-    catch(e){
-      log(e.toString());
-      return null;
-    }
   }
-  
-  void _getCurrentLocation() async{
+  void _getCurrentLocation() async {
     Location location = Location();
-
-    location.getLocation().then((location){
-      setState((){
-        _currentLocation=location;
+    location.getLocation().then((location) {
+      setState(() {
+        _currentLocation = location;
       });
     });
-
     location.onLocationChanged.listen((newLocation) {
       setState(() {
         _currentLocation=newLocation;
       });
      });
   }
-  void _moveCameraToPosition(LatLng position) async{
+  void _moveCameraToPosition(LatLng position) async {
     GoogleMapController googleMapController = await _mapController.future;
     googleMapController.animateCamera(
           CameraUpdate.newCameraPosition(
@@ -125,162 +127,206 @@ class _MapSampleState extends State<MapSample> {
           )
         );
   }
-
   final CarouselController _controller = CarouselController();
   int _current = 0;
-  Widget _imageCarouselWithInticator(Place place, StateSetter setModalState){
-    final List<Widget> imageSliders = place.photos!.map((item) => Container(
-      margin: const EdgeInsets.all(5.0),
-      child: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-          child: Stack(
-            children: <Widget>[
-              Image.network('https://places.googleapis.com/v1/${item.name}/media?maxHeightPx=400&maxWidthPx=400&key=$apiKey',fit: BoxFit.cover, height: 400,), //cheap fix by setting height to 400
-              Positioned(
-                bottom: 0.0,
-                left: 0.0,
-                right: 0.0,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Color.fromARGB(200, 0, 0, 0),
-                        Color.fromARGB(0, 0, 0, 0)
-                      ],
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 10.0, horizontal: 20.0),
-                ),
-              ),
-            ],
-          )),
-    )).toList();
+  Widget _imageCarouselWithInticator(Place place, StateSetter setModalState) {
+    final List<Widget> imageSliders = place.photos!
+        .map((item) => Container(
+              margin: const EdgeInsets.all(5.0),
+              child: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+                  child: Stack(
+                    children: <Widget>[
+                      Image.network(
+                        'https://places.googleapis.com/v1/${item.name}/media?maxHeightPx=400&maxWidthPx=400&key=$apiKey',
+                        fit: BoxFit.cover,
+                        height: 400,
+                      ), //cheap fix by setting height to 400
+                      Positioned(
+                        bottom: 0.0,
+                        left: 0.0,
+                        right: 0.0,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Color.fromARGB(200, 0, 0, 0),
+                                Color.fromARGB(0, 0, 0, 0)
+                              ],
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                            ),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10.0, horizontal: 20.0),
+                        ),
+                      ),
+                    ],
+                  )),
+            ))
+        .toList();
     return SizedBox(
-          height: 300,
-          child: Column(
-            children: [
-            Expanded(
-              child: CarouselSlider(
-                items: imageSliders,
-                carouselController: _controller,
-                options: CarouselOptions(
-                    autoPlay: true,
-                    enlargeCenterPage: true,
-                    onPageChanged: (index, reason) {
-                      setModalState(() {
-                        _current = index;
-                      });
-                    }),
+      height: 300,
+      child: Column(children: [
+        Expanded(
+          child: CarouselSlider(
+            items: imageSliders,
+            carouselController: _controller,
+            options: CarouselOptions(
+                autoPlay: true,
+                enlargeCenterPage: true,
+                onPageChanged: (index, reason) {
+                  setModalState(() {
+                    _current = index;
+                  });
+                }),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: place.photos!.asMap().entries.map((entry) {
+            return GestureDetector(
+              onTap: () => _controller.animateToPage(entry.key),
+              child: Container(
+                width: 12.0,
+                height: 12.0,
+                margin:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: (Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black)
+                        .withOpacity(_current == entry.key ? 0.9 : 0.4)),
+              ),
+            );
+          }).toList(),
+        ),
+      ]),
+    );
+  }
+
+  void _modalBottomSheet({required Place place}) {
+    showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setModalState) {
+          return Container(
+            padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.7), // White background with opacity
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20.0),
+                topRight: Radius.circular(20.0),
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: place.photos!.asMap().entries.map((entry) {
-                return GestureDetector(
-                  onTap: () => _controller.animateToPage(entry.key),
-                  child: Container(
-                    width: 12.0,
-                    height: 12.0,
-                    margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: (Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white
-                                : Colors.black)
-                            .withOpacity(_current == entry.key ? 0.9 : 0.4)),
-                  ),
-                );
-              }).toList(),
-            ),
-          ]),
-        );
-  }
-  void _modalBottomSheet({required Place place}){
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled:true,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setModalState){
-          return FractionallySizedBox(
-          heightFactor: 0.75,
-          child: Center(
-            child: Column(
-              children: <Widget>[   
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    TextButton(
-                      child: const Icon(Icons.clear),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.55),
-                    if(!_places.any((pl) => pl.id == place.id)) TextButton(
-                      child: const Text("SAVE"),
-                      onPressed: () async {
-                        setState(() {_places.add(place); _saveData();});
-                        Navigator.pop(context);
-                      }
-                    )]
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                  const SizedBox(width: 10),
-                  Image.network(
-                    "${place.iconMaskBaseUri!}.png",
-                    color: HexColor.fromHex(place.iconBackgroundColor!),
-                    scale: 5,
-                  ),
-                  const SizedBox(width: 10),
-                  Flexible(
-                     child: Text(
-                    place.displayName!.text,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-                    ),
-                  )],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    const SizedBox(width: 10),
-                    RatingBarIndicator(
-                      rating: place.rating ?? 1,
-                      direction: Axis.horizontal,
-                      itemCount: 5,
-                      itemSize: 30.0,
-                      itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      itemBuilder: (context, _) => const Icon(
-                        Icons.star,
-                        color: Colors.amber,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      IconButton(
+                        icon: Icon(Icons.clear, color: Colors.black),
+                        onPressed: () => Navigator.pop(context),
                       ),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      place.rating != null ? place.rating.toString() : "No reviews",
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                      if (!_places.any((pl) => pl.id == place.id))
+                        TextButton(
+                          child: Text(
+                             "SAVE",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                           onPressed: () async {
+                            setState(() {
+                              _places.add(place);
+                              _saveData();
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                    ],
+                  ),
+                  SizedBox(height: 20.0),
+                  Row(
+                    children: [
+                      Image.network(
+                        "${place.iconMaskBaseUri!}.png",
+                        color: HexColor.fromHex(place.iconBackgroundColor!),
+                        scale: 5,
                       ),
+                      SizedBox(width: 10.0),
+                      Expanded(
+                        child: Text(
+                          place.displayName!.text,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                            ),
+                        ),
+                        ),
+                    ],
+                  ),
+                  SizedBox(height: 20.0),
+                  Row(
+                    children: [
+                      RatingBarIndicator(
+                        rating: place.rating ?? 1,
+                        direction: Axis.horizontal,
+                        itemCount: 5,
+                        itemSize: 30.0,
+                        itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                        itemBuilder: (context, _) => Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                        ),
+                      ),
+                      SizedBox(width: 5.0),
+                      Text(
+                        place.rating != null
+                            ? place.rating.toString()
+                            : "No reviews",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                        ),
+                        ),
+                    ],
+                  ),
+                  SizedBox(height: 20.0),
+                  Text("${place.formattedAddress!} "),
+                  SizedBox(height: 20.0),
+                  Text(
+                    (place.regularOpeningHours != null
+                        ? (place.regularOpeningHours!.openNow
+                            ? "Open"
+                            : "Closed")
+                            : ""),
+                        style: TextStyle(
+                      color: place.regularOpeningHours != null
+                          ? (place.regularOpeningHours!.openNow
+                              ? const Color.fromARGB(255, 121, 190, 41) // Pastel green for "Open"
+                              : const Color.fromARGB(255, 196, 196, 74)) // Pastel yellow for "Closed"
+                          : Colors.black, // Default color
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(height: 20.0),
+                  if (place.photos != null)
+                    _imageCarouselWithInticator(place, setModalState),
                 ],
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  "${place.formattedAddress!} " 
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  (place.regularOpeningHours != null ? (place.regularOpeningHours!.openNow ? "Open" : "Closed") : "")
-                ),
-                if(place.photos!=null) _imageCarouselWithInticator(place, setModalState),
-              ],
-            ),
-          ),
-        );
-        });
-        });
-  }
+              ),
+               ),
+          );
+        },
+      );
+    },
+  );
+}
+
   void _toggleSelection(Place place) {
     setState(() {
       if (place.isSelected) {
@@ -294,23 +340,168 @@ class _MapSampleState extends State<MapSample> {
       }
     });
   }
-  Widget _placesCard(int index){
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      color: _places[index].cardColor,
-      child: Column(
-        mainAxisSize: MainAxisSize.min, 
-        children: <Widget>[
-          InkWell(
-            onTap: _placesTrashCan.isEmpty ? () {
-                _moveCameraToPosition(_places[index].location!); 
-                _modalBottomSheet(place: _places[index]);
-                setState(() {
+  Widget _placesCard(int index) {
+  return Card(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    color: Color.fromARGB(255, 255, 228, 181), // Same color as your location button
+    elevation: 4, // Increased elevation for more visible shadow
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        InkWell(
+          onTap: _placesTrashCan.isEmpty
+              ? () {
+                  _moveCameraToPosition(_places[index].location!);
+                  _modalBottomSheet(place: _places[index]);
+                  setState(() {
                     _poiMarkerLocation = _places[index].location;
                     _isPoiMarkerVisible = true;
+                  });
+                  if (_scaffoldKey.currentState!.isEndDrawerOpen) {
+                    _scaffoldKey.currentState!.closeEndDrawer();
+                  }
+                }
+              : () => _toggleSelection(_places[index]),
+          onLongPress: () {
+            _toggleSelection(_places[index]);
+            Feedback.forTap(context);
+          },
+          borderRadius: BorderRadius.circular(14),
+          child: ListTile(
+            selected: _places[index].isSelected,
+            title: Text(
+              _places[index].displayName!.text,
+              style: TextStyle(
+                color: Colors.black, // Black text color
+                fontWeight: FontWeight.bold, // Make the text slightly bolder
+                fontSize: 16, // Adjust the font size as needed
+              ),
+            ),
+            trailing: _placesTrashCan.isNotEmpty
+                ? Checkbox(
+                    value: _places[index].isSelected,
+                    onChanged: (bool? value) {
+                      Feedback.forTap(context);
+                      _toggleSelection(_places[index]);
+                    },
+                  )
+                : null,
+          ),
+        )
+      ],
+    ),
+  );
+}
+  Widget _sideNavigationBar() {
+  return Drawer(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          height: 100,
+          alignment: AlignmentDirectional.center,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: const Color(0xFF92C7CF), // Match the app's accent color
+          ),
+          child: const Text(
+            "SAVED PLACES",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+            ),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: _places.length,
+            itemBuilder: (_, index) {
+              return _placesCard(index);
+            },
+          ),
+        ),
+        if (_placesTrashCan.isNotEmpty)
+          ButtonTheme(
+            minWidth: 200.0,
+            height: 100.0,
+            child: IconButton(
+              onPressed: () async {
+                _places.removeWhere(
+                  (item) => _placesTrashCan.contains(item),
+                );
+                // Disable alarm
+                await _saveData();
+                setState(() {
+                  _placesTrashCan.clear();
+                  _isPoiMarkerVisible = false;
                 });
-                if(_scaffoldKey.currentState!.isEndDrawerOpen){
-                  _scaffoldKey.currentState!.closeEndDrawer();
+              },
+              icon: const Icon(
+                Icons.delete,
+                size: 100,
+                color: Colors.black, // Match the app's accent color
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+ @override
+Widget build(BuildContext context) {
+  bool mapLoaded = _currentLocation != null;
+  return GestureDetector(
+    onTap: () {
+      FocusScope.of(context).unfocus();
+    },
+    child: Scaffold(
+      key: _scaffoldKey,
+      body: Stack(
+        children: [
+          // Shimmer effect while loading the map
+          if (!mapLoaded)
+            Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.white,
+              ),
+            ),
+            if (!mapLoaded)
+            const Center(
+              child: Text(
+                'Loading...',
+                style: TextStyle(
+                  fontSize: 24.0,
+                  //fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          if (mapLoaded)
+            GoogleMap(
+              myLocationEnabled: true,
+              zoomControlsEnabled: false,
+              myLocationButtonEnabled: false,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(_currentLocation!.latitude!,
+                    _currentLocation!.longitude!),
+                zoom: 15.0,
+              ),
+              markers: {
+                if (_poiMarkerLocation != null)
+                  Marker(
+                      markerId: const MarkerId("selectedPlace"),
+                      visible: _isPoiMarkerVisible,
+                      position: _poiMarkerLocation!)
+              },
+              onTap: (argument) async {
+                Place? poi = await fetchPoi(argument);
+                if (poi != null) {
+                  _modalBottomSheet(place: poi);
                 }
               } : () => _toggleSelection(_places[index]),
             onLongPress: () {_toggleSelection(_places[index]);Feedback.forTap(context);},
@@ -355,66 +546,11 @@ class _MapSampleState extends State<MapSample> {
                 },
               ),
             ),
-            if (_placesTrashCan.isNotEmpty) ButtonTheme(
-              minWidth: 200.0,
-              height: 100.0,
-              child: IconButton(
-                onPressed: () async {
-                  _places.removeWhere((item) => _placesTrashCan.contains(item));
-                  //disable alarm
-                  await _saveData();
-                  setState(() {
-                    _placesTrashCan.clear();
-                    _isPoiMarkerVisible = false;
-                  });
-                },
-                icon: const Icon(Icons.delete, size: 100,)
-              )
-            )
         ],
       ),
-      ),
-    );
-  }
+      endDrawer: _sideNavigationBar(),
+    ),
+  );
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        key: _scaffoldKey,
-        endDrawer: _sideNavigationBar(),
-        appBar: AppBar(
-          title: const Text('Maps Sample App'),
-          elevation: 2,
-        ),
-        body: _currentLocation==null ? const Center(child: Text("Loading..."),) : GoogleMap(
-          myLocationEnabled: true,
-          zoomControlsEnabled: false,
-          myLocationButtonEnabled: false,
-          initialCameraPosition: CameraPosition(
-            target: LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
-            zoom: 15.0,
-          ),
-          markers: {
-             if (_poiMarkerLocation != null) Marker(
-              markerId: const MarkerId("selectedPlace"), 
-              visible: _isPoiMarkerVisible,
-              position: _poiMarkerLocation!
-            )
-          },
-          onTap: (argument) async {
-            Place? poi = await fetchPoi(argument);
-            if(poi != null) {
-              _modalBottomSheet(place: poi);
-            }
-          },
-          onMapCreated: (mapController) {
-            _mapController.complete(mapController);
-          }),
-          floatingActionButton: _currentLocation!=null ? FloatingActionButton.extended(
-            onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
-            label: Text('My Location'),
-            icon: Icon(Icons.location_on),
-          ) : null,
-    );
-  }
 }
