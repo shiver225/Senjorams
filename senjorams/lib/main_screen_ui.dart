@@ -201,7 +201,7 @@ class _MainScreenState extends State<MainScreen> {
                         color: Color.fromARGB(255, 206, 178, 129), size: 50),
                   ),
                 ),
-                const SizedBox(width: 20),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       minimumSize: const Size(100, 75)),
