@@ -622,7 +622,7 @@ Widget build(BuildContext context) {
             ),
           if (mapLoaded) // Render my location button only if map has finished loading
             Positioned(
-              top: 50, // Position below the app bar
+              top: 100, // Position below the app bar
               right: 0, // Align to the top right corner
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
