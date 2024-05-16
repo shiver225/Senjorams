@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -40,12 +39,13 @@ class _MapSampleState extends State<MapSample> {
   //GlobalKey _globalKey = GlobalKey();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
+  late PolylinePoints _polylinePoints;
+  final List<LatLng> _polylineCoordinates = [];
   final Map<PolylineId, Polyline> _polylines = {};
 
   List<Place> _places = [];
   final List<PlacePrediction> _searchResult = [];
   final List<Place> _placesTrashCan = [];
-  Place? _markedPlace;
 
   LocationData? _currentLocation; 
   LatLng? _poiMarkerLocation;
@@ -79,7 +79,7 @@ class _MapSampleState extends State<MapSample> {
     await prefs?.setString('savedPlaces', placeL);
   }
   
-  Future<Place?> _nearbySearch(LatLng position) async{
+  Future<Place?> _fetchPoi(LatLng position) async{
     Map data = {
     "maxResultCount": 1,
     "locationRestriction": {
@@ -107,25 +107,6 @@ class _MapSampleState extends State<MapSample> {
     
       return Place.fromJson(values["places"][0]);
     }
-    catch(e){
-      log(e.toString());
-      return null;
-    }
-  }
-  Future<Place?> _fetchPoi(String placeId) async{
-    try{
-      http.Response response =  await http.get(Uri.parse('https://places.googleapis.com/v1/places/$placeId'),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": apiKey,
-          "X-Goog-FieldMask": "location,id,displayName,iconBackgroundColor,formattedAddress,reviews,regularOpeningHours,rating,photos,userRatingCount,iconMaskBaseUri"
-          },
-      );
-      Map<String,dynamic> value = jsonDecode(response.body);
-      log(response.body);
-
-      return Place.fromJson(value);
-      }
     catch(e){
       log(e.toString());
       return null;
@@ -171,40 +152,38 @@ class _MapSampleState extends State<MapSample> {
     double destinationLatitude,
     double destinationLongitude,
   ) async {
-    PolylinePoints _polylinePoints;
-    List<LatLng> _polylineCoordinates = [];
-    // Initializing PolylinePoints
-    _polylinePoints = PolylinePoints();
+  // Initializing PolylinePoints
+  _polylinePoints = PolylinePoints();
 
-    // Generating the list of coordinates to be used for
-    // drawing the polylines
-    PolylineResult result = await _polylinePoints.getRouteBetweenCoordinates(
-      apiKey, // Google Maps API Key
-      PointLatLng(startLatitude, startLongitude),
-      PointLatLng(destinationLatitude, destinationLongitude),
-      travelMode: TravelMode.transit,
-    );
+  // Generating the list of coordinates to be used for
+  // drawing the polylines
+  PolylineResult result = await _polylinePoints.getRouteBetweenCoordinates(
+    apiKey, // Google Maps API Key
+    PointLatLng(startLatitude, startLongitude),
+    PointLatLng(destinationLatitude, destinationLongitude),
+    travelMode: TravelMode.transit,
+  );
 
-    // Adding the coordinates to the list
-    if (result.points.isNotEmpty) {
-      result.points.forEach((PointLatLng point) {
-        _polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-      });
-    }
+  // Adding the coordinates to the list
+  if (result.points.isNotEmpty) {
+    result.points.forEach((PointLatLng point) {
+      _polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+    });
+  }
 
-    // Defining an ID
-    PolylineId id = PolylineId('poly');
+  // Defining an ID
+  PolylineId id = PolylineId('poly');
 
-    // Initializing Polyline
-    Polyline polyline = Polyline(
-      polylineId: id,
-      color: Colors.red,
-      points: _polylineCoordinates,
-      width: 6,
-    );
+  // Initializing Polyline
+  Polyline polyline = Polyline(
+    polylineId: id,
+    color: Colors.red,
+    points: _polylineCoordinates,
+    width: 6,
+  );
 
-    // Adding the polyline to the map
-    _polylines[id] = polyline;
+  // Adding the polyline to the map
+  _polylines[id] = polyline;
 }
   void _getCurrentLocation() async{
     Location location = Location();
@@ -396,16 +375,7 @@ class _MapSampleState extends State<MapSample> {
               ),
               Positioned(
                 bottom: MediaQuery.of(context).size.height * 0.75,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState((){
-                      if(!_isPoiMarkerVisible) {return;}
-                      _polylines.clear();
-                      _createPolylines(_currentLocation!.latitude!, _currentLocation!.longitude!, _poiMarkerLocation!.latitude, _poiMarkerLocation!.longitude);
-                    });
-                    Navigator.pop(context);
-                  },
-                  child: const Icon(Icons.directions),)
+                child: ElevatedButton(onPressed: () => {}, child: Icon(Icons.route),)
               )
             ]
         ));
@@ -497,7 +467,6 @@ class _MapSampleState extends State<MapSample> {
                   setState(() {
                     _placesTrashCan.clear();
                     _isPoiMarkerVisible = false;
-                    _polylines.clear();
                   });
                 },
                 icon: const Icon(Icons.delete, size: 100,)
@@ -535,24 +504,23 @@ class _MapSampleState extends State<MapSample> {
                 if (_poiMarkerLocation != null) Marker(
                   markerId: const MarkerId("selectedPlace"), 
                   visible: _isPoiMarkerVisible,
-                  position: _poiMarkerLocation!,
-                  onTap: () => {if(_markedPlace!=null && _isPoiMarkerVisible) {_modalBottomSheet(place: _markedPlace!)}},
+                  position: _poiMarkerLocation!
                 )
               },
               onTap: (location) {
-                if(_polylines.isNotEmpty){return;}
                 if (_debounce?.isActive ?? false) _debounce!.cancel();
                 _debounce = Timer(const Duration(milliseconds: 1000), () async
                   {
-                    Place? poi = await _nearbySearch(location);
-                    if(poi == null) {return;}
+                    Place? poi = await _fetchPoi(location);
+                    if(poi != null) {
                     _modalBottomSheet(place: poi);
-                    _markedPlace=poi;
-                    
+                    }
                   });
                   setState(() {
                     _poiMarkerLocation=location;
                     _isPoiMarkerVisible = true;
+                    _polylines.clear();
+                    _createPolylines(_currentLocation!.latitude!, _currentLocation!.longitude!, location.latitude, location.longitude);
                   });
               },
               onMapCreated: (mapController) {
@@ -576,7 +544,7 @@ class _MapSampleState extends State<MapSample> {
                     controller: _searchFieldController,
                     focusNode: focusNode,
                     autofocus: false,
-                    onTapOutside: (event) => {focusNode.unfocus()},
+                    onTapOutside: (event) => focusNode.unfocus(),
                     style: const TextStyle(fontSize: 20),
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
@@ -590,6 +558,7 @@ class _MapSampleState extends State<MapSample> {
                           setState(
                             () {
                               _searchResult.clear();
+                              _isPoiMarkerVisible = false;
                             }
                           );
                         },
@@ -600,7 +569,6 @@ class _MapSampleState extends State<MapSample> {
                       hintStyle: const TextStyle(fontSize: 20)
                     )
                   );
-
                 },
                 debounceDuration: const Duration(milliseconds: 1000),
                 suggestionsCallback: (value) async {
@@ -610,41 +578,40 @@ class _MapSampleState extends State<MapSample> {
                   //
                   _searchFieldController.text = value.text.text;
 
-                  Place? place = await _fetchPoi(value.placeId);
-                  if(place == null){return;}
-                  _moveCameraToPosition(LatLng(place.location!.latitude, place.location!.longitude));
+                  http.Response response =  await http.get(Uri.parse('https://places.googleapis.com/v1/places/${value.placeId}'),
+                    headers: {
+                      "Content-Type": "application/json",
+                      "X-Goog-Api-Key": apiKey,
+                      "X-Goog-FieldMask": "location"
+                      },
+                  );
+                  Map values = jsonDecode(response.body);
+                  log(response.body);
+                  _moveCameraToPosition(LatLng(values["location"]["latitude"], values["location"]["longitude"]));
                   FocusManager.instance.primaryFocus?.unfocus();
                   setState(() {
-                    _poiMarkerLocation=LatLng(place.location!.latitude, place.location!.longitude);
+                    _poiMarkerLocation=LatLng(values["location"]["latitude"], values["location"]["longitude"]);
                     _isPoiMarkerVisible = true;
-                    _markedPlace=place;
                   });
-                  _modalBottomSheet(place: place);
                 },
               )
             ),
-            Positioned(
-              bottom: 10,
-              left: 10,
+            Align(
+              alignment: Alignment.bottomLeft,
               child: FloatingActionButton.extended(
                 heroTag: "btnLeft",
-                onPressed: () {
-                  setState((){
-                    _isPoiMarkerVisible=false;
-                    _polylines.clear();
-                  });
-                },
-                label: const Icon(Icons.directions_off),
+                onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
+                label: Text('Nuoroda'),
+                icon: Icon(Icons.route),
               )
             ),
-            Positioned(
-              bottom: 10,
-              right: 10,
+            Align(
+              alignment: Alignment.bottomRight,
               child: FloatingActionButton.extended(
                 heroTag: "btnRight",
                 onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
-                label: const Text('My Location'),
-                icon: const Icon(Icons.location_on),
+                label: Text('My Location'),
+                icon: Icon(Icons.location_on),
               )
             ),
           ]
