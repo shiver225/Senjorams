@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:senjorams/main.dart';
 import 'package:senjorams/models/alarm_model.dart';
 import 'package:uuid/v1.dart';
@@ -22,11 +25,25 @@ class _SleepScreenState extends State<SleepScreen> {
   TimeOfDay _selectedTimeSleep = TimeOfDay.now();
   TimeOfDay _selectedTimeWakeUp = TimeOfDay(hour: (TimeOfDay.now().hour + 8)%24, minute: TimeOfDay.now().minute);
 
+  late String _timeString = '';
+  late var timer;
+
   @override
   void initState() {
     super.initState();
     _loadData();
+
+    _updateTime(); // Update time initially
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
   }
+
+  void _updateTime() {
+    final DateTime now = DateTime.now();
+    setState(() {
+      _timeString = DateFormat.Hms().format(now);
+    });
+  }
+
   void _loadData() {
     final String? saved = prefs?.getString('alarmList');
     print(saved);
@@ -44,10 +61,12 @@ class _SleepScreenState extends State<SleepScreen> {
     setState(() {
       if (alarm.isSelected) {
         alarm.cardColor=Colors.white;
+        alarm.textColor = Colors.black;
         alarm.isSelected = false;
         _alarmTrashCan.remove(alarm);
       } else {
         alarm.cardColor=const Color.fromARGB(255, 223, 222, 222);
+        alarm.textColor = Colors.black;
         alarm.isSelected = true;
         alarm.activationDate = DateTime.now();
         _alarmTrashCan.add(alarm);
@@ -70,12 +89,12 @@ class _SleepScreenState extends State<SleepScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     TextButton(
-                      child: const Icon(Icons.clear),
+                      child: const Icon(Icons.clear, color: Colors.black,),
                       onPressed: () => Navigator.pop(context),
                     ),
                     SizedBox(width: MediaQuery.of(context).size.width * 0.55),
                     TextButton(
-                      child: const Icon(Icons.check),
+                      child: const Icon(Icons.check, color: Colors.black,),
                       onPressed: () async {
                         setState(() {
                           if(_visableSleepSchedule[1]){
@@ -92,7 +111,7 @@ class _SleepScreenState extends State<SleepScreen> {
                             else{
                               _alarmList.add(Alarm(
                                 time: [_selectedTimeSleep,_selectedTimeWakeUp],
-                                 alarmId: UuidV1().hashCode,
+                                 alarmId: const UuidV1().hashCode,
                                   title: ['Miegas', 'Keltis'],
                                   body: ['Miegas','Keltis'],
                                   enabled: true,
@@ -113,7 +132,7 @@ class _SleepScreenState extends State<SleepScreen> {
                             else{
                               _alarmList.add(Alarm(
                                 time: [_selectedTime ?? TimeOfDay.now()],
-                                  alarmId: UuidV1().hashCode,
+                                  alarmId: const UuidV1().hashCode,
                                   title: ['Miegas'], 
                                   body: ['Miegas'], 
                                   enabled: true
@@ -133,7 +152,7 @@ class _SleepScreenState extends State<SleepScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Visibility(
                   maintainSize: true,
                   maintainAnimation: true,
@@ -151,15 +170,15 @@ class _SleepScreenState extends State<SleepScreen> {
                     buttonHeight: (MediaQuery.of(context).size.width - 36)/10
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 _timePicker(setModalState),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 _inkButtons(
                   isSelected: _visableSleepSchedule,
                   setModalState: setModalState,
                   buttonText: ["Vieną kartą", "Tvarkaraštis"],
                   spacing: MediaQuery.of(context).size.width * 0.3
-                 ),
+                ),
               ],
             ),
           ),
@@ -188,10 +207,14 @@ class _SleepScreenState extends State<SleepScreen> {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
               subtitle: Text(
-                _alarmList[index].linkedAlarmAmm == 0 ? "Vieną kartą" : "Kasdienis | ${_alarmList[index].time[0].format(context)}"
+                _alarmList[index].linkedAlarmAmm == 0 ? "Vieną kartą" : "Kasdienis | ${_alarmList[index].time[0].format(context)}",
+                style: const TextStyle(
+                color: Colors.black,
+                ),
               ),
               trailing:_alarmTrashCan.isEmpty ? Switch(
                 value: _alarmList[index].enabled,
@@ -204,6 +227,7 @@ class _SleepScreenState extends State<SleepScreen> {
                   await _alarmList[index].updateScheduledNotification();
                   await _saveData();
                 },
+                activeColor: Color.fromARGB(255, 221, 195, 149),
               ) 
               : Checkbox(
                 value: _alarmList[index].isSelected,
@@ -211,6 +235,7 @@ class _SleepScreenState extends State<SleepScreen> {
                   Feedback.forTap(context);
                   _toggleSelection(_alarmList[index]);            
                 },
+                activeColor: Colors.black,
               ),
               
               ),
@@ -233,7 +258,7 @@ class _SleepScreenState extends State<SleepScreen> {
           //using Inkwell widget to create a button
           return InkWell( 
               borderRadius: BorderRadius.circular(20),
-              splashColor: Colors.deepPurple.shade100, //the default splashColor is grey
+              splashColor: const Color.fromARGB(255, 204, 177, 130), //the default splashColor is grey
               onTap: () {
                 //set the toggle logic
                 setModalState(() { 
@@ -244,7 +269,7 @@ class _SleepScreenState extends State<SleepScreen> {
               },
               child: Ink(
                 decoration: BoxDecoration(
-                  color: isSelected[index] ? Colors.deepPurple : Color.fromARGB(255, 247,246,250), 
+                  color: isSelected[index] ? const Color.fromARGB(255, 221, 195, 149) : Colors.white, 
                   borderRadius: BorderRadius.circular(20), 
                 ),
                 child: Center(
@@ -252,7 +277,7 @@ class _SleepScreenState extends State<SleepScreen> {
                     buttonText[index], 
                     textAlign: TextAlign.center, 
                     style: TextStyle(
-                      color: isSelected[index] ? Color.fromARGB(255, 247,246,250) : Colors.deepPurple,
+                      color: isSelected[index] ? Colors.white : const Color.fromARGB(255, 221, 195, 149),
                       fontSize: 15,
                     ),
                   ),
@@ -277,8 +302,8 @@ class _SleepScreenState extends State<SleepScreen> {
   ){
     return ToggleButtons(
       renderBorder: false,
-      color: Colors.deepPurple,
-      fillColor: Colors.deepPurple,
+      color: const Color.fromARGB(255, 221, 195, 149),
+      fillColor: const Color.fromARGB(255, 221, 195, 149),
       selectedColor: Colors.white,
       borderRadius: BorderRadius.circular(20),
       isSelected: selectionList,
@@ -335,7 +360,7 @@ class _SleepScreenState extends State<SleepScreen> {
             textTheme: CupertinoTextThemeData(
                 dateTimePickerTextStyle: TextStyle(
                     fontSize: 45,
-                    color: Colors.deepPurple,
+                    color: const Color(0xFF92C7CF),
                     fontWeight: FontWeight.bold,
                 ),
             ),
@@ -370,12 +395,43 @@ class _SleepScreenState extends State<SleepScreen> {
     return Scaffold(
       appBar: _alarmTrashCan.isEmpty ? 
       AppBar(
-        title: const Text('Sleep Tracker'),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 30), // Adjust the left padding as needed
+          child: IconButton(
+            icon: const FaIcon(FontAwesomeIcons.arrowLeft),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20), // Adjust the padding as needed
+            child: IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () {
+                _modalScrollPicker(context: context);
+                },// the add thing
+            ),
+          ),
+        ],
+        automaticallyImplyLeading: false,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(50),
+          ),
+        ),
+        backgroundColor: const Color(0xFF92C7CF),
+        title: Text(
+          _timeString,
+          style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
       )
       :AppBar(
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color(0xFF92C7CF),
         leading: IconButton(
-          icon: const Icon(Icons.clear, color: Colors.white),
+          icon: const Icon(Icons.clear, color: Colors.black),
           onPressed: () {
             for (var element in _alarmTrashCan) {
               element.isSelected = false;
@@ -388,7 +444,7 @@ class _SleepScreenState extends State<SleepScreen> {
         ),
         title: Text(
           _alarmTrashCan.length.toString(), 
-          style: const TextStyle(color:Colors.white),
+          style: const TextStyle(color:Colors.black),
         ),
         actions: [
           IconButton(
@@ -402,7 +458,7 @@ class _SleepScreenState extends State<SleepScreen> {
                 await _saveData();
                 setState(() {_alarmTrashCan.clear();});
               },
-              icon: const Icon(Icons.delete, color: Colors.white))
+              icon: const Icon(Icons.delete, color: Colors.black))
         ],
       ),
       body: Padding(
@@ -435,21 +491,6 @@ class _SleepScreenState extends State<SleepScreen> {
                 ),
               ),
           ],
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: ElevatedButton(
-          style: ButtonStyle(
-            shape: MaterialStateProperty.all(CircleBorder()),
-            padding: MaterialStateProperty.all(EdgeInsets.all(20)),
-            backgroundColor: MaterialStateProperty.all(Colors.deepPurple),// <-- Button color
-            overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
-              if (states.contains(MaterialState.pressed)) return Colors.deepPurple.shade800; // <-- Splash color
-            }),
-          ),
-          onPressed: () => _modalScrollPicker(context: context),
-          child: const Icon(Icons.add, color: Colors.white, size: 24,)
         ),
       ),
     );
