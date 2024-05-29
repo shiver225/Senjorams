@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:senjorams/models/exercise_plan_model.dart';
@@ -12,19 +13,16 @@ class SportScreen extends StatelessWidget {
       future: ExercisePlan.loadExercisePlan(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
+          return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
             ),
           );
         } else {
           if (snapshot.hasData) {
-            // User has a plan, navigate to the plan details screen
-            //ExercisePlan plan = ExercisePlan.loadExercisePlan() as ExercisePlan;
             return ExercisePlanScreen(
                 plan: snapshot.data as ExercisePlan, isChosen: true);
           } else {
-            // User does not have a plan, navigate to another screen
             return ChoosePlanScreen();
           }
         }
@@ -42,76 +40,120 @@ class ExercisePlanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Intensity levels"),
-        ),
-        body: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          SizedBox(
-            height: 60,
-            child: isChosen
-                ? _displayText(context, "Your current plan '${plan.getName}'",
-                    40, TextAlign.center)
-                : _displayText(context, plan.getName, 40, TextAlign.center),
+      appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 30),
+          child: IconButton(
+            icon: const FaIcon(FontAwesomeIcons.arrowLeft),
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
-          SizedBox(
-              height: 100,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                child: isChosen
-                    ? _displayText(
-                        context,
-                        "Details of exercises and recommended frequencies for plan ${plan.getName}. \nClick 'Change' to see other plans",
-                        20,
-                        TextAlign.left)
-                    : _displayText(
-                        context,
-                        "Details of exercises and recommended frequencies. \nClick 'Choose' to pick this plan",
-                        20,
-                        TextAlign.left),
-              )),
+        ),
+        automaticallyImplyLeading: false,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(50),
+          ),
+        ),
+        backgroundColor: const Color(0xFF92C7CF),
+        title: _buildTimeWidget(),
+        centerTitle: true,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding:
+                const EdgeInsets.only(top: 20), // Add additional top padding
+            child: _displayText(
+                context,
+                isChosen ? "Your current plan '${plan.getName}'" : plan.getName,
+                40,
+                TextAlign.center),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5, right: 20, top: 20),
+            child: _displayText(
+              context,
+              isChosen
+                  ? ""
+                  : "Details of exercises and recommended frequencies.",
+              20,
+              TextAlign.left,
+            ),
+          ),
           _displayPlanInfo(context, plan),
           Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-              child: isChosen
-                  ? ElevatedButton(
-                      style:
-                          ElevatedButton.styleFrom(minimumSize: Size(200, 60)),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ChoosePlanScreen()));
-                      },
-                      child: Text("CHANGE",
-                          style: TextStyle(
-                              fontSize: 30, fontWeight: FontWeight.bold)),
-                    )
-                  : ElevatedButton(
-                      style:
-                          ElevatedButton.styleFrom(minimumSize: Size(200, 60)),
-                      onPressed: () {
-                        ExercisePlan.saveExercisePlan(plan);
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ExercisePlanScreen(
-                                    plan: plan, isChosen: true)));
-                      },
-                      child: Text("CHOOSE",
-                          style: TextStyle(
-                              fontSize: 30, fontWeight: FontWeight.bold)),
-                    ))
-        ]));
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(
+                    255, 255, 225, 179), // Light sand color
+                minimumSize: const Size(200, 60),
+              ),
+              onPressed: () {
+                if (!isChosen) {
+                  ExercisePlan.saveExercisePlan(plan);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ExercisePlanScreen(plan: plan, isChosen: true),
+                    ),
+                  );
+                } else {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChoosePlanScreen(),
+                    ),
+                  ).then((_) {
+                    Navigator.pop(context);
+                  });
+                }
+              },
+              child: Text(
+                isChosen ? "Change" : "Choose",
+                style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
 class ChoosePlanScreen extends StatelessWidget {
+  bool isPersonalized = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Intensity levels"),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 30),
+          child: IconButton(
+            icon: const FaIcon(FontAwesomeIcons.arrowLeft),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        automaticallyImplyLeading: false,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(50),
+          ),
+        ),
+        backgroundColor: const Color(0xFF92C7CF),
+        title: _buildTimeWidget(),
+        centerTitle: true,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -119,207 +161,261 @@ class ChoosePlanScreen extends StatelessWidget {
         children: [
           Expanded(
             child: ListView(
-              padding: EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(10.0),
               children: intensityOptions
                   .map((option) => _displayIntensityButton(context, option))
                   .toList(),
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            padding:
+                const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: GestureDetector(
               onTap: () {
-                Navigator.push(
+                if (!isPersonalized) {
+                  isPersonalized = true;
+                  Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ChoosePlanScreen()
-                        //StartSurveyScreen(),
-                        ));
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ChoosePlanScreen(), //Yra PersonalizeCreen() metodas tai ten gal reiktu kazkas prikurt
+                    ),
+                  );
+                }
               },
               child: Card(
-                elevation: 5, // Add elevation for shadow effect
+                elevation: 5,
+                color: const Color.fromARGB(
+                    255, 255, 225, 179), // Light sand color
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0), // Rounded corners
+                  borderRadius: BorderRadius.circular(20.0),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(children: [
-                        FittedBox(
-                          fit: BoxFit.fitWidth,
-                          child: Icon(Icons.question_mark_outlined,
-                              color: Colors.black12, size: 50),
+                child: Container(
+                  padding: const EdgeInsets.all(12.0),
+                  child: const Column(
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.fitWidth,
+                        child: Icon(
+                          Icons.question_mark_outlined,
+                          color: Colors.black12,
+                          size: 50,
                         ),
-                        Text(
-                          "Personalize",
-                          style: TextStyle(
-                            color: Colors.black87, // Text color
-                            fontSize: 20, // Font size
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        "Personalize",
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ]),
-                    ),
-                  ],
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 }
 
+class PersonalizeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 30),
+          child: IconButton(
+            icon: const FaIcon(FontAwesomeIcons.arrowLeft),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        automaticallyImplyLeading: false,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(50),
+          ),
+        ),
+        backgroundColor: const Color(0xFF92C7CF),
+        title: _buildTimeWidget(),
+        centerTitle: true,
+      ),
+      body: const Center(
+        child: Text(
+          "Personalize Screen",
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
+    );
+  }
+}
+
+Widget _buildTimeWidget() {
+  return StreamBuilder(
+    stream: Stream.periodic(const Duration(seconds: 1)),
+    builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 0),
+        child: Text(
+          _formatTime(DateTime.now()),
+          style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+        ),
+      );
+    },
+  );
+}
+
+String _formatTime(DateTime time) {
+  return DateFormat.Hms().format(time);
+}
+
 Widget _displayText(
     BuildContext context, String text1, double size, TextAlign align) {
-  return Row(children: [
-    Flexible(
-      child: Text(
-        text1,
-        style: TextStyle(
-          color: Colors.black87, // Text color
-          fontSize: size, // Font size
-          //fontWeight: FontWeight.bold,
-        ),
-        textAlign: align,
-        softWrap: true,
-      ),
-    )
-  ]);
-}
-
-// Displays info of any plan as a row of exercises displayed in a column
-Widget _displayPlanInfo(BuildContext context, ExercisePlan plan) {
-  return Expanded(
-      child: ListView(
-    addAutomaticKeepAlives: true,
-    padding: EdgeInsets.all(8.0),
-    children:
-        plan.exercises.map((ex) => _displayExerciseInfo(context, ex)).toList(),
-  ));
-}
-
-// Displays information about a single exercise
-Widget _displayExerciseInfo(
-    BuildContext context, Map<String, dynamic> exercise) {
-  return Card(
-      elevation: 3.0,
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Icon(icons[exercise['icon']],
-                      color: Colors.black12, size: 50),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    exercise['name'],
-                    style: TextStyle(
-                      color: Colors.black87, // Text color
-                      fontSize: 40, // Font size
-                      //fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                    softWrap: true,
-                  ),
-                ),
-                SizedBox(width: 40),
-                Text(
-                  'every ${exercise['interval'].toString()} ${exercise['freq'].toString()}',
-                  style: TextStyle(
-                    color: Colors.black87, // Text color
-                    fontSize: 40, // Font size
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.right,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ));
-}
-
-/* Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: Text("Intensity levels"),
-    ),
-    body: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: ListView(
-            padding: EdgeInsets.all(8.0),
-            children: intensityOptions
-                .map((option) => _displayIntensityButton(context, option))
-                .toList(),
+        Text(
+          text1,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: size,
+            letterSpacing: 0.5,
+            height: 1.5,
           ),
+          textAlign: align,
         ),
       ],
     ),
   );
-} */
+}
+
+Widget _displayPlanInfo(BuildContext context, ExercisePlan plan) {
+  return Expanded(
+    child: ListView(
+      addAutomaticKeepAlives: true,
+      padding: const EdgeInsets.all(8.0),
+      children: plan.exercises
+          .map((ex) => _displayExerciseInfo(context, ex))
+          .toList(),
+    ),
+  );
+}
+
+Widget _displayExerciseInfo(
+    BuildContext context, Map<String, dynamic> exercise) {
+  return Card(
+    elevation: 5.0,
+    color: const Color.fromARGB(255, 255, 225, 179),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12.0),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icons[exercise['icon']],
+                color: Colors.black,
+                size: 40,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  exercise['name'],
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text(
+                'Every ${exercise['interval'].toString()} ${exercise['freq'].toString()}',
+                style: const TextStyle(
+                  color: Color.fromARGB(255, 56, 56, 56),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
 Widget _displayIntensityButton(
     BuildContext context, Map<String, dynamic> option) {
   return Padding(
-    padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
     child: GestureDetector(
       onTap: () {
         ExercisePlan plan = ExercisePlan(
-            name: option['intensity'], exercises: option['activities']);
+          name: option['intensity'],
+          exercises: option['activities'],
+        );
         Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  ExercisePlanScreen(plan: plan, isChosen: false),
-            ));
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                ExercisePlanScreen(plan: plan, isChosen: false),
+          ),
+        );
       },
       child: Card(
-        elevation: 5, // Add elevation for shadow effect
+        elevation: 5,
+        color: const Color.fromARGB(255, 255, 225, 179),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0), // Rounded corners
+          borderRadius: BorderRadius.circular(20.0),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(children: [
-                FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Icon(icons[option['icon']],
-                      color: Colors.black12, size: 50),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              FittedBox(
+                fit: BoxFit.fitWidth,
+                child: Icon(
+                  icons[option['icon']],
+                  color: Colors.black,
+                  size: 50,
                 ),
-                Text(
-                  option['intensity'],
-                  style: TextStyle(
-                    color: Colors.black87, // Text color
-                    fontSize: 20, // Font size
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                option['intensity'],
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
                 ),
-              ]),
-            ),
-          ],
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     ),
