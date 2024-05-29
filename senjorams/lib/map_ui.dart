@@ -700,30 +700,48 @@ Widget build(BuildContext context) {
                     focusNode: focusNode,
                     autofocus: false,
                     onTapOutside: (event) => {focusNode.unfocus()},
-                    style: const TextStyle(fontSize: 20),
+                    style: const TextStyle(fontSize: 18, color: Colors.black),
                     textAlignVertical: TextAlignVertical.center,
                     decoration: InputDecoration(
                       isDense: true,
                       filled: true,
                       fillColor: Colors.white,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Colors.white)),
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: IconButton(onPressed: () {
-                          _searchFieldController.clear(); 
-                          setState(
-                            () {
-                              _searchResult.clear();
-                            }
-                          );
-                        },
-                        icon: const Icon(Icons.cancel)
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF92C7CF),
+                          width: 2.0, // Thicker border
                         ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF92C7CF),
+                          width: 2.0, // Thicker border when focused
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(
+                          color: Color(0xFF92C7CF),
+                          width: 2.0, // Thicker border when enabled
+                        ),
+                      ),
+                      prefixIcon: const Icon(Icons.search, color: Colors.blueAccent), // More colorful search icon
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          _searchFieldController.clear();
+                          setState(() {
+                            _searchResult.clear();
+                          });
+                        },
+                        icon: const Icon(Icons.cancel, color: Colors.redAccent), // More colorful cancel icon
+                      ),
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       hintText: 'Paieška',
-                      hintStyle: const TextStyle(fontSize: 20)
-                    )
+                      hintStyle: const TextStyle(fontSize: 18, color: Color.fromARGB(255, 58, 58, 58)),
+                    ),
                   );
-
                 },
                 debounceDuration: const Duration(milliseconds: 1000),
                 suggestionsCallback: (value) async {
@@ -764,15 +782,31 @@ Widget build(BuildContext context) {
             ),
             if (mapLoaded) 
               Positioned(
-                bottom: 10,
-                right: 10,
-                child: FloatingActionButton.extended(
-                  heroTag: "btnRight",
-                  onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
-                  label: const Text('My Location'),
-                  icon: const Icon(Icons.location_on),
-                )
-              ),
+          bottom: 15,
+          left: 15,
+          child: FloatingActionButton(
+            heroTag: "btnLeft",
+            onPressed: () {
+              setState(() {
+                _isPoiMarkerVisible = false;
+                _polylines.clear();
+              });
+            },
+            backgroundColor: Color(0xFFF4E1C4), // Light sand color
+            child: const Icon(Icons.directions_off, color: Colors.black),
+          ),
+        ),
+        if (mapLoaded)
+          Positioned(
+            bottom: 15,
+            right: 15,
+            child: FloatingActionButton(
+              heroTag: "btnRight",
+              onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
+              backgroundColor: Color(0xFFF4E1C4), // Light sand color
+              child: const Icon(Icons.location_on, color: Colors.black),
+            ),
+          ),
         ],
       ),
     ),
