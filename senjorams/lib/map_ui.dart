@@ -699,11 +699,11 @@ Widget build(BuildContext context) {
             ),
           if (mapLoaded && _polylines.isNotEmpty)
             Positioned(
-              top: 200,
+              bottom: 20,
               child: Text(
                 _formatDistance(_calculateDistane(_polylineCoordinates)),
                 style: const TextStyle(
-                  fontSize: 60, 
+                  fontSize: 50, 
                   color: Color(0xFF92C7CF), 
                   fontWeight: FontWeight.bold,
                   shadows: [
