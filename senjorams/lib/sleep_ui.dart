@@ -113,7 +113,7 @@ class _SleepScreenState extends State<SleepScreen> {
                                 time: [_selectedTimeSleep,_selectedTimeWakeUp],
                                  alarmId: const UuidV1().hashCode,
                                   title: ['Miegas', 'Keltis'],
-                                  body: ['Miegas','Keltis'],
+                                  body: ['Laikas eiti miegoti','Laikas pabusti iš miego'],
                                   enabled: true,
                                   linkedAlarmAmm: 1
                                   ));
@@ -134,7 +134,7 @@ class _SleepScreenState extends State<SleepScreen> {
                                 time: [_selectedTime ?? TimeOfDay.now()],
                                   alarmId: const UuidV1().hashCode,
                                   title: ['Miegas'], 
-                                  body: ['Miegas'], 
+                                  body: ['Laikas eiti miegoti'], 
                                   enabled: true
                                   ));
                             }

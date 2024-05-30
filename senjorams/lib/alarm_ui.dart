@@ -29,7 +29,7 @@ class AlarmScreen extends StatelessWidget {
               decoration: ShapeDecoration(
                   shape: CircleBorder(
                       side: BorderSide(
-                          color: Colors.deepPurple,
+                          color: const Color(0xFF92C7CF),
                           style: BorderStyle.solid,
                           width: 4))),
               child: Column(
@@ -37,14 +37,14 @@ class AlarmScreen extends StatelessWidget {
                 children: <Widget>[
                   Icon(
                     Icons.alarm,
-                    color: Colors.deepPurple,
+                    color: Color.fromARGB(255, 49, 135, 148),
                     size: 32,
                   ),
                   DefaultTextStyle(
                     style: TextStyle(
                         fontSize: 50,
                         fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple.shade800),
+                        color: Color.fromARGB(255, 32, 94, 104)),
                     child :Text(
                       format.format(now),
                     ),
@@ -70,8 +70,8 @@ class AlarmScreen extends StatelessWidget {
                 player.stop();
                 SystemNavigator.pop();
               },
-              innerColor: Colors.deepPurple,
-              outerColor: Color.fromARGB(255, 196, 183, 235),
+              innerColor: Color.fromARGB(255, 221, 195, 149),
+              outerColor: Color.fromARGB(255, 211, 161, 75),
             ),
           )
         ],

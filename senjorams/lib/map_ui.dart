@@ -17,6 +17,7 @@ import 'package:senjorams/models/place_model.dart';
 import 'package:senjorams/models/place_prediction_model.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import 'dart:math' as math;
 
 const apiKey="AIzaSyAVd3YlwDIiYmq1Lmq1rpXkkxaN5V0zUNc"; //not safe i bet
 extension HexColor on Color {
@@ -40,6 +41,8 @@ class _MapSampleState extends State<MapSample> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   final Map<PolylineId, Polyline> _polylines = {};
+  List<LatLng> _polylineCoordinates = [];
+
 
   List<Place> _places = [];
   final List<PlacePrediction> _searchResult = [];
@@ -53,7 +56,7 @@ class _MapSampleState extends State<MapSample> {
 
   int _current = 0; //index for image carousel
   late String _timeString = '';
-  late var timer;
+  late dynamic timer;
   late FocusNode _mapFocusNode;
 
   @override
@@ -179,6 +182,37 @@ class _MapSampleState extends State<MapSample> {
       return null;
     }
   }
+  double _calculateDistane(List<LatLng> polyline) {
+    double totalDistance = 0;
+    for (int i = 0; i < polyline.length; i++) {
+      if (i < polyline.length - 1) { // skip the last index
+        totalDistance += _getStraightLineDistance(
+            polyline[i + 1].latitude,
+            polyline[i + 1].longitude,
+            polyline[i].latitude,
+            polyline[i].longitude);
+      }
+    }
+    return totalDistance;
+  }
+  double _getStraightLineDistance(lat1, lon1, lat2, lon2) {
+    var R = 6371; // Radius of the earth in km
+    var dLat = _deg2rad(lat2 - lat1);
+    var dLon = _deg2rad(lon2 - lon1);
+    var a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+        math.cos(_deg2rad(lat1)) *
+            math.cos(_deg2rad(lat2)) *
+            math.sin(dLon / 2) *
+            math.sin(dLon / 2);
+    var c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    var d = R * c; // Distance in km
+    return d * 1000; //in m
+  }
+
+  dynamic _deg2rad(deg) {
+    return deg * (math.pi / 180);
+  }
+
   void _createPolylines(
     double startLatitude,
     double startLongitude,
@@ -186,10 +220,9 @@ class _MapSampleState extends State<MapSample> {
     double destinationLongitude,
   ) async {
     PolylinePoints _polylinePoints;
-    List<LatLng> _polylineCoordinates = [];
     // Initializing PolylinePoints
     _polylinePoints = PolylinePoints();
-
+    List<LatLng> _polylineCoordinatesTemp = [];
     // Generating the list of coordinates to be used for
     // drawing the polylines
     PolylineResult result = await _polylinePoints.getRouteBetweenCoordinates(
@@ -202,13 +235,13 @@ class _MapSampleState extends State<MapSample> {
     // Adding the coordinates to the list
     if (result.points.isNotEmpty) {
       result.points.forEach((PointLatLng point) {
-        _polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+        _polylineCoordinatesTemp.add(LatLng(point.latitude, point.longitude));
       });
     }
 
     // Defining an ID
     PolylineId id = PolylineId('poly');
-
+    _polylineCoordinates = _polylineCoordinatesTemp;
     // Initializing Polyline
     Polyline polyline = Polyline(
       polylineId: id,
@@ -230,6 +263,9 @@ class _MapSampleState extends State<MapSample> {
     location.onLocationChanged.listen((newLocation) {
       setState(() {
         _currentLocation = newLocation;
+        if(_polylines.isNotEmpty){
+          _createPolylines(_currentLocation!.latitude!, _currentLocation!.longitude!, _polylineCoordinates.last.latitude, _polylineCoordinates.last.longitude);
+        }
       });
     });
   }
@@ -347,7 +383,7 @@ class _MapSampleState extends State<MapSample> {
                           const Spacer(),
                           if(!_places.any((pl) => pl.id == place.id)) 
                           TextButton(
-                            child: const Text("SAVE"),
+                            child: const Text("IŠSAUGOTI"),
                             onPressed: () async {
                               setState(() {_places.add(place); _saveData();});
                               Navigator.pop(context);
@@ -389,7 +425,7 @@ class _MapSampleState extends State<MapSample> {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            place.rating != null ? place.rating.toString() : "No reviews",
+                            place.rating != null ? place.rating.toString() : "Nėra atsiliepimų",
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
                             ),
                       ],
@@ -402,8 +438,8 @@ class _MapSampleState extends State<MapSample> {
                       Text(
                         (place.regularOpeningHours != null
                             ? (place.regularOpeningHours!.openNow
-                                ? "Open"
-                                : "Closed")
+                                ? "Atidaryta"
+                                : "Uždaryta")
                                 : ""),
                             style: TextStyle(
                           color: place.regularOpeningHours != null
@@ -452,6 +488,13 @@ class _MapSampleState extends State<MapSample> {
         _placesTrashCan.add(place);
       }
     });
+  }
+  String _formatDistance(double distance){
+    if(distance >= 1000)
+    {
+      return (distance/1000).toStringAsFixed(2) + "km";
+    }
+    return distance.toStringAsFixed(2) + "m";
   }
   Widget _placesCard(int index) {
   return Card(
@@ -563,7 +606,7 @@ class _MapSampleState extends State<MapSample> {
     ),
   );
 }
- @override
+@override
 Widget build(BuildContext context) {
   bool mapLoaded = _currentLocation != null;
   return GestureDetector(
@@ -575,6 +618,7 @@ Widget build(BuildContext context) {
       resizeToAvoidBottomInset : false,
       endDrawer: _sideNavigationBar(),
       body: Stack(
+        alignment: Alignment.center,
         children: [
           // Shimmer effect while loading the map
           if (!mapLoaded)
@@ -634,6 +678,35 @@ Widget build(BuildContext context) {
               onMapCreated: (mapController) {
                 _mapController.complete(mapController);
               }
+            ),
+          if (mapLoaded && _polylines.isNotEmpty)
+            Positioned(
+              top: 200,
+              child: Text(
+                _formatDistance(_calculateDistane(_polylineCoordinates)),
+                style: const TextStyle(
+                  fontSize: 60, 
+                  color: Color(0xFF92C7CF), 
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow( // bottomLeft
+                      offset: Offset(-1.5, -1.5),
+                      color: Colors.black
+                    ),
+                    Shadow( // bottomRight
+                      offset: Offset(1.5, -1.5),
+                      color: Colors.black
+                    ),
+                    Shadow( // topRight
+                      offset: Offset(1.5, 1.5),
+                      color: Colors.black
+                    ),
+                    Shadow( // topLeft
+                      offset: Offset(-1.5, 1.5),
+                      color: Colors.black
+                    ),
+                  ]),
+                ),
             ),
           Positioned(
             top: 0,
@@ -768,7 +841,12 @@ Widget build(BuildContext context) {
                 right: 10,
                 child: FloatingActionButton.extended(
                   heroTag: "btnRight",
-                  onPressed: () => _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!)),
+                  onPressed: (){
+                    _moveCameraToPosition(LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!));
+                    if(_polylines.isNotEmpty){
+                      log(_calculateDistane(_polylineCoordinates).toString());
+                    }
+                    },
                   label: const Text('My Location'),
                   icon: const Icon(Icons.location_on),
                 )

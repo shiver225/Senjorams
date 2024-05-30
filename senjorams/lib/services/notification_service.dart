@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
@@ -24,6 +25,7 @@ class NotificationService{
     return _notificationService;
   }
 
+  static Timer? timer;
   static final player = AudioPlayer();
 
   final FlutterLocalNotificationsPlugin notificationsPlugin =
@@ -75,6 +77,8 @@ class NotificationService{
     await player.setVolume(1);
     await player.setAsset('assets/audio/best_alarm.mp3');
     player.play();
+    if (timer?.isActive ?? false) timer!.cancel();
+    timer = Timer(const Duration(minutes: 2), () => player.stop());
   }
 
   /// Use this method to detect if the user dismissed a notification
@@ -103,8 +107,8 @@ static Future<void> scheduledNotification({
     final int id = 0,
     final String? summary,
     final Map<String, String>? payload,
-    final ActionType actionType = ActionType.Default,
-    final NotificationLayout notificationLayout = NotificationLayout.Default,
+    final ActionType actionType = ActionType.KeepOnTop,
+    final NotificationLayout notificationLayout = NotificationLayout.BigText,
     final NotificationCategory? category,
     final String? bigPicture,
     final List<NotificationActionButton>? actionButtons,
@@ -130,7 +134,9 @@ static Future<void> scheduledNotification({
       schedule: NotificationCalendar(
               hour: hour,
               minute: minutes,
-              repeats: repeat,
+              second:0,
+              millisecond: 0,
+              repeats: false,
               timeZone:
                   await AwesomeNotifications().getLocalTimeZoneIdentifier(),
               preciseAlarm: true,
