@@ -341,13 +341,24 @@ class _MapSampleState extends State<MapSample> {
                       Row(
                         children: <Widget>[
                           TextButton(
-                          child: const Icon(Icons.clear),
-                          onPressed: () => Navigator.pop(context),
+                            child: const Icon(
+                              Icons.clear, 
+                              color: Colors.red,
+                              size: 28,
+                            ),
+                            onPressed: () => Navigator.pop(context),
                           ),
                           const Spacer(),
                           if(!_places.any((pl) => pl.id == place.id)) 
                           TextButton(
-                            child: const Text("SAVE"),
+                            child: const Text(
+                              "SAVE",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 132, 180, 187),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                ),
+                              ),
                             onPressed: () async {
                               setState(() {_places.add(place); _saveData();});
                               Navigator.pop(context);
@@ -432,7 +443,14 @@ class _MapSampleState extends State<MapSample> {
                     });
                     Navigator.pop(context);
                   },
-                  child: const Icon(Icons.directions),)
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF4E1C4),
+                  ),
+                  child: const Icon(
+                    Icons.directions,
+                    color: Colors.black,
+                  ),
+                )
               )
             ]
         ));

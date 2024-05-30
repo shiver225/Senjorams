@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SocialEventScreen extends StatefulWidget {
@@ -14,10 +17,23 @@ class SocialEventScreen extends StatefulWidget {
 class _SocialEventsScreenState extends State<SocialEventScreen> {
   final Map<String, List<Map<String, String>>> cityEvents = {};
 
+  late String _timeString = '';
+  late var timer;
+
   @override
   void initState() {
     super.initState();
     _loadData();
+
+    _updateTime(); // Update time initially
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
+  }
+
+  void _updateTime() {
+    final DateTime now = DateTime.now();
+    setState(() {
+      _timeString = DateFormat.Hms().format(now);
+    });
   }
 
   Future<void> _loadData() async {
@@ -61,18 +77,50 @@ class _SocialEventsScreenState extends State<SocialEventScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Choose a City'),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 30), // Adjust the left padding as needed
+          child: IconButton(
+            icon: const FaIcon(FontAwesomeIcons.arrowLeft),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        automaticallyImplyLeading: false,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(50),
+          ),
+        ),
+        backgroundColor: const Color(0xFF92C7CF),
+        title: Text(
+          _timeString,
+          style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
       ),
       body: Center(
-        child: ListView.builder(
-          itemCount: cities.length,
-          itemBuilder: (context, index) {
-            String cityName = cities.keys.elementAt(index);
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: ElevatedButton(
-                style:
-                    ElevatedButton.styleFrom(minimumSize: const Size(100, 75)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: GridView.builder(
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2, // Two buttons per row
+              mainAxisSpacing: 30.0,
+              crossAxisSpacing: 30.0,
+              childAspectRatio: 0.9, // Adjust the aspect ratio for bigger buttons
+            ),
+            itemCount: cities.keys.length,
+            itemBuilder: (context, index) {
+              String cityName = cities.keys.elementAt(index);
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: const Color(0xFFF4E4C1), // Light sand color
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -84,16 +132,13 @@ class _SocialEventsScreenState extends State<SocialEventScreen> {
                     ),
                   );
                 },
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Text(
-                    cityName,
-                    style: TextStyle(fontSize: 20.0), // Adjust the font size
-                  ),
+                child: Text(
+                  cityName,
+                  style: TextStyle(fontSize: 24.0), // Adjust the font size
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -111,7 +156,27 @@ class EventListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Events in $city'),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 30), // Adjust the left padding as needed
+          child: IconButton(
+            icon: const FaIcon(FontAwesomeIcons.arrowLeft),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        automaticallyImplyLeading: false,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(50),
+          ),
+        ),
+        backgroundColor: const Color(0xFF92C7CF),
+        title: Text(
+          'Events in $city',
+          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
       ),
       body: Center(
         child: ListView.builder(
@@ -120,45 +185,67 @@ class EventListScreen extends StatelessWidget {
             final event = events[index];
             return Card(
               margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              elevation: 10, // Increased elevation for more shadow
+              color: Color.fromARGB(255, 253, 231, 182), // Light sand color for the card
               child: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      event['title']!,
-                      style: TextStyle(
-                        fontSize: 20.0, // Adjust the font size as needed
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.event,
+                          color: Color(0xFF92C7CF), // Matching icon color
+                          size: 40,
+                        ),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            event['title']!,
+                            style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                    Divider(color: Colors.black),
                     SizedBox(height: 8.0),
                     Text(
                       'Type: ${event['type']}',
-                      style: TextStyle(fontSize: 16.0),
+                      style: TextStyle(fontSize: 16.0, color: Colors.grey[800]),
                     ),
                     Text(
                       'Location: ${event['location']}',
-                      style: TextStyle(fontSize: 16.0),
+                      style: TextStyle(fontSize: 16.0, color: Colors.grey[800]),
                     ),
                     Text(
                       'Starts at: ${event['start']}',
-                      style: TextStyle(fontSize: 16.0),
+                      style: TextStyle(fontSize: 16.0, color: Colors.grey[800]),
                     ),
                     Text(
-                      'Ends ar: ${event['end']}',
-                      style: TextStyle(fontSize: 16.0),
+                      'Ends at: ${event['end']}',
+                      style: TextStyle(fontSize: 16.0, color: Colors.grey[800]),
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        _launchURL(event['link']!);
-                      },
-                      child: Text(
-                        'Event Link',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Colors.blue,
-                          decoration: TextDecoration.underline,
+                    SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () {
+                          _launchURL(event['link']!);
+                        },
+                        child: Text(
+                          'Event Link',
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            color: Color.fromARGB(255, 95, 140, 199), // Matching link color
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                     ),
