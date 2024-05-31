@@ -77,6 +77,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-        locale: const Locale('lt', 'LT'), home: MainScreen());
+        locale: const Locale('lt', 'LT'), home: StartScreen());
   }
 }

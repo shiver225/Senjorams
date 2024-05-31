@@ -68,9 +68,6 @@ class _FoodScreenState extends State<FoodScreen> {
             // Show dialog to input user information and calculate daily calories needed
             _openUserInfoDialog();
           }
-        } else {
-          // Show dialog to input user information and calculate daily calories needed
-          _openUserInfoDialog();
         }
       } catch (e) {
         print('Error fetching daily calories needed: $e');
@@ -91,13 +88,7 @@ class _FoodScreenState extends State<FoodScreen> {
             setState(() {
               _consumedFoodsHistory = userData['consumedFoodHistory'];
             });
-          } else {
-            // Show dialog to input user information and calculate daily calories needed
-            _openUserInfoDialog();
           }
-        } else {
-          // Show dialog to input user information and calculate daily calories needed
-          _openUserInfoDialog();
         }
       } catch (e) {
         print('Error fetching food history: $e');
@@ -258,7 +249,7 @@ class _FoodScreenState extends State<FoodScreen> {
                           _buildNutritionInfo('Natris (mg)', _foodData!['sodium_mg']),
                           _buildNutritionInfo('Kalis (mg)', _foodData!['potassium_mg']),
                           _buildNutritionInfo('Cholesterolis (mg)', _foodData!['cholesterol_mg']),
-                          _buildNutritionInfo('Bendras angliavandenių kiekis (g)', _foodData!['carbohydrates_total_g']),
+                          _buildNutritionInfo('Angliavandenių kiekis (g)', _foodData!['carbohydrates_total_g'].toStringAsFixed(2)),
                           _buildNutritionInfo('Skaidulos (g)', _foodData!['fiber_g']),
                           _buildNutritionInfo('Cukrus (g)', _foodData!['sugar_g']),
                         ],
@@ -327,7 +318,7 @@ class _FoodScreenState extends State<FoodScreen> {
                               _buildNutritionInfo('Natris (mg)', _totalNutritionIntake['sodium_mg']),
                               _buildNutritionInfo('Kalis (mg)', _totalNutritionIntake['potassium_mg']),
                               _buildNutritionInfo('Cholesterolis (mg)', _totalNutritionIntake['cholesterol_mg']),
-                              _buildNutritionInfo('Bendras angliavandenių kiekis (g)', _totalNutritionIntake['carbohydrates_total_g']),
+                              _buildNutritionInfo('Angliavandenių kiekis (g)', _totalNutritionIntake['carbohydrates_total_g'].toStringAsFixed(2)),
                               _buildNutritionInfo('Skaidulos (g)', _totalNutritionIntake['fiber_g']),
                               _buildNutritionInfo('Cukrus (g)', _totalNutritionIntake['sugar_g']),
                             ],
