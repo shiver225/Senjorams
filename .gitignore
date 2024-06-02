@@ -66,4 +66,4 @@ node_modules/
 .env
 
 # Dart files to ignore
-Senjorams\senjorams\lib\utilities\keys.dart
+senjorams\lib\utilities\keys.dart
