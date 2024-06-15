@@ -14,6 +14,7 @@ import 'package:senjorams/social_events.dart';
 import 'package:senjorams/start_sreen_ui.dart';
 import 'package:senjorams/sleep_ui.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -228,33 +229,7 @@ class _MainScreenState extends State<MainScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
           child: ElevatedButton(
-            onPressed: () {
-              // Display popup window
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    content: const Text("Pagalba iškviesta!",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          // Close the dialog
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text(
-                          "Close",
-                          textAlign: TextAlign.end,
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
+            onPressed: () => _showCallButtonsDialog(context),
             style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red, foregroundColor: Colors.black),
             child: const Text(
@@ -263,6 +238,71 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showCallButtonsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Pasirinkite liniją'),
+          content: CallButtons(),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Atšaukti'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class CallButtons extends StatelessWidget {
+  final List<Map<String, String>> contacts = [
+    {'name': 'Vyrų linija', 'number': 'tel:+37068272974'},
+    {'name': 'Moterų linija', 'number': 'tel:+37068272974'},
+    {'name': 'Vilties linija', 'number': 'tel:+37068272974'},
+    {'name': 'Sidabrinė linija', 'number': 'tel:+37068272974'},
+  ];
+
+  void _makePhoneCall(String url) async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      throw 'Nepavyko paskambinti numeriu $url';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: ListBody(
+        children: contacts.map((contact) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: () => _makePhoneCall(contact['number']!),
+              child: Text(
+                '${contact['name']}',
+                style: TextStyle(color: Colors.black, fontSize: 16.0),
+              ),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 12.0, horizontal: 24.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                backgroundColor: Color.fromARGB(255, 221, 195, 149),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
