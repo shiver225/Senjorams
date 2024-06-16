@@ -70,6 +70,8 @@ dependencies:
   flutter_typeahead: ^5.2.0
   flutter_polyline_points: ^2.0.0
   shimmer: ^3.0.0
+  google_ml_kit: ^0.7.2+3
+  camera: ^0.10.0+1
 
 
 dev_dependencies:

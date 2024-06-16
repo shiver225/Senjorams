@@ -6,6 +6,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:senjorams/models/medicine.dart';
 import 'package:senjorams/meds_grid_ui.dart';
+import 'package:camera/camera.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 
 class MedicineScreen extends StatefulWidget {
   const MedicineScreen({Key? key});
@@ -151,17 +153,42 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
   final TextEditingController _medicineController = TextEditingController();
   String selectedValue = 'Every 6 hours';
   String mealDepend = 'Before meal';
+  CameraController? _cameraController;
+  late Future<void> _initializeControllerFuture;
+  bool _isDetecting = false;
+  bool _isCameraReady = false;
+  List<String> _recognizedWords = [];
 
   @override
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
     _selectedTime = TimeOfDay.now();
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    try {
+      final cameras = await availableCameras();
+      final camera = cameras.firstWhere(
+          (camera) => camera.lensDirection == CameraLensDirection.back);
+
+      _cameraController = CameraController(camera, ResolutionPreset.medium);
+      _initializeControllerFuture = _cameraController!.initialize();
+      await _initializeControllerFuture; // Wait for initialization to complete
+      if (!mounted) return;
+      setState(() {
+        _isCameraReady = true; // Camera is now ready
+      });
+    } catch (e) {
+      print('Error initializing camera: $e');
+    }
   }
 
   @override
   void dispose() {
     _medicineController.dispose();
+    _cameraController!.dispose();
     super.dispose();
   }
 
@@ -191,6 +218,63 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
     }
   }
 
+  Widget _cameraPreviewWidget() {
+    if (_cameraController!.value.isInitialized) {
+      return AspectRatio(
+        aspectRatio: _cameraController!.value.aspectRatio,
+        child: CameraPreview(_cameraController!),
+      );
+    } else {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+  }
+
+  Future<void> _scanText() async {
+    if (_cameraController == null || !_cameraController!.value.isInitialized) {
+      return;
+    }
+
+    try {
+      if (_isDetecting) return;
+      _isDetecting = true;
+
+      await _initializeControllerFuture;
+      final picture = await _cameraController!.takePicture();
+
+      final inputImage = InputImage.fromFilePath(picture.path);
+      final textDetector = GoogleMlKit.vision.textDetector();
+      final RecognisedText recognisedText =
+          await textDetector.processImage(inputImage);
+
+      List<String> words = [];
+      for (TextBlock block in recognisedText.blocks) {
+        for (TextLine line in block.lines) {
+          for (TextElement element in line.elements) {
+            words.add(element.text);
+          }
+        }
+      }
+
+      setState(() {
+        _recognizedWords = words;
+      });
+
+      textDetector.close();
+    } catch (e) {
+      print(e);
+    } finally {
+      _isDetecting = false;
+    }
+  }
+
+  void _addWordToInputField(String word) {
+    setState(() {
+      _medicineController.text += ' $word';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -206,6 +290,20 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
   }
 
   Widget contentBox(BuildContext context) {
+    if (!_isCameraReady) {
+      // Show loading indicator while camera is initializing
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -225,6 +323,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
             ),
           ),
           const SizedBox(height: 20),
+          _cameraPreviewWidget(),
           TextField(
             controller: _medicineController,
             decoration: InputDecoration(
@@ -240,6 +339,19 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
               ),
             ),
           ),
+          ElevatedButton(
+            onPressed: _scanText,
+            child: const Text('Scan Medicine Name'),
+          ),
+          if (_recognizedWords.isNotEmpty)
+            Wrap(
+              children: _recognizedWords.map((word) {
+                return GestureDetector(
+                  onTap: () => _addWordToInputField(word),
+                  child: Chip(label: Text(word)),
+                );
+              }).toList(),
+            ),
           const SizedBox(height: 20),
           DropdownButtonFormField<String>(
             value: selectedValue,
@@ -305,15 +417,16 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
               ElevatedButton(
                 onPressed: () => _selectDate(context),
                 style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 24.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  backgroundColor: Color.fromARGB(255, 221, 195, 149),
                 ),
-                backgroundColor: Color.fromARGB(255, 221, 195, 149),
-              ),
                 child: const Text(
-                'Select Start Date',
-                style: TextStyle(color: Colors.white, fontSize: 14.0),
+                  'Select Start Date',
+                  style: TextStyle(color: Colors.white, fontSize: 14.0),
                 ),
               ),
               const SizedBox(width: 10),
@@ -326,16 +439,17 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
               ElevatedButton(
                 onPressed: () => _selectTime(context),
                 style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 24.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  backgroundColor: Color.fromARGB(255, 221, 195, 149),
                 ),
-                backgroundColor: Color.fromARGB(255, 221, 195, 149),
-              ),
                 child: const Text(
                   'Select Start Time',
                   style: TextStyle(color: Colors.white, fontSize: 14.0),
-                  ),
+                ),
               ),
               const SizedBox(width: 10),
               Text(_selectedTime.format(context)),
@@ -352,7 +466,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 child: const Text(
                   'Cancel',
                   style: TextStyle(color: Colors.black, fontSize: 14.0),
-                  ),
+                ),
               ),
               const SizedBox(width: 10),
               ElevatedButton(
@@ -367,7 +481,8 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                   Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 24.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -376,7 +491,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 child: const Text(
                   'Save',
                   style: TextStyle(color: Colors.white, fontSize: 14.0),
-                  ),
+                ),
               ),
             ],
           ),
