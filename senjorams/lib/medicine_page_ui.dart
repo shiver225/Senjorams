@@ -33,6 +33,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
 
   void _updateTime() {
     final DateTime now = DateTime.now();
+    if (!mounted) return;
     setState(() {
       _timeString = DateFormat.Hms().format(now);
     });
@@ -305,15 +306,16 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
               ElevatedButton(
                 onPressed: () => _selectDate(context),
                 style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 24.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  backgroundColor: Color.fromARGB(255, 221, 195, 149),
                 ),
-                backgroundColor: Color.fromARGB(255, 221, 195, 149),
-              ),
                 child: const Text(
-                'Select Start Date',
-                style: TextStyle(color: Colors.white, fontSize: 14.0),
+                  'Select Start Date',
+                  style: TextStyle(color: Colors.white, fontSize: 14.0),
                 ),
               ),
               const SizedBox(width: 10),
@@ -326,16 +328,17 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
               ElevatedButton(
                 onPressed: () => _selectTime(context),
                 style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 24.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  backgroundColor: Color.fromARGB(255, 221, 195, 149),
                 ),
-                backgroundColor: Color.fromARGB(255, 221, 195, 149),
-              ),
                 child: const Text(
                   'Select Start Time',
                   style: TextStyle(color: Colors.white, fontSize: 14.0),
-                  ),
+                ),
               ),
               const SizedBox(width: 10),
               Text(_selectedTime.format(context)),
@@ -352,7 +355,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 child: const Text(
                   'Cancel',
                   style: TextStyle(color: Colors.black, fontSize: 14.0),
-                  ),
+                ),
               ),
               const SizedBox(width: 10),
               ElevatedButton(
@@ -367,7 +370,8 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                   Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 24.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -376,7 +380,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 child: const Text(
                   'Save',
                   style: TextStyle(color: Colors.white, fontSize: 14.0),
-                  ),
+                ),
               ),
             ],
           ),
