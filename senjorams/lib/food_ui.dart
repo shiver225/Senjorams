@@ -42,11 +42,13 @@ class _FoodScreenState extends State<FoodScreen> {
     _fetchFoodHistory();
 
     _updateTime(); // Update time initially
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
+    timer =
+        Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTime());
   }
 
   void _updateTime() {
     final DateTime now = DateTime.now();
+    if (!mounted) return;
     setState(() {
       _timeString = DateFormat.Hms().format(now);
     });
@@ -57,9 +59,13 @@ class _FoodScreenState extends State<FoodScreen> {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get();
         if (userDoc.exists) {
-          Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+          Map<String, dynamic> userData =
+              userDoc.data() as Map<String, dynamic>;
           if (userData.containsKey('dailyCaloriesNeeded')) {
             setState(() {
               _dailyCaloriesNeeded = userData['dailyCaloriesNeeded'];
@@ -81,9 +87,13 @@ class _FoodScreenState extends State<FoodScreen> {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get();
         if (userDoc.exists) {
-          Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+          Map<String, dynamic> userData =
+              userDoc.data() as Map<String, dynamic>;
           if (userData.containsKey('consumedFoodHistory')) {
             setState(() {
               _consumedFoodsHistory = userData['consumedFoodHistory'];
@@ -97,7 +107,6 @@ class _FoodScreenState extends State<FoodScreen> {
     setState(() {});
   }
 
-
   // Function to open dialog for inputting user information
   void _openUserInfoDialog() {
     showDialog(
@@ -105,12 +114,15 @@ class _FoodScreenState extends State<FoodScreen> {
       builder: (BuildContext context) {
         return Theme(
           data: ThemeData(
-            dialogBackgroundColor: Colors.white.withOpacity(0.9), // Change background color
+            dialogBackgroundColor:
+                Colors.white.withOpacity(0.9), // Change background color
           ),
           child: AlertDialog(
             title: const Text(
               'Dienos maistinės vertės',
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold), // Change title font and color
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold), // Change title font and color
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -119,7 +131,8 @@ class _FoodScreenState extends State<FoodScreen> {
                   controller: _weightController,
                   decoration: const InputDecoration(
                     labelText: 'Svoris (kg)',
-                    labelStyle: TextStyle(color: Colors.black), // Change label text color
+                    labelStyle: TextStyle(
+                        color: Colors.black), // Change label text color
                   ),
                   keyboardType: TextInputType.number,
                 ),
@@ -127,7 +140,8 @@ class _FoodScreenState extends State<FoodScreen> {
                   controller: _heightController,
                   decoration: const InputDecoration(
                     labelText: 'Ūgis (cm)',
-                    labelStyle: TextStyle(color: Colors.black), // Change label text color
+                    labelStyle: TextStyle(
+                        color: Colors.black), // Change label text color
                   ),
                   keyboardType: TextInputType.number,
                 ),
@@ -135,7 +149,8 @@ class _FoodScreenState extends State<FoodScreen> {
                   controller: _ageController,
                   decoration: const InputDecoration(
                     labelText: 'Amžius',
-                    labelStyle: TextStyle(color: Colors.black), // Change label text color
+                    labelStyle: TextStyle(
+                        color: Colors.black), // Change label text color
                   ),
                   keyboardType: TextInputType.number,
                 ),
@@ -145,8 +160,12 @@ class _FoodScreenState extends State<FoodScreen> {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF92C7CF).withOpacity(0.7), // Change button color
-                    textStyle: TextStyle(color: Colors.black, fontWeight: FontWeight.bold), // Change button text style
+                    backgroundColor: const Color(0xFF92C7CF)
+                        .withOpacity(0.7), // Change button color
+                    textStyle: TextStyle(
+                        color: Colors.black,
+                        fontWeight:
+                            FontWeight.bold), // Change button text style
                   ),
                   child: const Text(
                     'Skaičiuoti',
@@ -164,7 +183,6 @@ class _FoodScreenState extends State<FoodScreen> {
     );
   }
 
-
   // Function to calculate daily calories needed and save user info to Firestore
   void _calculateDailyCaloriesNeeded() async {
     // Retrieve user input
@@ -175,7 +193,8 @@ class _FoodScreenState extends State<FoodScreen> {
     // Perform calculation (example formula)
     // You can replace this with a formula suitable for your app
     double basalMetabolicRate = 10 * weight + 6.25 * height - 5 * age + 5;
-    _dailyCaloriesNeeded = basalMetabolicRate * 1.2; // Assuming light activity level
+    _dailyCaloriesNeeded =
+        basalMetabolicRate * 1.2; // Assuming light activity level
 
     // Get current user
     User? user = FirebaseAuth.instance.currentUser;
@@ -194,7 +213,8 @@ class _FoodScreenState extends State<FoodScreen> {
       }
     }
 
-    setState(() {}); // Trigger a rebuild to update the UI with the calculated value
+    setState(
+        () {}); // Trigger a rebuild to update the UI with the calculated value
   }
 
   get foodName => _foodNameController.text.trim();
@@ -208,9 +228,11 @@ class _FoodScreenState extends State<FoodScreen> {
         _isLoading = true;
       });
       try {
-        final translatedFoodName = await translator.translate(foodName, to: 'en');
+        final translatedFoodName =
+            await translator.translate(foodName, to: 'en');
         final foodToFetch = translatedFoodName.text.trim();
-        final List<dynamic> foodList = await FoodAPI.fetchFoodNutrition(foodToFetch);
+        final List<dynamic> foodList =
+            await FoodAPI.fetchFoodNutrition(foodToFetch);
         if (foodList.isNotEmpty) {
           setState(() {
             _foodData = foodList.first;
@@ -240,19 +262,24 @@ class _FoodScreenState extends State<FoodScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                          _buildNutritionInfo('Pavadinimas', foodName),
-                          _buildNutritionInfo('Kalorojos', _foodData!['calories']),
-                          _buildNutritionInfo('Porcijos dydis (g)', _foodData!['serving_size_g']),
-                          _buildNutritionInfo('Bendras riebalų kiekis (g)', _foodData!['fat_total_g']),
-                          _buildNutritionInfo('Sotieji riebalai (g)', _foodData!['fat_saturated_g']),
-                          _buildNutritionInfo('Baltymai (g)', _foodData!['protein_g']),
-                          _buildNutritionInfo('Natris (mg)', _foodData!['sodium_mg']),
-                          _buildNutritionInfo('Kalis (mg)', _foodData!['potassium_mg']),
-                          _buildNutritionInfo('Cholesterolis (mg)', _foodData!['cholesterol_mg']),
-                          _buildNutritionInfo('Angliavandenių kiekis (g)', _foodData!['carbohydrates_total_g'].toStringAsFixed(2)),
-                          _buildNutritionInfo('Skaidulos (g)', _foodData!['fiber_g']),
-                          _buildNutritionInfo('Cukrus (g)', _foodData!['sugar_g']),
-                        ],
+                  _buildNutritionInfo('Pavadinimas', foodName),
+                  _buildNutritionInfo('Kalorojos', _foodData!['calories']),
+                  _buildNutritionInfo(
+                      'Porcijos dydis (g)', _foodData!['serving_size_g']),
+                  _buildNutritionInfo(
+                      'Bendras riebalų kiekis (g)', _foodData!['fat_total_g']),
+                  _buildNutritionInfo(
+                      'Sotieji riebalai (g)', _foodData!['fat_saturated_g']),
+                  _buildNutritionInfo('Baltymai (g)', _foodData!['protein_g']),
+                  _buildNutritionInfo('Natris (mg)', _foodData!['sodium_mg']),
+                  _buildNutritionInfo('Kalis (mg)', _foodData!['potassium_mg']),
+                  _buildNutritionInfo(
+                      'Cholesterolis (mg)', _foodData!['cholesterol_mg']),
+                  _buildNutritionInfo('Angliavandenių kiekis (g)',
+                      _foodData!['carbohydrates_total_g'].toStringAsFixed(2)),
+                  _buildNutritionInfo('Skaidulos (g)', _foodData!['fiber_g']),
+                  _buildNutritionInfo('Cukrus (g)', _foodData!['sugar_g']),
+                ],
               ),
             ),
           ),
@@ -267,9 +294,11 @@ class _FoodScreenState extends State<FoodScreen> {
     _totalNutritionIntake.clear();
     final List<String> foodItems = consumedFood.split(',');
     for (String foodItem in foodItems) {
-      final translatedFoodName = await translator.translate(foodItem.trim(), to: 'en');
+      final translatedFoodName =
+          await translator.translate(foodItem.trim(), to: 'en');
       final foodToFetch = translatedFoodName.text.trim();
-      final List<dynamic> foodList = await FoodAPI.fetchFoodNutrition(foodToFetch);
+      final List<dynamic> foodList =
+          await FoodAPI.fetchFoodNutrition(foodToFetch);
       if (foodList.isNotEmpty) {
         final Map<String, dynamic> foodData = foodList.first;
         foodData.forEach((key, value) {
@@ -283,7 +312,6 @@ class _FoodScreenState extends State<FoodScreen> {
     }
     setState(() {});
   }
-  
 
   Widget _buildTotalNutritionIntake() {
     return Expanded(
@@ -307,24 +335,38 @@ class _FoodScreenState extends State<FoodScreen> {
                   ),
                 ),
                 const SizedBox(height: 10.0),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                              _buildNutritionInfo('Kalorojos', _totalNutritionIntake['calories']),
-                              _buildNutritionInfo('Porcijos dydis (g)', _totalNutritionIntake['serving_size_g']),
-                              _buildNutritionInfo('Bendras riebalų kiekis (g)', _totalNutritionIntake['fat_total_g']),
-                              _buildNutritionInfo('Sotieji riebalai (g)', _totalNutritionIntake['fat_saturated_g']),
-                              _buildNutritionInfo('Baltymai (g)', _totalNutritionIntake['protein_g']),
-                              _buildNutritionInfo('Natris (mg)', _totalNutritionIntake['sodium_mg']),
-                              _buildNutritionInfo('Kalis (mg)', _totalNutritionIntake['potassium_mg']),
-                              _buildNutritionInfo('Cholesterolis (mg)', _totalNutritionIntake['cholesterol_mg']),
-                              _buildNutritionInfo('Angliavandenių kiekis (g)', _totalNutritionIntake['carbohydrates_total_g'].toStringAsFixed(2)),
-                              _buildNutritionInfo('Skaidulos (g)', _totalNutritionIntake['fiber_g']),
-                              _buildNutritionInfo('Cukrus (g)', _totalNutritionIntake['sugar_g']),
-                            ],
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildNutritionInfo(
+                        'Kalorojos', _totalNutritionIntake['calories']),
+                    _buildNutritionInfo('Porcijos dydis (g)',
+                        _totalNutritionIntake['serving_size_g']),
+                    _buildNutritionInfo('Bendras riebalų kiekis (g)',
+                        _totalNutritionIntake['fat_total_g']),
+                    _buildNutritionInfo('Sotieji riebalai (g)',
+                        _totalNutritionIntake['fat_saturated_g']),
+                    _buildNutritionInfo(
+                        'Baltymai (g)', _totalNutritionIntake['protein_g']),
+                    _buildNutritionInfo(
+                        'Natris (mg)', _totalNutritionIntake['sodium_mg']),
+                    _buildNutritionInfo(
+                        'Kalis (mg)', _totalNutritionIntake['potassium_mg']),
+                    _buildNutritionInfo('Cholesterolis (mg)',
+                        _totalNutritionIntake['cholesterol_mg']),
+                    _buildNutritionInfo(
+                        'Angliavandenių kiekis (g)',
+                        _totalNutritionIntake['carbohydrates_total_g']
+                            .toStringAsFixed(2)),
+                    _buildNutritionInfo(
+                        'Skaidulos (g)', _totalNutritionIntake['fiber_g']),
+                    _buildNutritionInfo(
+                        'Cukrus (g)', _totalNutritionIntake['sugar_g']),
+                  ],
+                ),
                 const SizedBox(height: 10.0),
-                if (_dailyCaloriesNeeded != null && _totalNutritionIntake.isNotEmpty)
+                if (_dailyCaloriesNeeded != null &&
+                    _totalNutritionIntake.isNotEmpty)
                   ..._buildRemainingNutritionInfo(),
               ],
             ),
@@ -363,7 +405,8 @@ class _FoodScreenState extends State<FoodScreen> {
       });
       // Calculate remaining calories intake
       double remainingCalories = _dailyCaloriesNeeded! - totalCaloriesIntake;
-      return remainingCalories.toStringAsFixed(2); // Convert to string with 2 decimal places
+      return remainingCalories
+          .toStringAsFixed(2); // Convert to string with 2 decimal places
     }
     return '';
   }
@@ -374,15 +417,22 @@ class _FoodScreenState extends State<FoodScreen> {
       builder: (BuildContext context) {
         return Theme(
           data: ThemeData(
-            dialogBackgroundColor: Colors.white.withOpacity(0.9), // Change background color
-            textTheme: TextTheme( // Change text font and color
-              bodyText1: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16.0),
+            dialogBackgroundColor:
+                Colors.white.withOpacity(0.9), // Change background color
+            textTheme: TextTheme(
+              // Change text font and color
+              bodyText1: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.0),
             ),
           ),
           child: AlertDialog(
             title: const Text(
               'Dienos istorija',
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold), // Change title font and color
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold), // Change title font and color
             ),
             content: Container(
               width: double.maxFinite,
@@ -393,7 +443,8 @@ class _FoodScreenState extends State<FoodScreen> {
                   return ListTile(
                     title: Text(
                       _consumedFoodsHistory[index],
-                      style: TextStyle(color: Colors.black), // Change content text color
+                      style: TextStyle(
+                          color: Colors.black), // Change content text color
                     ),
                   );
                 },
@@ -406,13 +457,18 @@ class _FoodScreenState extends State<FoodScreen> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 206, 178, 129).withOpacity(0.1), // Change button color
+                    color: Color.fromARGB(255, 206, 178, 129)
+                        .withOpacity(0.1), // Change button color
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
                   child: const Text(
                     'Uždaryti',
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold), // Change button text style
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontWeight:
+                            FontWeight.bold), // Change button text style
                   ),
                 ),
               ),
@@ -423,15 +479,13 @@ class _FoodScreenState extends State<FoodScreen> {
     );
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
-          padding: const EdgeInsets.only(left: 30), // Adjust the left padding as needed
+          padding: const EdgeInsets.only(
+              left: 30), // Adjust the left padding as needed
           child: IconButton(
             icon: const FaIcon(FontAwesomeIcons.arrowLeft),
             onPressed: () {
@@ -441,7 +495,8 @@ class _FoodScreenState extends State<FoodScreen> {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20), // Adjust the padding as needed
+            padding: const EdgeInsets.symmetric(
+                horizontal: 20), // Adjust the padding as needed
             child: IconButton(
               icon: const Icon(Icons.add),
               onPressed: _openUserInfoDialog,
@@ -481,17 +536,21 @@ class _FoodScreenState extends State<FoodScreen> {
                 ),
               ),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZĄąČčĘęĖėĮįŠšŲųŪūŽž\s]')),
+                FilteringTextInputFormatter.allow(
+                    RegExp(r'[a-zA-ZĄąČčĘęĖėĮįŠšŲųŪūŽž\s]')),
               ],
             ),
             const SingleChildScrollView(child: SizedBox(height: 20.0)),
             ElevatedButton(
-              onPressed: _isLoading ? null : () {
-                _fetchFoodNutrition();
-                FocusScope.of(context).unfocus(); // Hide keyboard
-              },
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      _fetchFoodNutrition();
+                      FocusScope.of(context).unfocus(); // Hide keyboard
+                    },
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 12.0, horizontal: 24.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -511,17 +570,17 @@ class _FoodScreenState extends State<FoodScreen> {
                     ),
             ),
             const SingleChildScrollView(child: SizedBox(height: 20.0)),
-            if (_isLoading)
-              const Center(child: CircularProgressIndicator()),
-            if (_foodData != null)
-              _buildFoodNutrition(),
+            if (_isLoading) const Center(child: CircularProgressIndicator()),
+            if (_foodData != null) _buildFoodNutrition(),
             if (_dailyCaloriesNeeded != null)
-              _buildNutritionInfo('Per dieną reikia kalorijų: ', _dailyCaloriesNeeded),
+              _buildNutritionInfo(
+                  'Per dieną reikia kalorijų: ', _dailyCaloriesNeeded),
             const SizedBox(height: 20.0),
             TextFormField(
               controller: _consumedFoodController,
               decoration: InputDecoration(
-                labelText: 'Įveskite suvartotą maistą šiandien (atskirta kableliais)',
+                labelText:
+                    'Įveskite suvartotą maistą šiandien (atskirta kableliais)',
                 labelStyle: const TextStyle(color: Colors.black),
                 enabledBorder: OutlineInputBorder(
                   borderSide: const BorderSide(color: const Color(0xFF92C7CF)),
@@ -533,7 +592,8 @@ class _FoodScreenState extends State<FoodScreen> {
                 ),
               ),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZĄąČčĘęĖėĮįŠšŲųŪūŽž\s,]')),
+                FilteringTextInputFormatter.allow(
+                    RegExp(r'[a-zA-ZĄąČčĘęĖėĮįŠšŲųŪūŽž\s,]')),
               ],
             ),
             const SingleChildScrollView(child: SizedBox(height: 20.0)),
@@ -543,7 +603,8 @@ class _FoodScreenState extends State<FoodScreen> {
                 _consumedFoodsHistory.add(_consumedFoodController.text);
               },
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 12.0, horizontal: 24.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -552,27 +613,25 @@ class _FoodScreenState extends State<FoodScreen> {
               child: const Text(
                 'Apskaičiuoti visas maistines medžiagas',
                 style: TextStyle(color: Colors.white, fontSize: 16.0),
-                ),
+              ),
             ),
             const SizedBox(height: 20.0),
-            if (_totalNutritionIntake.isNotEmpty)
-              _buildTotalNutritionIntake(),
+            if (_totalNutritionIntake.isNotEmpty) _buildTotalNutritionIntake(),
             if (_consumedFoodsHistory.isNotEmpty)
               ElevatedButton(
                 onPressed: () {
                   _showConsumedFoodsHistory();
                 },
                 style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12.0, horizontal: 24.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  backgroundColor: Color.fromARGB(255, 206, 178, 129),
                 ),
-                backgroundColor: Color.fromARGB(255, 206, 178, 129),
-              ),
-                child: const Text(
-                  'Dienos istorija',
-                  style: TextStyle(color: Colors.white, fontSize: 16.0)
-                ),
+                child: const Text('Dienos istorija',
+                    style: TextStyle(color: Colors.white, fontSize: 16.0)),
               ),
           ],
         ),
@@ -588,7 +647,10 @@ class _FoodScreenState extends State<FoodScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16.0),
+            style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 16.0),
           ),
           Text(
             '$value',
