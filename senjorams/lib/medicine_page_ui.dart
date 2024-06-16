@@ -35,6 +35,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
 
   void _updateTime() {
     final DateTime now = DateTime.now();
+    if (!mounted) return;
     setState(() {
       _timeString = DateFormat.Hms().format(now);
     });
