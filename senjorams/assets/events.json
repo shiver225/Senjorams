@@ -1,689 +1,172 @@
-[
-    {
-    "city":"kaunas",
-    "events": [
-        {
-            "type": "Koncertas",
-            "title": "Rimvis. Prasidėjo Šiltos Dienos.",
-            "location": "Hogas PUB, Kaunas",
-            "start": "2024-03-30 19:00:00",
-            "end": "2024-03-30 21:30:00",
-            "link": "https://renginiai.kasvyksta.lt//123577/rimvis-prasidejo-siltos-dienos"
-        },
+{
+    "kaunas": [
         {
             "type": "Paroda",
-            "title": "Pavasarinis POP-UP | Kūrėjų mugė",
-            "location": "Drobės fabrikas | Mano sofa, Kaunas",
-            "start": "2024-04-13 10:00:00",
-            "end": "2024-04-13 19:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123555/pavasarinis-pop-up-kureju-muge"
+            "title": "Tarptautinės visų šunų veislių parodos „KAUNO PAVASARIS",
+            "location": "Universiteto g 10B, Akademija, Kauno rajonas, Kaunas",
+            "start": "2024-04-20 10:00:00",
+            "end": "2024-04-21 10:00:00",
+            "link": "https://renginiai.kasvyksta.lt/109277/tarptautines-visu-sunu-veisliu-parodos-kauno-pavasaris-2023-ir-lkms-taure-2023"
         },
         {
             "type": "Koncertas",
-            "title": "KAUNO MIESTO SIMFONINIO ORKESTRO SEZONO UŽDARYMO KONCERTAS SU UKRAINOS OPEROS PRIMADONA LIUDMYLA MONASTYRSKA",
+            "title": "OPEROS SOLISTO TOMO PAVILIONIO ŠVENTINIS KONCERTAS",
             "location": "Kauno valstybinė filharmonija, Kaunas",
-            "start": "2024-05-10 18:00:00",
-            "end": "2024-05-10 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123161/kauno-miesto-simfoninio-orkestro-sezono-uzdarymo-koncertas-su-ukrainos-operos-primadona-liudmyla-monastyrska"
+            "start": "2024-04-26 18:00:00",
+            "end": "2024-04-26 20:00:00",
+            "link": "https://renginiai.kasvyksta.lt/124289/operos-solisto-tomo-pavilionio-sventinis-koncertas"
+        },
+        {
+            "type": "Iniciatyva",
+            "title": "Pečių ir kaklo masažo pamoka ",
+            "location": "\"Ananda cacao\", Kaunas",
+            "start": "2024-05-06 18:30:00",
+            "end": "2024-05-06 21:30:00",
+            "link": "https://renginiai.kasvyksta.lt/125706/peciu-ir-kaklo-masazo-pamoka"
         },
         {
             "type": "Koncertas",
-            "title": "JAUNŲJŲ GRUPIŲ KONKURSAS HOGAS OPEN 2024 | PUSFINALIS I",
+            "title": "JAUNŲJŲ GRUPIŲ KONKURSAS HOGAS OPEN 2024 | FINALAS",
             "location": "Hogas PUB, Kaunas",
-            "start": "2024-03-27 18:00:00",
-            "end": "2024-03-28 00:00:00",
-            "link": "https://renginiai.kasvyksta.lt//121552/jaunuju-grupiu-konkursas-hogas-open-2024-gyva-atranka-i"
+            "start": "2024-04-17 18:00:00",
+            "end": "2024-04-18 00:00:00",
+            "link": "https://renginiai.kasvyksta.lt/121552/jaunuju-grupiu-konkursas-hogas-open-2024-gyva-atranka-i"
+        },
+        {
+            "type": "Koncertas",
+            "title": "Jazz Jam Session No.1",
+            "location": "Teatro klubas, Kaunas",
+            "start": "2024-04-18 19:00:00",
+            "end": "2024-04-18 23:00:00",
+            "link": "https://renginiai.kasvyksta.lt/125679/jazz-jam-session-no-1"
+        },
+        {
+            "type": "Spektaklis",
+            "title": "Dviejų Korėjų susijungimas ",
+            "location": "Nacionaliinis Kauno dramos teatras  , Kaunas",
+            "start": "2024-04-19 18:00:00",
+            "end": "2024-04-19 21:00:00",
+            "link": "https://renginiai.kasvyksta.lt/123185/dvieju-koreju-susijungimas"
+        },
+        {
+            "type": "Iniciatyva",
+            "title": "GONGAI. BŪGNAI. VIOLONČELĖ. Kelionė garsuose.",
+            "location": "Savanorių pr. 363, 4 aukšte, \"Sarasvati\" jogos studija. Šalia \"Arena\" pica., Kaunas",
+            "start": "2024-04-19 19:00:00",
+            "end": "2024-04-19 21:00:00",
+            "link": "https://renginiai.kasvyksta.lt/90016/gongai-bugnai-violoncele-kelione-garsuose"
+        },
+        {
+            "type": "Ekskursijos",
+            "title": "EKSKURSIJA KAUNO POŽEMIAI",
+            "location": "Prie Kauno pilies tiltelio, Kaunas",
+            "start": "2024-04-20 10:15:00",
+            "end": "2024-04-20 12:15:00",
+            "link": "https://renginiai.kasvyksta.lt/106682/ekskursija-kauno-pozemiai"
+        },
+        {
+            "type": "Koncertas",
+            "title": " Igor Sokolov „KINO Tribute LT“",
+            "location": " KINAS \"Panemunė\"  Vaidoto g. 26,, Kaunas",
+            "start": "2024-04-20 18:00:00",
+            "end": "2024-04-20 20:00:00",
+            "link": "https://renginiai.kasvyksta.lt/89040/igor-sokolov-kino-tribute-lt"
+        },
+        {
+            "type": "Spektaklis",
+            "title": "Dviejų Korėjų susijungimas ",
+            "location": "Nacionalinis Kauno dramos teatras, Kaunas",
+            "start": "2024-04-20 18:00:00",
+            "end": "2024-04-20 21:00:00",
+            "link": "https://renginiai.kasvyksta.lt/123185/dvieju-koreju-susijungimas"
+        },
+        {
+            "type": "Spektaklis",
+            "title": "Impro džemas #102 (komedijos vakaras)",
+            "location": "„Impro Kaunas“ teatro salė, Kaunas",
+            "start": "2024-04-20 18:30:00",
+            "end": "2024-04-20 20:00:00",
+            "link": "https://renginiai.kasvyksta.lt/105281/impro-dzemas-66-su-teatru-impro-kaunas"
         },
         {
             "type": "Mokymas",
-            "title": "Rytinė improvizacijos treniruotė",
-            "location": "„Impro Kaunas“ teatro salė, Kaunas",
-            "start": "2024-03-29 09:30:00",
-            "end": "2024-03-29 11:30:00",
-            "link": "https://renginiai.kasvyksta.lt//123931/rytine-improvizacijos-treniruote"
+            "title": "Šviesos valdymo ir supratimo mokymai fotografams",
+            "location": "Gaižiūnų g. 4, Kaunas",
+            "start": "2024-04-21 12:00:00",
+            "end": "2024-04-21 17:00:00",
+            "link": "https://renginiai.kasvyksta.lt/125690/sviesos-valdymo-ir-supratimo-mokymai-fotografams"
         },
         {
             "type": "Spektaklis",
-            "title": "Impro džemas #100 (komedijos vakaras)",
-            "location": "„Impro Kaunas“ teatro salė, Kaunas",
-            "start": "2024-03-30 18:30:00",
-            "end": "2024-03-30 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//105281/impro-dzemas-66-su-teatru-impro-kaunas"
+            "title": "Dviejų Korėjų susijungimas ",
+            "location": "Nacionalinis Kauno dramos teatras, Kaunas",
+            "start": "2024-04-21 15:00:00",
+            "end": "2024-04-21 18:00:00",
+            "link": "https://renginiai.kasvyksta.lt/123185/dvieju-koreju-susijungimas"
         },
         {
             "type": "Spektaklis",
-            "title": "Velykų Babų žaidynės su POSH",
-            "location": "„Impro Kaunas“ teatro salė, Kaunas",
-            "start": "2024-04-01 18:30:00",
-            "end": "2024-04-01 21:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123606/velyku-babu-zaidynes-su-posh"
+            "title": "Improvizacijų šou „ILGAS\"",
+            "location": "Kauno miesto kamerinis teatras, Kaunas",
+            "start": "2024-05-14 19:00:00",
+            "end": "2024-05-14 20:30:00",
+            "link": "https://renginiai.kasvyksta.lt/125688/improvizaciju-sou-ilgas"
         },
         {
             "type": "Premjera",
-            "title": "KOMEDIJA I INTRIGANTĖS I ",
-            "location": "Girstučio kultūros rūmai, Kaunas, Kaunas",
-            "start": "2024-04-07 18:30:00",
-            "end": "2024-04-07 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123548/komedija-i-intrigantes-i"
-        },
-        {
-            "type": "Spektaklis",
-            "title": "MUZIKINĖ KOMEDIJA \" ŠMAIKŠTUOLIAI INTRIGANTAI\": užkulisinis aktorių gyvenimas, kuriozinės situacijos ir legendinių grupių muzika",
-            "location": "Kauno kultūros centro Girstučio padalinys, Kaunas",
-            "start": "2024-04-13 18:30:00",
-            "end": "2024-04-13 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123553/muzikine-komedija-smaikstuoliai-intrigantai-uzkulisinis-aktoriu-gyvenimas-kuriozines-situacijos-ir-legendiniu-grupiu-muzika"
-        },
-        {
-            "type": "Paroda",
-            "title": "Nauja ekspozicija „Rūmų istorijos“",
-            "location": "Istorinė Lietuvos Respublikos Prezidentūra Kaune, Kaunas",
-            "start": "2021-12-15 00:00:00",
-            "end": "2025-07-15 03:00:00",
-            "link": "https://renginiai.kasvyksta.lt//97652/nauja-ekspozicija-rumu-istorijos"
-        },
-        {
-            "type": "Paroda",
-            "title": "Tremtinių tekstilės ir skulptūrinių objektų paroda „Sudygsniuota“",
-            "location": "Kauno IX forto muziejus, Kaunas",
-            "start": "2023-06-16 17:00:00",
-            "end": "2024-06-16 18:00:00",
-            "link": "https://renginiai.kasvyksta.lt//110983/tremtiniu-tekstiles-ir-skulpturiniu-objektu-paroda-sudygsniuota"
-        },
-        {
-            "type": "Paroda",
-            "title": "Kęstučio Grigaliūno paroda „Lietuvos žydai, grįžę iš nacių konclagerių“",
-            "location": "Kauno IX forto muziejus, Kaunas",
-            "start": "2023-07-13 13:00:00",
-            "end": "2025-03-02 17:00:00",
-            "link": "https://renginiai.kasvyksta.lt//111679/kestucio-grigaliuno-paroda-lietuvos-zydai-grize-is-naciu-konclageriu"
-        },
-        {
-            "type": "Ekskursijos",
-            "title": "VYKSTA KASDIEN JUMS TINKAMU METU. Orientacinis pasivaikščiojimas LAISVASIS KAUNAS",
-            "location": "Vytauto Didžiojo karo muziejaus sodelis, Kaunas",
-            "start": "2023-09-02 15:00:00",
-            "end": "2024-04-30 17:00:00",
-            "link": "https://renginiai.kasvyksta.lt//105484/vyksta-kasdien-jums-tinkamu-metu-orientacinis-pasivaiksciojimas-laisvasis-kaunas"
-        },
-        {
-            "type": "Mokymas",
-            "title": "Matematikos laboratorija „MatLab“",
-            "location": "Kauno švietimo inovacijų centras, Kaunas",
-            "start": "2023-09-13 15:30:00",
-            "end": "2024-05-29 17:00:00",
-            "link": "https://renginiai.kasvyksta.lt//103466/matematikos-laboratorija-matlab"
-        },
-        {
-            "type": "Paroda",
-            "title": "Christiano Boltanskio meninė instaliacija „Animitas“",
-            "location": "Kauno IX forto muziejus, Kaunas",
-            "start": "2023-09-22 13:00:00",
-            "end": "2028-09-22 13:00:00",
-            "link": "https://renginiai.kasvyksta.lt//113665/christiano-boltanskio-menine-instaliacija-animitas"
-        },
-        {
-            "type": "Paroda",
-            "title": "3D autostereograma „Trimatė pasaka“, sukurta pagal M. K. Čiurlionio kūrinius",
-            "location": "Nacionalinis M. K. Čiurlionio dailės muziejus, Kaunas",
-            "start": "2023-10-25 00:00:00",
-            "end": "2024-12-31 03:00:00",
-            "link": "https://renginiai.kasvyksta.lt//116793/3d-autostereograma-trimate-pasaka-sukurta-pagal-m-k-ciurlionio-kurinius"
-        },
-        {
-            "type": "Minėjimas",
-            "title": "Lietuvos Respublikos Prezidento Antano Smetonos (1874 – 1944) jubiliejinių metų programa Istorinėje Prezidentūroje Kaune",
-            "location": "Istorinė Lietuvos Respublikos Prezidentūra Kaune, Kaunas",
-            "start": "2024-01-09 15:00:00",
-            "end": "2024-10-03 18:00:00",
-            "link": "https://renginiai.kasvyksta.lt//117517/lietuvos-respublikos-prezidento-antano-smetonos-1874-1944-jubiliejiniu-metu-programa-istorineje-prezidenturoje-kaune"
-        },
-        {
-            "type": "Mokymas",
-            "title": "Apskaitos tvarkymo neformaliojo profesinio mokymo programa",
-            "location": "Vytauto pr. 29, Kaunas",
-            "start": "2024-02-01 08:30:00",
-            "end": "2024-05-10 15:00:00",
-            "link": "https://renginiai.kasvyksta.lt//117105/apskaitos-tvarkymo-neformaliojo-profesinio-mokymo-programa"
-        },
-        {
-            "type": "uzsakomi-vns",
-            "title": "Kavos degustacijos ir edukacija",
-            "location": "Green Cafe, Kaunas",
-            "start": "2024-02-22 11:00:00",
-            "end": "2024-03-31 14:00:00",
-            "link": "https://renginiai.kasvyksta.lt//121936/kavos-degustacijos-ir-edukacija"
-        },
-        {
-            "type": "Mokymas",
-            "title": "Apskaitininko modulinė profesinio mokymo programa",
-            "location": "Vytauto pr. 29, Kaunas",
-            "start": "2024-02-23 08:30:00",
-            "end": "2024-08-05 15:00:00",
-            "link": "https://renginiai.kasvyksta.lt//117106/apskaitininko-moduline-profesinio-mokymo-programa"
-        },
-        {
-            "type": "Paroda",
-            "title": "Paroda „Ikonos ant šovinių dėžių“",
-            "location": "Kauno IX forto muziejus, Kaunas",
-            "start": "2024-02-29 13:00:00",
-            "end": "2024-08-25 18:00:00",
-            "link": "https://renginiai.kasvyksta.lt//121822/paroda-ikonos-ant-soviniu-deziu"
-        }
-    ]
-},{
-    "city":"vilnius",
-    "events": [
-        {
-            "type": "Koncertas",
-            "title": "Gravity Warehouse x Power Hit Radio Gimtadienis: ARGY",
-            "location": "Savanorių prospektas 178B, Vilnius, Vilnius",
-            "start": "2024-04-20 20:00:00",
-            "end": "2024-04-21 04:00:00",
-            "link": "https://renginiai.kasvyksta.lt//120509/gravity-warehouse-x-power-hit-radio-gimtadienis-argy"
-        },
-        {
-            "type": "Sportas",
-            "title": "Išbandyk naują pramogą - sportą!",
-            "location": "Vingrių g. 3B, Vilnius",
-            "start": "2024-03-02 10:00:00",
-            "end": "2024-03-31 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//119927/kirviu-metymas"
-        },
-        {
-            "type": "Koncertas",
-            "title": "Deimantas Balys Jazz Trio | Wes Montgomery Tribute",
-            "location": "Muzikos stotis, Geležinkelio g. 6, Vilnius",
-            "start": "2024-04-06 20:00:00",
-            "end": "2024-04-06 22:30:00",
-            "link": "https://renginiai.kasvyksta.lt//123769/deimantas-balys-trio-wes-montgomery-tribute"
-        },
-        {
-            "type": "Festivalis",
-            "title": "Kamado Bono grilio festivalis 2024",
-            "location": "Viešbutis „Vilnius Grand Resort\", Vilnius",
-            "start": "2024-05-18 15:00:00",
-            "end": "2024-05-18 19:00:00",
-            "link": "https://renginiai.kasvyksta.lt//117076/kamado-bono-grilio-festivalis-2024"
-        },
-        {
-            "type": "Paroda",
-            "title": "Paroda „Paimti ir prisiminti – Vilnius ir jo atmintis numizmatikoje ir bonistikoje“",
-            "location": "Pinigų muziejus, Vilnius",
-            "start": "2023-07-05 10:00:00",
-            "end": "2024-05-31 19:00:00",
-            "link": "https://renginiai.kasvyksta.lt//111540/paroda-paimti-ir-prisiminti-vilnius-ir-jo-atmintis-numizmatikoje-ir-bonistikoje"
-        },
-        {
-            "type": "Ekskursijos",
-            "title": "VYKSTA JUMS PATOGIU METU, SU GIDU. Orientacinė ekskursija VILNIAUS GETO GRINDINIU",
-            "location": "Visų Šventųjų bažnyčia, Vilnius",
-            "start": "2023-09-02 14:00:00",
-            "end": "2024-04-30 16:00:00",
-            "link": "https://renginiai.kasvyksta.lt//88195/orientacine-ekskursija-vilnius-pabegimas-is-geto"
-        },
-        {
-            "type": "Seminaras",
-            "title": "Ketvirtasis paskaitų ciklas „Istorijos miestui ir pasauliui“",
-            "location": "Senasis arsenalas, Vilnius",
-            "start": "2023-10-05 18:00:00",
-            "end": "2024-04-18 19:00:00",
-            "link": "https://renginiai.kasvyksta.lt//114074/ketvirtasis-paskaitu-ciklas-istorijos-miestui-ir-pasauliui"
-        },
-        {
-            "type": "Paroda",
-            "title": "Menininkų paroda – „Galvos, kaukės, maskaronai\"",
-            "location": "Energetikos ir technikos muziejus, Vilnius",
-            "start": "2024-02-06 17:30:00",
-            "end": "2024-04-07 18:30:00",
-            "link": "https://renginiai.kasvyksta.lt//120142/menininku-paroda-galvos-kaukes-maskaronai"
-        },
-        {
-            "type": "Mokymas",
-            "title": "PATYS",
-            "location": "Lietuvos nacionalinis radijas ir televizija, Vilnius",
-            "start": "2024-02-26 14:30:00",
-            "end": "2024-05-06 17:30:00",
-            "link": "https://renginiai.kasvyksta.lt//121128/patys-24"
-        },
-        {
-            "type": "Iniciatyva",
-            "title": "Ateik išdaužyti savo emocijas!",
-            "location": "Vingrių g. 3B, Vilnius",
-            "start": "2024-03-02 10:00:00",
-            "end": "2024-03-31 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//111533/ateik-isdauzyti-savo-emocijas"
-        },
-        {
-            "type": "Paroda",
-            "title": "IDIOMA I Babel Mnauar tapybos paroda",
-            "location": "AP galerija (Užupio g. 24, Jono Meko skersvėjis), Vilnius",
-            "start": "2024-03-05 11:00:00",
-            "end": "2024-03-31 19:30:00",
-            "link": "https://renginiai.kasvyksta.lt//122883/idioma-i-babel-mnauar-tapybos-paroda"
-        },
-        {
-            "type": "Paroda",
-            "title": "Nomedos Čiurlionytės tapybos darbų paroda „Angelų vienybė“",
-            "location": "M. K. Čiurlionio namai, Savičiaus g. 11 Vilnius, Vilnius",
-            "start": "2024-03-06 17:30:00",
-            "end": "2024-05-04 17:00:00",
-            "link": "https://renginiai.kasvyksta.lt//122301/nomedos-ciurlionytes-tapybos-darbu-paroda-angelu-vienybe"
-        },
-        {
-            "type": "Paroda",
-            "title": "Antano Martinaičio paroda VIENO PAUKŠČIO ISTORIJA",
-            "location": "VVJ meno galerija, Vilnius",
-            "start": "2024-03-06 18:00:00",
-            "end": "2024-04-07 16:00:00",
-            "link": "https://renginiai.kasvyksta.lt//122619/antano-martinaicio-paroda-vieno-paukscio-istorija"
-        },
-        {
-            "type": "Ekskursijos",
-            "title": "Orientacinė ekskursija „Senojo Vilniaus legendos ir simboliai“",
-            "location": "Vilniaus Rotušės aikštė, Vilnius",
-            "start": "2024-03-08 00:00:00",
-            "end": "2024-04-08 00:00:00",
-            "link": "https://renginiai.kasvyksta.lt//111002/orientacine-ekskursija-senojo-vilniaus-legendos-ir-simboliai"
-        },
-        {
-            "type": "Ekskursijos",
-            "title": "Orientacinė ekskursija „Karališkoji Vilniaus meilės istorija“",
-            "location": "Vilniaus katedros varpinė, Vilnius",
-            "start": "2024-03-08 00:00:00",
-            "end": "2024-04-08 00:00:00",
-            "link": "https://renginiai.kasvyksta.lt//107729/orientacine-ekskursija-karaliskoji-vilniaus-meiles-istorija"
-        },
-        {
-            "type": "Ekskursijos",
-            "title": "Orientacinė ekskursija „(Ne)Dingęs Vilnius“ ",
-            "location": "Vilniaus katedros varpinė, Vilnius",
-            "start": "2024-03-08 00:00:00",
-            "end": "2024-04-08 00:00:00",
-            "link": "https://renginiai.kasvyksta.lt//107731/orientacine-ekskursija-ne-dinges-vilnius"
-        },
-        {
-            "type": "Paroda",
-            "title": "TEXTILE TALES. Džinos Jasiūnienės paroda Antakalnio galerijoje",
-            "location": "Antakalnio galerija, Antakalnio g. 86, Vilnius",
-            "start": "2024-03-08 18:00:00",
-            "end": "2024-03-28 18:00:00",
-            "link": "https://renginiai.kasvyksta.lt//122519/textile-tales-dzinos-jasiunienes-paroda-antakalnio-galerijoje"
-        },
-        {
-            "type": "Paroda",
-            "title": "Artūro Braziūno tapybos paroda „Kelias į save“ – tapybos metaforų labirintais",
-            "location": "COMPENSA koncertų salė, Vilnius",
-            "start": "2024-03-12 18:00:00",
-            "end": "2024-04-12 18:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123229/arturo-braziuno-tapybos-paroda-kelias-i-save-tapybos-metaforu-labirintais"
-        },
-        {
-            "type": "Paroda",
-            "title": "AUKLĖJIMAS / Rasos Jundulaitės personalinė kūrybos paroda",
-            "location": "Užupio meno inkubatorius, Vilnius",
-            "start": "2024-03-15 18:00:00",
-            "end": "2024-04-20 18:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123560/auklejimas-rasos-jundulaites-personaline-kurybos-paroda"
-        },
-        {
-            "type": "Festivalis",
-            "title": " DAINOS MENAS | Tarptautinis vokalinės kamerinės muzikos festivalis ",
-            "location": "Fortepijonų salonas \"Organum\" (Savanorių pr. 1), Vilnius",
-            "start": "2024-03-16 18:00:00",
-            "end": "2024-04-07 17:30:00",
-            "link": "https://renginiai.kasvyksta.lt//122080/dainos-menas-tarptautinis-vokalines-kamerines-muzikos-festivalis"
-        },
-        {
-            "type": "Paroda",
-            "title": "Istorinės kartografijos paroda „Lietuva Europoje“",
-            "location": "Vilnius, Pilies g. 26, Signatarų namai, Štralio salė (įėjimas pro „Eskedar Coffee Bar“), Vilnius",
-            "start": "2024-03-22 14:45:00",
-            "end": "2024-04-07 00:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123775/istorines-kartografijos-paroda-lietuva-europoje"
-        }
-    ]
-},{
-    "city":"klaipeda",
-    "events" : [
-        {
-            "type": "Premjera",
-            "title": "PREMJERA: Dokumentinis spektaklis „NAMAI“",
-            "location": "Klaipėdos kultūros fabrikas, Klaipėda",
-            "start": "2024-03-28 18:30:00",
-            "end": "2024-03-28 21:00:00",
-            "link": "https://renginiai.kasvyksta.lt//120193/premjera-dokumentinis-spektaklis-namai"
-        },
-        {
-            "type": "Spektaklis",
-            "title": "Muzikinė komedija AMERIKA PIRTYJE - rež. Valentinas Masalskis",
-            "location": "Klaipėdos kultūros fabrikas, Klaipėda",
-            "start": "2024-04-05 18:30:00",
-            "end": "2024-04-05 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//100341/muzikine-komedija-amerika-pirtyje-rez-valentinas-masalskis"
-        },
-        {
-            "type": "Minėjimas",
-            "title": "VELYKINIAI VĖLYVIEJI PUSRYČIAI ",
-            "location": "MICHAELSON boutique HOTEL, Klaipėda",
-            "start": "2024-03-31 12:00:00",
-            "end": "2024-04-01 15:00:00",
-            "link": "https://renginiai.kasvyksta.lt//124038/velykiniai-velyvieji-pusryciai"
-        },
-        {
-            "type": "Spektaklis",
-            "title": "DOMINO teatras | komedija PRIMADONOS",
-            "location": "Klaipėdos koncertų salė, Klaipėda",
-            "start": "2024-04-21 18:00:00",
-            "end": "2024-04-21 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//68351/domino-teatras-komedija-primadonos"
-        },
-        {
-            "type": "Vakarėlis",
-            "title": "03.31. PRESIDENT BONGO (GusGus), Klaipėda",
-            "location": "Švyturys BHouse, Klaipėda",
-            "start": "2024-03-31 22:00:00",
-            "end": "2024-04-01 04:00:00",
-            "link": "https://renginiai.kasvyksta.lt//121661/03-31-president-bongo-gusgus-klaipeda"
-        },
-        {
-            "type": "Spektaklis",
-            "title": "MUZIKINĖ KOMEDIJA \" ŠMAIKŠTUOLIAI INTRIGANTAI\": užkulisinis aktorių gyvenimas, kuriozinės situacijos ir legendinių grupių muzika",
-            "location": "Klaipėdos koncertų salė, Klaipėda",
-            "start": "2024-04-14 18:30:00",
-            "end": "2024-04-14 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123553/muzikine-komedija-smaikstuoliai-intrigantai-uzkulisinis-aktoriu-gyvenimas-kuriozines-situacijos-ir-legendiniu-grupiu-muzika"
-        },
-        {
-            "type": "Spektaklis",
-            "title": "Itriguojanti komedija „KAIMYNAI BE RYŠIO” ",
-            "location": "Klaipėdos koncertų salė, Klaipėda",
-            "start": "2024-04-22 18:30:00",
-            "end": "2024-04-22 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123554/itriguojanti-komedija-kaimynai-be-rysio"
-        },
-        {
-            "type": "Vakarėlis",
-            "title": "VIVA LA OYSTER austrių vakaras",
-            "location": "Restoranas VIVALAVITA, Klaipėda",
-            "start": "2024-03-27 18:00:00",
-            "end": "2024-03-28 00:00:00",
-            "link": "https://renginiai.kasvyksta.lt//119611/viva-la-oyster-austriu-vakaras"
-        },
-        {
-            "type": "Ekskursijos",
-            "title": "VYKSTA KASDIEN, JUMS PATOGIU METU. Orientacinis pasivaikščiojimo žaidimas \"DINGUSI KLAIPĖDA\"",
-            "location": "Vero cafe, Tiltų g. 1, Klaipėda",
-            "start": "2023-09-02 14:00:00",
-            "end": "2024-04-30 16:00:00",
-            "link": "https://renginiai.kasvyksta.lt//87467/orientacinis-pasivaiksciojimo-zaidimas-dingusi-klaipeda"
-        },
-        {
-            "type": "Paroda",
-            "title": "Algirdo Taurinsko tapybos paroda „Nutapytas gyvenimas“",
-            "location": "Meno skyrius /Klaipėdos miesto savivaldybės Imanuelio Kanto viešoji biblioteka , Klaipėda",
-            "start": "2024-03-01 00:00:00",
-            "end": "2024-03-29 19:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123317/algirdo-taurinsko-tapybos-paroda-nutapytas-gyvenimas"
-        },
-        {
-            "type": "Paroda",
-            "title": "Nedo Bučio kūrybiniai darbais iš „kristaliukų“",
-            "location": "„Karlskronos“ biblioteka / Klaipėdos miesto savivaldybės Imanuelio Kanto viešoji biblioteka , Klaipėda",
-            "start": "2024-03-01 00:00:00",
-            "end": "2024-03-31 00:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123248/nedo-bucio-kurybiniai-darbais-is-kristaliuku"
-        },
-        {
-            "type": "Paroda",
-            "title": "Kristinos Ubavičiūtės personalinė paroda „Gyvenu prie jūros“",
-            "location": "Melnragės biblioteka / Klaipėdos miesto savivaldybės I. Kanto viešoji biblioteka, Klaipėda",
-            "start": "2024-03-01 00:00:00",
-            "end": "2024-03-31 00:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123247/kristinos-ubaviciutes-personaline-paroda-gyvenu-prie-juros"
-        },
-        {
-            "type": "Paroda",
-            "title": "Felicijos Kačenauskaitės-Pinkevičienės grafikos darbų  paroda",
-            "location": "Laukininkų biblioteka / Klaipėdos miesto savivaldybės Imanuelio Kanto viešoji biblioteka , Klaipėda",
-            "start": "2024-03-01 00:00:00",
-            "end": "2024-03-31 03:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123244/felicijos-kacenauskaites-pinkevicienes-grafikos-darbu-paroda"
-        },
-        {
-            "type": "Paroda",
-            "title": "A. Tarasevičiaus tapybos paroda „Nebaigtų paveikslų paroda“",
-            "location": "Girulių biblioteka / Klaipėdos miesto savivaldybės Imanuelio Kanto viešoji biblioteka , Klaipėda",
-            "start": "2024-03-04 00:00:00",
-            "end": "2024-04-04 18:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123365/a-taraseviciaus-tapybos-paroda-nebaigtu-paveikslu-paroda"
-        },
-        {
-            "type": "Paroda",
-            "title": "Spaudinių paroda „Lalo, Velykos! Lalo, Velykėlės!“",
-            "location": "Girulių biblioteka / Klaipėdos miesto savivaldybės Imanuelio Kanto viešoji biblioteka , Klaipėda",
-            "start": "2024-03-20 00:00:00",
-            "end": "2024-04-10 17:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123994/spaudiniu-paroda-lalo-velykos-lalo-velykeles"
-        },
-        {
-            "type": "Iniciatyva",
-            "title": "Diskusija su V. Čepu „Žmogus tarp žmonių: tarpusavio santykiai ir jų išbandymai“",
-            "location": "„Kauno atžalyno“ biblioteka / Klaipėdos miesto savivaldybės Imanuelio Kanto viešoji biblioteka , Klaipėda",
-            "start": "2024-03-28 15:30:00",
-            "end": "2024-03-28 16:30:00",
-            "link": "https://renginiai.kasvyksta.lt//123991/diskusija-su-v-cepu-zmogus-tarp-zmoniu-tarpusavio-santykiai-ir-ju-isbandymai"
-        },
-        {
-            "type": "Iniciatyva",
-            "title": "„Klaipėdos knyga 2023“ knygų pristatymai ",
-            "location": "Meno skyrius /Klaipėdos miesto savivaldybės Imanuelio Kanto viešoji biblioteka , Klaipėda",
-            "start": "2024-03-28 17:00:00",
-            "end": "2024-03-28 18:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123836/klaipedos-knyga-2023-knygu-pristatymai"
-        },
-        {
-            "type": "Vakarėlis",
-            "title": "VIVA LA Burger vakarienė",
-            "location": "Restoranas VIVALAVITA, Klaipėda",
-            "start": "2024-03-28 18:00:00",
-            "end": "2024-03-29 00:00:00",
-            "link": "https://renginiai.kasvyksta.lt//119612/viva-la-burger-vakariene"
-        },
-        {
-            "type": "Vakarėlis",
-            "title": "Vakarienė žvakių šviesoje su gitaros muzika",
-            "location": "Panoraminis restoranas XII, Klaipėda",
-            "start": "2024-03-28 18:00:00",
-            "end": "2024-03-29 00:00:00",
-            "link": "https://renginiai.kasvyksta.lt//119918/vakariene-zvakiu-sviesoje-su-gitaros-muzika"
-        },
-        {
-            "type": "Paroda",
-            "title": "Klaipėdos galerijoje – Ingos Šmitienės personalinė paroda „Corrosio“",
-            "location": "Klaipėdos galerija, Klaipėda",
-            "start": "2024-03-28 18:30:00",
-            "end": "2024-03-28 20:30:00",
-            "link": "https://renginiai.kasvyksta.lt//123964/klaipedos-galerijoje-ingos-smitienes-personaline-paroda-corrosio"
-        },
-        {
-            "type": "Koncertas",
-            "title": "DOMINYKA MAULIŪTĖ IR GRUPĖ \"STOP JAZZ\" | Kurpiai",
-            "location": "Restoranas - Džiazo klubas \"Kurpiai\", Klaipėda",
-            "start": "2024-03-28 20:00:00",
-            "end": "2024-03-28 23:00:00",
-            "link": "https://renginiai.kasvyksta.lt//111203/dominyka-mauliute-ir-grupe-stop-jazz-kurpiai"
-        }
-    ]},{
-    "city":"siauliai",
-    "events": [
-        {
-            "type": "Koncertas",
-            "title": "PIKASO 25-mečio koncertas 9131 | Šiauliai",
-            "location": "Šiaulių kultūros centras, Šiauliai",
-            "start": "2024-04-05 19:00:00",
-            "end": "2024-04-05 21:00:00",
-            "link": "https://renginiai.kasvyksta.lt//117042/pikaso-25-mecio-koncertas-9131-siauliai"
-        },
-        {
-            "type": "Minėjimas",
-            "title": " Pasaulinės Žemės dienos renginių programa Šiauliuose ",
-            "location": "Šiaulių miesto erdvės, Šiauliai",
-            "start": "2024-03-15 10:00:00",
-            "end": "2024-03-29 17:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123241/pasaulines-zemes-dienos-renginiu-programa-siauliuose"
-        },
-        {
-            "type": "Iniciatyva",
-            "title": "Ką veikti laukiant Velykų?",
-            "location": "Šiaulių apskrities Povilo Višinskio viešoji biblioteka, Šiauliai",
-            "start": "2024-03-20 10:00:00",
-            "end": "2024-03-29 15:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123844/ka-veikti-laukiant-velyku"
-        },
-        {
-            "type": "Premjera",
-            "title": "Šnipų romano „Moneta & labirintas“ pristatymas",
-            "location": "Šiaulių apskrities Povilo Višinskio viešoji biblioteka, Šiauliai",
-            "start": "2024-03-28 17:30:00",
-            "end": "2024-03-28 19:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123981/snipu-romano-moneta-labirintas-pristatymas"
-        },
-        {
-            "type": "Koncertas",
-            "title": "Koncertas Lietuvos įstojimo į NATO aljansą 20-mečiui paminėti",
-            "location": "Šiaulių apskrities Povilo Višinskio viešoji biblioteka, Šiauliai",
-            "start": "2024-03-29 18:00:00",
-            "end": "2024-03-29 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123982/koncertas-lietuvos-istojimo-i-nato-aljansa-20-meciui-pamineti"
-        },
-        {
-            "type": "Koncertas",
-            "title": "Koncertas, skirtas Lietuvos įstojimo į NATO aljansą 20-mečiui",
-            "location": "Šiaulių apskrities Povilo Višinskio viešoji biblioteka, Šiauliai",
-            "start": "2024-03-29 18:00:00",
-            "end": "2024-03-29 19:30:00",
-            "link": "https://renginiai.kasvyksta.lt//123766/koncertas-skirtas-lietuvos-istojimo-i-nato-aljansa-20-meciui"
-        },
-        {
-            "type": "Koncertas",
-            "title": " Naisių vasaros teatro muzikinė programa-koncertas 2024 m. kovas",
-            "location": "Šiaulių kultūros centras, Šiauliai",
-            "start": "2024-03-29 18:00:00",
-            "end": "2024-03-29 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//108905/naisiu-vasaros-teatro-muzikine-programa-koncertas"
-        },
-        {
-            "type": "Koncertas",
-            "title": "Nemokamas muzkinis vakaras su Živile Gedvilaite",
-            "location": "Bleu de Frenkel, Šiauliai",
-            "start": "2024-03-29 20:00:00",
-            "end": "2024-03-29 22:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123576/nemokamas-muzkinis-vakaras-su-zivile-gedvilaite"
-        },
-        {
-            "type": "Koncertas",
-            "title": "Velykų šviesa",
-            "location": "Šiaulių švč. Mergelės Marijos nekalto prasidėjimo bažnyčia, Šiauliai",
-            "start": "2024-04-01 14:00:00",
-            "end": "2024-04-01 15:30:00",
-            "link": "https://renginiai.kasvyksta.lt//82269/velyku-sviesa"
-        },
-        {
-            "type": "Festivalis",
-            "title": "Festivalio RESURREXIT atidarymo koncertas",
-            "location": "Šiaulių švč. Mergelės Marijos nekalto prasidėjimo bažnyčia, Šiauliai",
-            "start": "2024-04-01 19:00:00",
-            "end": "2024-04-01 22:00:00",
-            "link": "https://renginiai.kasvyksta.lt//122487/festivalio-resurrexit-atidarymo-koncertas"
-        },
-        {
-            "type": "Festivalis",
-            "title": "Pabudimas / RESURREXIT",
-            "location": "Polifonija - kamerinė salė, Šiauliai",
-            "start": "2024-04-02 18:30:00",
-            "end": "2024-04-02 21:30:00",
-            "link": "https://renginiai.kasvyksta.lt//122488/pabudimas-resurrexit"
-        },
-        {
-            "type": "Festivalis",
-            "title": "Meilė klysta / RESURREXIT",
-            "location": "Tytuvėnai, Šiauliai",
-            "start": "2024-04-03 18:00:00",
-            "end": "2024-04-03 21:00:00",
-            "link": "https://renginiai.kasvyksta.lt//122494/meile-klysta-resurrexit"
-        },
-        {
-            "type": "Festivalis",
-            "title": "TÉNÈBRES / RESURREXIT",
-            "location": "Šiaulių švč. Mergelės Marijos nekalto prasidėjimo bažnyčia, Šiauliai",
-            "start": "2024-04-03 19:00:00",
-            "end": "2024-04-03 22:00:00",
-            "link": "https://renginiai.kasvyksta.lt//122489/t-n-bres-resurrexit"
-        },
-        {
-            "type": "Festivalis",
-            "title": "Vargonų improvizacijos / RESURREXIT",
-            "location": "Šiaulių švč. Mergelės Marijos nekalto prasidėjimo bažnyčia, Šiauliai",
-            "start": "2024-04-04 19:00:00",
-            "end": "2024-04-04 22:00:00",
-            "link": "https://renginiai.kasvyksta.lt//122490/vargonu-improvizacijos-resurrexit"
-        },
-        {
-            "type": "Mokymas",
-            "title": "KONFERENCIJA RELIGINĖ MUZIKA: MENAS, MOKSLAS, PRAKTIKA / RESURREXIT",
-            "location": "Polifonija - kamerinė salė, Šiauliai",
-            "start": "2024-04-05 10:00:00",
-            "end": "2024-04-05 17:00:00",
-            "link": "https://renginiai.kasvyksta.lt//122492/konferencija-religine-muzika-menas-mokslas-praktika-resurrexit"
-        },
-        {
-            "type": "Festivalis",
-            "title": "Meilės audra / RESURREXIT",
-            "location": "Valstybinis Šiaulių dramos teatras, Šiauliai",
-            "start": "2024-04-05 19:00:00",
-            "end": "2024-04-05 22:00:00",
-            "link": "https://renginiai.kasvyksta.lt//122495/meiles-audra-resurrexit"
-        },
-        {
-            "type": "Koncertas",
-            "title": "Nemokamas muzikinis vakaras restorane BLEU DE FRENKEL",
-            "location": "Bleu de Frenkel, Šiauliai",
-            "start": "2024-04-05 20:00:00",
-            "end": "2024-04-05 22:00:00",
-            "link": "https://renginiai.kasvyksta.lt//119794/nemokamas-muzikinis-vakaras-restorane-bleu-de-frenkel"
-        },
-        {
-            "type": "Koncertas",
-            "title": " Respublikinis vyresniųjų liaudiškų šokių festivalis „Šokio sūkury 2024“ ",
-            "location": "Šiaulių kultūros centras, Šiauliai",
-            "start": "2024-04-06 15:00:00",
-            "end": "2024-04-06 16:30:00",
-            "link": "https://renginiai.kasvyksta.lt//124262/respublikinis-vyresniuju-liaudisku-sokiu-festivalis-sokio-sukury-2024"
-        },
-        {
-            "type": "Festivalis",
-            "title": "SKAMBANČIOS ŠIAULIŲ BAŽNYČIOS / RESURREXIT",
-            "location": "Šiaulių bažnyčios, Šiauliai",
-            "start": "2024-04-06 17:00:00",
-            "end": "2024-04-06 20:00:00",
-            "link": "https://renginiai.kasvyksta.lt//122491/skambancios-siauliu-baznycios-resurrexit"
-        },
-        {
-            "type": "Festivalis",
-            "title": "Festivalio RESURREXIT uždarymas",
-            "location": "Šiaulių švč. Mergelės Marijos nekalto prasidėjimo bažnyčia, Šiauliai",
-            "start": "2024-04-07 19:00:00",
-            "end": "2024-04-07 22:00:00",
-            "link": "https://renginiai.kasvyksta.lt//122493/festivalio-resurrexit-uzdarymas"
+            "title": "Premjera I ” PROFESORIAUS KLASTINGAS TIRPALAS”",
+            "location": "Kauno kultūros centro Girstučio padalinys, Kovo 11-osios g. 26, Kaunas, Lietuva, Kaunas",
+            "start": "2024-05-21 18:30:00",
+            "end": "2024-05-21 20:00:00",
+            "link": "https://renginiai.kasvyksta.lt/125790/profesoriaus-klastingas-tirpalas"
+        },
+        {
+            "type": "Kinas",
+            "title": "YES DAY kino centre CINAMON!",
+            "location": "Kino centras „Cinamon“, Kaunas",
+            "start": "2024-04-17 10:00:00",
+            "end": "2024-04-17 22:30:00",
+            "link": "https://renginiai.kasvyksta.lt/96711/yes-day"
         },
         {
             "type": "Vaikams",
-            "title": " Koncertas „Baletijos karalystė. Šokių mokykla“ su Šiaulių kultūros centro choreografijos studija „Impresija“ ",
-            "location": "Šiaulių kultūros centras, Šiauliai",
-            "start": "2024-04-08 18:00:00",
-            "end": "2024-04-08 19:00:00",
-            "link": "https://renginiai.kasvyksta.lt//123326/koncertas-baletijos-karalyste-sokiu-mokykla-su-siauliu-kulturos-centro-choreografijos-studija-impresija"
+            "title": "Gimtadienio Šventė ir kūrybiškos edukacijos vaikams ir paaugliams",
+            "location": "Jonavos g. 26a, Kaunas",
+            "start": "2024-04-17 11:00:00",
+            "end": "2024-05-16 20:00:00",
+            "link": "https://renginiai.kasvyksta.lt/59510/gimtadienio-svente-ir-kurybiskos-edukacijos-vaikams"
+        },
+        {
+            "type": "Vakarėlis",
+            "title": "Privatūs tapybos, keramikos, puodelių dekoravimo ir kt. vakarai įmonėms, draugams, šeimoms Jūsų ir mūsų erdvėse",
+            "location": "M. Valančiaus g. 21, Kaunas, Kaunas",
+            "start": "2024-04-17 12:00:00",
+            "end": "2024-05-15 21:00:00",
+            "link": "https://renginiai.kasvyksta.lt/114912/privatus-tapybos-keramikos-kalediniu-vainiku-kurimo-ir-kt-vakarai-imonems-draugams-seimoms-jusu-ir-musu-erdvese"
+        },
+        {
+            "type": "Vaikams",
+            "title": "Nemokama edukacija: Mokomės sodinti!",
+            "location": "Edukacinis pramogų centras „CurioCity“ (PLC Mega), Kaunas",
+            "start": "2024-04-17 15:00:00",
+            "end": "2024-05-19 20:00:00",
+            "link": "https://renginiai.kasvyksta.lt/125782/nemokama-edukacija-mokomes-sodinti"
+        },
+        {
+            "type": "Mokymas",
+            "title": "Laisvalaikis su tapyba suaugusiems ir vaikams",
+            "location": "M. Valančiaus g. 21, Kaunas",
+            "start": "2024-04-17 17:00:00",
+            "end": "2024-05-09 20:30:00",
+            "link": "https://renginiai.kasvyksta.lt/103392/individualios-tapybos-pamokos-suaugusiems-ir-vaikams-issirinkite-ir-tapykite-jums-patinkanti-paveiksla"
+        },
+        {
+            "type": "Paroda",
+            "title": "Parodos „BIBLIJA VAKAR, DABAR IR PER AMŽIUS: džiaugsmas sielai, grožis akims“ atidarymas",
+            "location": "Nacionalinis M. K. Čiurlionio dailės muziejus, Kaunas",
+            "start": "2024-04-17 17:00:00",
+            "end": "2024-04-17 18:00:00",
+            "link": "https://renginiai.kasvyksta.lt/125381/parodos-biblija-vakar-dabar-ir-per-amzius-dziaugsmas-sielai-grozis-akims-atidarymas"
         }
-    ]}
     ]
+}
